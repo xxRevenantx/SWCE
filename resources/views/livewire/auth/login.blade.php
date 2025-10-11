@@ -1,4 +1,4 @@
-<div class="flex flex-col gap-7 dark:bg-neutral-800  p-6 rounded-lg ">
+<div class="flex flex-col gap-7 bg-white shadow-2xl dark:bg-neutral-800 p-6 rounded-lg ">
     <x-auth-header :title="__('Inicia sesión en tu cuenta')" :description="__('Ingresa tu email para iniciar sesión en tu panel')" />
 
     <!-- Session Status -->

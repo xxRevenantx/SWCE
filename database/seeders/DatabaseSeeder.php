@@ -15,13 +15,19 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        User::factory()->create([
-            'name' => 'Moctezuma',
-            'email' => 'centrouniversitario@gmail.com',
-            'password' => bcrypt('12345678')
+
+         $this->call([
+            RoleSeeder::class,
+            UserSeeder::class,
+
+            // Add other seeders here
         ]);
 
-        $this->call(RoleSeeder::class);
+        // User::factory()->create([
+        //     'name' => 'Centro Universitario Moctezuma AC',
+        //     'email' => 'centrouniversitariomoctezuma@gmail.com',
+        //     'password' => bcrypt('12345678')
+        // ])->assignRole('Admin');
         // $this->call(UserSeeder::class);
     }
 }
