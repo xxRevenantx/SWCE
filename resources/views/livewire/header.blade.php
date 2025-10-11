@@ -26,6 +26,7 @@
 
       </div>
 
+      {{ auth()->user()->photo ? 'Tiene foto de perfil' : 'No tiene foto de perfil' }}
       <!-- Avatar -->
     @if(auth()->user()->photo)
       <div class="relative w-10 h-10 hidden lg:block">
@@ -42,7 +43,8 @@
         <span class="block font-semibold text-neutral-800 dark:text-neutral-100">{{ auth()->user()->username }}</span>
       </div>
     @else
-      <flux:avatar circle badge badge:circle badge:color="green" class="hidden lg:block" :initials="auth()->user()->initials()" :name="auth()->user()->username" />
+      <flux:avatar badge badge:color="green"  />
+
       <div class="w-full text-center lg:hidden">
         <span class="block font-semibold text-neutral-800 dark:text-neutral-100">{{ auth()->user()->username }}</span>
       </div>
