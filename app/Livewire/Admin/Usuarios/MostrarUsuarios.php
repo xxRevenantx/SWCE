@@ -70,31 +70,51 @@ class MostrarUsuarios extends Component
     }
 
     // Cambia el rol de los usuarios seleccionados
-    public function cambioRolUsuariosSeleccionados($id){
-        $usuarios = User::whereIn('id', $this->selected)->get();
+   public function cambioRolUsuariosSeleccionados($id)
+{
+    $usuarios = User::whereIn('id', $this->selected)->get();
 
-        foreach ($usuarios as $usuario) {
-            $usuario->roles()->sync($id); // Asigna el nuevo rol
-        }
-
-        // Muestra mensaje de éxito
-        $this->dispatch('swal', [
-            'title' => '¡Rol cambiado correctamente!',
-            'icon' => 'success',
-            'position' => 'top-end',
-        ]);
-        $this->selected = [];
-        $this->selectAll = false;
-        $this->limpiarFiltros();
+    foreach ($usuarios as $usuario) {
+        $usuario->roles()->sync($id);
     }
 
+
+    $this->refreshAdminStats();
+
+    $this->dispatch('swal', [
+        'title' => '¡Rol cambiado correctamente!',
+        'icon' => 'success',
+        'position' => 'top-end',
+    ]);
+
+    $this->dispatch('refreshUsuarios');
+    $this->selected = [];
+    $this->selectAll = false;
+    $this->limpiarFiltros();
+}
+
+
     // Se ejecuta al iniciar el componente
+
+
+    #[On('refreshUsuarios')]
+    public function onRefreshUsuarios(): void
+    {
+        $this->refreshAdminStats(); // <-- vuelve a contar y obtener admins
+    }
+
+    public function refreshAdminStats(): void
+    {
+        $this->contar_admin  = User::role('Admin')->count();
+        $this->obtener_admin = User::role('Admin')->get();
+    }
+
+    #[On('refreshUsuarios')]
     public function mount(){
+
         $this->roles = Role::all(); // Obtiene todos los roles
 
-        $this->contar_admin = User::role('Admin')->count(); // Cuenta los admins
-
-        $this->obtener_admin = User::role('Admin')->get(); // Obtiene los admins
+        $this->refreshAdminStats();
     }
 
     // Obtiene la lista de usuarios según los filtros y búsqueda
@@ -118,7 +138,6 @@ class MostrarUsuarios extends Component
         if ($this->search) {
             $query->where(function ($query) {
                 $query->where('email', 'like', '%' . $this->search . '%')
-                    ->orWhere('CURP', 'like', '%' . $this->search . '%')
                     ->orWhere('username', 'like', '%' . $this->search . '%')
                     ->orWhereHas('roles', function ($query) {
                         $query->where('name', 'like', '%' . $this->search . '%');
@@ -126,9 +145,9 @@ class MostrarUsuarios extends Component
             });
         }
 
-        // Excluye usuarios con el rol "SuperAdmin"
+        // Excluye usuarios con el rol "Admin"
         $query->whereDoesntHave('roles', function ($query) {
-            $query->where('name', 'SuperAdmin');
+            $query->where('name', 'Admin');
         });
 
         return $query->paginate(15); // Devuelve los usuarios paginados
@@ -155,6 +174,7 @@ class MostrarUsuarios extends Component
                 'position' => 'top-end',
             ]);
         }
+          $this->refreshAdminStats();
     }
 
     // Inactiva usuarios con ciertos roles
@@ -162,7 +182,7 @@ class MostrarUsuarios extends Component
     {
         $user = User::all();
         foreach ($user as $u) {
-            if ($u->roles()->whereIn('name', ['Estudiante', 'Profesor', 'Invitado'])->exists()) {
+            if ($u->roles()->whereIn('name', ['Profesor', 'Estudiante'])->exists()) {
                 $u->status = 'false'; // Cambia el estado a inactivo
                 $u->save();
             }
@@ -173,6 +193,8 @@ class MostrarUsuarios extends Component
             'icon' => 'success',
             'position' => 'top-end',
         ]);
+
+          $this->refreshAdminStats();
     }
 
     // Activa usuarios con ciertos roles
@@ -192,6 +214,7 @@ class MostrarUsuarios extends Component
             'icon' => 'success',
             'position' => 'top-end',
         ]);
+          $this->refreshAdminStats();
     }
 
     // Limpia los filtros de búsqueda y selección
@@ -213,8 +236,7 @@ class MostrarUsuarios extends Component
         $this->resetPage();
     }
 
-    // Renderiza la vista con la lista de usuarios
-    #[On('refreshUsuarios')]
+
     public function render()
     {
         return view('livewire.admin.usuarios.mostrar-usuarios', [

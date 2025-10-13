@@ -12,9 +12,24 @@ class CrearUsuario extends Component
 
     public $username;
     public $email;
-    public $CURP;
-    public $rol;
+   public $rol = [];
 
+    protected $rules = [
+        'username' => 'required|unique:users,username|max:15',
+        'email'    => 'required|email|unique:users,email',
+        'rol'      => 'required|array|min:1',     // validar que haya al menos 1
+        'rol.*'    => 'integer|exists:roles,id',  // validar cada id
+    ];
+
+    protected $messages = [
+        'username.unique' => 'El nombre de usuario ya está en uso.',
+        'email.unique'    => 'El correo electrónico ya está en uso.',
+        'email.email'     => 'El correo electrónico no es válido.',
+        'rol.required'    => 'Debes seleccionar al menos un rol.',
+        'rol.array'       => 'Formato de roles inválido.',
+        'rol.min'         => 'Debes seleccionar al menos un rol.',
+        'rol.*.exists'    => 'Algún rol seleccionado no existe.',
+    ];
 
 
     public function mount()
@@ -31,33 +46,25 @@ class CrearUsuario extends Component
         return $username;
     }
 
+      // Validación “en vivo” por campo (incluye el grupo rol)
+    public function updated($field)
+    {
+        $this->validateOnly($field === 'rol' || str_starts_with($field, 'rol.')
+            ? 'rol'
+            : $field
+        );
+    }
+
 
 
 
     public function guardarUsuario(){
-
-
-
-        $this->validate([
-            'username' => 'required|unique:users,username|max:15',
-            'email' => 'required|email|unique:users,email',
-            'rol' => 'required',
-        ],[
-            'username.unique' => 'El nombre de usuario ya está en uso.',
-            'email.unique' => 'El correo electrónico ya está en uso.',
-            'email.email' => 'El correo electrónico no es válido.',
-
-            'rol.required' => 'Debes seleccionar al menos un rol.',
-        ]);
-
-
-
-        // Aquí puedes agregar la lógica para guardar el usuario en la base de datos
-
+        $this->validate();
+        // Aquí agregamos la lógica para guardar el usuario en la base de datos
         $user = User::create([
             'username' => trim($this->username),
             'email' => trim($this->email),
-            'password' => bcrypt('12345678'), // Cambia esto según tus necesidades
+            'password' => bcrypt('12345678'), // Contraseña por defecto
             'status' => 'true',
             'photo' => null,
 
@@ -76,10 +83,9 @@ class CrearUsuario extends Component
         // Limpiar los campos después de guardar
         $this->username = $this->generarUsernameUnico();
         $this->email = '';
-        $this->CURP = '';
         $this->rol = [];
 
-        $this->dispatch('refreshUsuarios');
+       $this->dispatch('refreshUsuarios');
 
     }
 

@@ -14,7 +14,7 @@
 
             <flux:navlist variant="outline">
                 <flux:navlist.group :heading="__('Platform')" class="grid">
-                    <flux:navlist.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>{{ __('Dashboard') }}</flux:navlist.item>
+                    <flux:navlist.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>Dashboard</flux:navlist.item>
                 </flux:navlist.group>
             </flux:navlist>
 
@@ -32,11 +32,21 @@
 
             <!-- Desktop User Menu -->
             <flux:dropdown class="hidden lg:block" position="bottom" align="start">
-                <flux:profile
-                    :name="auth()->user()->username"
+                 @if (auth()->user()->photo)
+                <flux:profile circle badge badge:circle badge:color="green" src="{{ asset('storage/profile-photos/'.auth()->user()->photo) }}"
                     :initials="auth()->user()->initials()"
-                    icon:trailing="chevrons-up-down"
+                    :name="auth()->user()->username"
+                    icon-trailing="chevrons-up-down"
                 />
+            @else
+                <flux:profile circle badge badge:circle badge:color="green" class="overflow-hidden"
+                    :initials="auth()->user()->initials()"
+                      :name="auth()->user()->username"
+                    icon-trailing="chevrons-up-down"
+                />
+
+            @endif
+
 
                 <flux:menu class="w-[220px]">
                     <flux:menu.radio.group>
@@ -46,7 +56,8 @@
                                     <span
                                         class="flex h-full w-full items-center justify-center rounded-lg bg-neutral-200 text-black dark:bg-neutral-700 dark:text-white"
                                     >
-                                        {{ auth()->user()->initials() }}
+                                        {{-- {{ auth()->user()->initials() }} --}}
+                                          <img src="{{ asset('storage/profile-photos/' . auth()->user()->photo) }}" alt="Avatar" class="w-full h-full object-cover">
                                     </span>
                                 </span>
 

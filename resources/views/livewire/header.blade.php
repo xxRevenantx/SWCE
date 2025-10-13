@@ -26,7 +26,7 @@
 
       </div>
 
-      {{ auth()->user()->photo ? 'Tiene foto de perfil' : 'No tiene foto de perfil' }}
+   
       <!-- Avatar -->
     @if(auth()->user()->photo)
       <div class="relative w-10 h-10 hidden lg:block">

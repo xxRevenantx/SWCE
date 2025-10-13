@@ -7,21 +7,38 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Validation\Rule;
 use Livewire\Component;
+use Illuminate\Support\Facades\Storage;
+
+
+use Livewire\Attributes\On;
+use Livewire\WithFileUploads;
+
 
 class Profile extends Component
 {
-    public string $name = '';
+    use WithFileUploads;
+
+    public string $username = '';
 
     public string $email = '';
 
-    /**
-     * Mount the component.
-     */
+    public $photo;
+
+    public $photoUrl;
+
+    public $photoTemporary;
+
+
+
+
+    #[On('refreshProfile')]
     public function mount(): void
     {
-        $this->name = Auth::user()->username;
+        $this->username = Auth::user()->username;
         $this->email = Auth::user()->email;
+        $this->photoUrl  = Auth::user()->photo;
     }
+
 
     /**
      * Update the profile information for the currently authenticated user.
@@ -31,7 +48,9 @@ class Profile extends Component
         $user = Auth::user();
 
         $validated = $this->validate([
-            'username' => ['required', 'string', 'max:255'],
+            'username' => ['required', 'string', 'max:255','unique:users,username,' . $user->id],
+
+            'photo' => ['nullable', 'image', 'max:2048', 'mimes:jpeg,jpg,png'],
 
             'email' => [
                 'required',
@@ -41,7 +60,36 @@ class Profile extends Component
                 'max:255',
                 Rule::unique(User::class)->ignore($user->id),
             ],
+        ],[
+            'username.required' => 'El nombre de usuario es obligatorio.',
+            'username.unique' => 'El nombre de usuario ya está en uso.',
+            'username.max' => 'El nombre de usuario no puede tener más de 255 caracteres.',
+
+            'email.required' => 'El correo electrónico es obligatorio.',
+            'email.email' => 'El correo electrónico debe ser una dirección válida.',
+            'email.unique' => 'El correo electrónico ya está en uso.',
+            'email.lowercase' => 'El correo electrónico debe estar en minúsculas.',
+            'email.max' => 'El correo electrónico no puede tener más de 255 caracteres.',
+
+            'photo.image' => 'La foto debe ser una imagen.',
+            'photo.max' => 'La foto no puede pesar más de 2 MB.',
+            'photo.mimes' => 'La foto debe ser un archivo JPEG, JPG o PNG.',
         ]);
+
+            // Si se sube una nueva foto...
+        if ($this->photo) {
+            // Elimina la imagen anterior si no es la default
+            if ($user->photo && $user->photo !== 'default.jpg') {
+                Storage::delete('profile-photos/' . $user->photo);
+            }
+
+            // Guarda la nueva imagen
+            $path = $this->photo->store('profile-photos');
+            $validated['photo'] = str_replace('profile-photos/', '', $path);
+        } else {
+            unset($validated['photo']);
+        }
+
 
         $user->fill($validated);
 
@@ -51,12 +99,34 @@ class Profile extends Component
 
         $user->save();
 
-        $this->dispatch('profile-updated', name: $user->username);
+        $this->dispatch('refreshHeader');
+        $this->dispatch('refreshProfile');
+
+        $this->reset('photo'); // <- Esto limpia el input de tipo file
+
+        $this->dispatch('profile-updated', username: $user->username);
     }
 
-    /**
-     * Send an email verification notification to the current user.
-     */
+        public function eliminarFoto():void{
+                $user = Auth::user();
+
+        // Si existe una foto y no es la default, la eliminamos del disco
+        if ($user->photo && $user->photo !== 'default.jpg') {
+            Storage::delete('profile-photos/' . $user->photo);
+        }
+
+        // Establecemos el valor en la BD como 'default.jpg'
+        $user->photo = null;
+        $user->save();
+
+        // Actualizamos la vista Livewire
+        $this->photo = null;
+        $this->photoUrl = $user->photo;
+
+        $this->dispatch('refreshHeader');
+        $this->dispatch('refreshProfile');
+    }
+
     public function resendVerificationNotification(): void
     {
         $user = Auth::user();

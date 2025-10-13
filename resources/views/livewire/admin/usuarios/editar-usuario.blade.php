@@ -73,7 +73,7 @@
                 placeholder="Nombre de usuario"
                 autocomplete="username"
               />
-              @error('username')<p class="mt-1 text-xs text-red-600 dark:text-red-400">{{ $message }}</p>@enderror
+              {{-- @error('username')<p class="mt-1 text-xs text-red-600 dark:text-red-400">{{ $message }}</p>@enderror --}}
             </div>
 
 
@@ -87,7 +87,7 @@
                 placeholder="correo@ejemplo.com"
                 autocomplete="email"
               />
-              @error('email')<p class="mt-1 text-xs text-red-600 dark:text-red-400">{{ $message }}</p>@enderror
+              {{-- @error('email')<p class="mt-1 text-xs text-red-600 dark:text-red-400">{{ $message }}</p>@enderror --}}
             </div>
           </div>
 
@@ -134,7 +134,7 @@
                 @endforeach
               </div>
             </flux:checkbox.group>
-            @error('rol')<p class="mt-1 text-xs text-red-600 dark:text-red-400">{{ $message }}</p>@enderror
+
           </div>
 
           <!-- Acciones -->

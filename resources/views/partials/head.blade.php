@@ -18,5 +18,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&family=Raleway:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
 
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
+
 @vite(['resources/css/app.css', 'resources/js/app.js'])
 @fluxAppearance

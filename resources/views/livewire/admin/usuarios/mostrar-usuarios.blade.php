@@ -110,18 +110,7 @@
         <div class="flex flex-wrap items-center gap-2 sm:gap-3">
 
           @if($usuarios->isNotEmpty())
-            <!-- Exportar -->
-            <flux:button wire:click="exportarUsuarios" variant="primary"
-              class="bg-emerald-600 hover:bg-emerald-700 focus:ring-4 dark:text-white"
-              wire:loading.attr="disabled" wire:target="exportarUsuarios">
-              <div class="flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                        d="M19.5 14.25v-2.625A3.375 3.375 0 0016.125 8.25h-1.5A1.125 1.125 0 0113.5 7.125v-1.5A3.375 3.375 0 0010.125 2.25H8.25m.75 12l3 3m0 0l3-3m-3 3v-6M7.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
-                </svg>
-                <span>Exportar</span>
-              </div>
-            </flux:button>
+
 
             <!-- Inactivar -->
             <flux:button @click="inactivarUsuarios" variant="primary"
@@ -187,13 +176,20 @@
             <flux:button disabled variant="primary" class="bg-neutral-200 text-neutral-700">Inactivar</flux:button>
             <flux:button disabled variant="primary" class="bg-neutral-200 text-neutral-700">Activar</flux:button>
             <flux:button wire:click="limpiarFiltros" variant="primary" class="bg-neutral-200 text-neutral-900">Limpiar Filtros</flux:button>
-          @endif
+
+            <flux:modal.trigger name="obtener_admin">
+              <flux:button class="bg-neutral-100 hover:bg-neutral-200 text-neutral-800">
+                <flux:icon.user /> Admin
+                <flux:badge color="indigo">{{ $contar_admin }}</flux:badge>
+              </flux:button>
+            </flux:modal.trigger>
+            @endif
         </div>
       </div>
     </div>
 
     <!-- Modal Admin -->
-    <flux:modal name="super-admin" variant="flyout">
+    <flux:modal name="obtener_admin" variant="flyout">
       <div class="space-y-6">
         <div>
           <flux:heading size="lg">Roles del Admin</flux:heading>

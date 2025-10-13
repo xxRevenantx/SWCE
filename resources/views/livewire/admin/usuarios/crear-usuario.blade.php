@@ -68,7 +68,6 @@
                     placeholder="Nombre de usuario"
                     autocomplete="username"
                   />
-                  @error('username')<p class="mt-1 text-xs text-red-600 dark:text-red-400">{{ $message }}</p>@enderror
                 </div>
 
 
@@ -82,26 +81,36 @@
                     placeholder="correo@ejemplo.com"
                     autocomplete="email"
                   />
-                  @error('email')<p class="mt-1 text-xs text-red-600 dark:text-red-400">{{ $message }}</p>@enderror
                 </div>
               </div>
 
               <!-- Roles -->
+           
               <div class="mt-5">
-                <div class="mb-2 text-sm font-medium text-neutral-700 dark:text-neutral-200">Listado de roles <span class="ml-1 inline-block rounded bg-indigo-100 dark:bg-indigo-900/40 px-1.5 py-0.5 text-[10px] text-indigo-700 dark:text-indigo-300">Requerido</span></div>
+                <div class="mb-2 text-sm font-medium text-neutral-700 dark:text-neutral-200">
+                  Listado de roles
+                  <span class="ml-1 inline-block rounded bg-indigo-100 dark:bg-indigo-900/40 px-1.5 py-0.5 text-[10px] text-indigo-700 dark:text-indigo-300">Requerido</span>
+                </div>
 
-                <flux:checkbox.group wire:model.live="rol">
+                <flux:checkbox.group
+                    wire:model.live="rol"
+                    class="{{ $errors->has('rol') ? 'ring-1 ring-red-500 rounded-xl' : '' }}"
+                >
                   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                    @foreach ($roles as $rol)
+                    @foreach ($roles as $rolItem)
                       <label class="flex items-center gap-2 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-neutral-50/60 dark:bg-neutral-900/30 px-3 py-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 cursor-pointer">
-                        <flux:checkbox value="{{ $rol->id }}" />
-                        <span class="text-sm text-neutral-800 dark:text-neutral-100">{{ $rol->name }}</span>
+                        <flux:checkbox value="{{ $rolItem->id }}" />
+                        <span class="text-sm text-neutral-800 dark:text-neutral-100">{{ $rolItem->name }}</span>
                       </label>
                     @endforeach
                   </div>
                 </flux:checkbox.group>
-                @error('rol')<p class="mt-2 text-xs text-red-600 dark:text-red-400">{{ $message }}</p>@enderror
+
+                @error('rol')
+                  <p class="mt-2 text-sm text-red-500">{{ $message }}</p>
+                @enderror
               </div>
+
 
                <!-- Divider -->
             <div class="mt-6 border-t border-gray-200 dark:border-neutral-800"></div>
