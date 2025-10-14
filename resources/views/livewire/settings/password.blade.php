@@ -17,6 +17,10 @@
                 required
                 autocomplete="new-password"
             />
+            <li class="text-sm text-gray-500 list-disc ms-6">
+                {{ __('La contraseña debe contener mínimo 8 caracteres, un número, una mayúscula y un carácter especial.') }}
+            </li>
+
             <flux:input
                 wire:model="password_confirmation"
                 :label="__('Confirm Password')"

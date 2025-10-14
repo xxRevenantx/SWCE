@@ -7,14 +7,40 @@
         <flux:sidebar sticky stashable class="border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
             <flux:sidebar.toggle class="lg:hidden" icon="x-mark" />
 
+            @can('admin.dashboard')
             <a href="{{ route('dashboard') }}" class="me-5 flex items-center space-x-2 rtl:space-x-reverse" wire:navigate>
-                SWCE
+                 <x-app-logo />
             </a>
+            @endcan
+            @can('estudiante.dashboard')
+                     <a href="{{ route('estudiante.dashboard') }}" class="me-5 flex items-center space-x-2 rtl:space-x-reverse" wire:navigate>
+                    <x-app-logo />
+                </a>
+            @endcan
 
+
+            @can('profesor.dashboard')
+            <a href="{{ route('profesor.dashboard') }}" class="me-5 flex items-center space-x-2 rtl:space-x-reverse" wire:navigate>
+                 <x-app-logo />
+            </a>
+            @endcan
 
             <flux:navlist variant="outline">
                 <flux:navlist.group :heading="__('Platform')" class="grid">
+
+                        @can('admin.dashboard')
                     <flux:navlist.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>Dashboard</flux:navlist.item>
+                        @endcan
+
+                    @can('profesor.dashboard')
+                    <flux:navlist.item icon="home" :href="route('profesor.dashboard')" :current="request()->routeIs('profesor.dashboard')" wire:navigate>Dashboard Profesor</flux:navlist.item>
+                    @endcan
+
+                    @can('estudiante.dashboard')
+                    <flux:navlist.item icon="home" :href="route('estudiante.dashboard')" :current="request()->routeIs('estudiante.dashboard')" wire:navigate>Mi panel
+                    </flux:navlist.item>
+                    @endcan
+
                 </flux:navlist.group>
             </flux:navlist>
 
@@ -23,6 +49,14 @@
             <flux:navlist >
                 <flux:navlist.group :heading="__('Usuarios')" class="grid ">
                     <flux:navlist.item icon="users" :href="route('admin.usuarios.index')" :current="request()->routeIs('admin.usuarios.index')" wire:navigate>{{ __('Usuarios') }}</flux:navlist.item>
+                </flux:navlist.group>
+            </flux:navlist>
+            @endcan
+
+         @can('admin.licenciaturas')
+            <flux:navlist >
+                <flux:navlist.group :heading="__('Licenciaturas')" class="grid ">
+                    <flux:navlist.item icon="book" :href="route('admin.licenciaturas.index')" :current="request()->routeIs('admin.licenciaturas.index')" wire:navigate>{{ __('Licenciaturas') }}</flux:navlist.item>
                 </flux:navlist.group>
             </flux:navlist>
             @endcan
@@ -39,7 +73,7 @@
                     icon-trailing="chevrons-up-down"
                 />
             @else
-                <flux:profile circle badge badge:circle badge:color="green" class="overflow-hidden"
+                <flux:profile circle badge badge:circle badge:color="green" src="{{ asset('storage/default.png') }}"
                     :initials="auth()->user()->initials()"
                       :name="auth()->user()->username"
                     icon-trailing="chevrons-up-down"
@@ -56,8 +90,7 @@
                                     <span
                                         class="flex h-full w-full items-center justify-center rounded-lg bg-neutral-200 text-black dark:bg-neutral-700 dark:text-white"
                                     >
-                                        {{-- {{ auth()->user()->initials() }} --}}
-                                          <img src="{{ asset('storage/profile-photos/' . auth()->user()->photo) }}" alt="Avatar" class="w-full h-full object-cover">
+                                        <flux:avatar circle  :initials="auth()->user()->initials()" :name="auth()->user()->username" />
                                     </span>
                                 </span>
 

@@ -1,9 +1,10 @@
 <section class="w-full">
     @include('partials.settings-heading')
 
-    <x-settings.layout :heading="__('Profile')" :subheading="__('Update your name and email address')">
+    <x-settings.layout :heading="__('Profile')" :subheading="__('Actualiza la información de tu perfil y tu dirección de correo electrónico.')">
+        {{-- Profile Information --}}
         <form wire:submit="updateProfileInformation" class="my-6 w-full space-y-6">
-    
+
             <div>
 
          <div>
