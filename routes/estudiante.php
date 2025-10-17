@@ -6,10 +6,8 @@ use Illuminate\Support\Facades\Route;
 
 
 Route::middleware(['auth'])->group(function () {
+   Route::view('panel-estudiante', 'estudiante.dashboard')->middleware('can:estudiante.dashboard')->name('estudiante.dashboard'); // estudiante.dashboard (URL /estudiante/dashboard)
 
-
-    // Route::view('estudiante/dashboard', 'estudiante.dashboard')->middleware('can:estudiante.dashboard')->middleware(['auth', 'verified'])->name('estudiante.dashboard');
-    Route::view('/dashboard', 'estudiante.dashboard')->middleware(['verified', 'can:estudiante.dashboard'])->name('dashboard');
 
 });
 

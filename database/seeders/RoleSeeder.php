@@ -22,15 +22,23 @@ class RoleSeeder extends Seeder
 
         // Crear el permiso 'admin.dashboard' y asignarlo al rol 'Admin'
         Permission::create(['name' => 'admin.dashboard'])->syncRoles([$role1]);
-        // Crear el permiso 'profesor.dashboard' y asignarlo al rol 'Profesor'
-        Permission::create(['name' => 'profesor.dashboard'])->syncRoles([$role2]);
-        // Crear el permiso 'estudiante.dashboard' y asignarlo al rol 'Estudiante'
-        Permission::create(['name' => 'estudiante.dashboard'])->syncRoles([$role3]);
-
         // Crear el permiso 'admin.usuarios' y asignarlo al rol 'Admin'
         Permission::create(['name' => 'admin.usuarios'])->syncRoles([$role1]);
         // Crear el permiso 'admin.licenciaturas' y asignarlo al rol 'Admin'
         Permission::create(['name' => 'admin.licenciaturas'])->syncRoles([$role1]);
+
+
+        // Crear el permiso 'profesor.dashboard' y asignarlo al rol 'Profesor'
+        Permission::create(['name' => 'profesor.dashboard'])->syncRoles([$role2]);
+
+
+
+
+
+        // Crear el permiso 'estudiante.dashboard' y asignarlo al rol 'Estudiante'
+        Permission::create(['name' => 'estudiante.dashboard'])->syncRoles([$role3]);
+
+
 
 
     }

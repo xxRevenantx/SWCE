@@ -14,7 +14,7 @@
             @endcan
 
             @can('profesor.dashboard')
-            <a href="{{ route('profesor.dashboard') }}" class="me-5 flex items-center space-x-2 rtl:space-x-reverse" wire:navigate>
+            <a href="{{ route('dashboard') }}" class="me-5 flex items-center space-x-2 rtl:space-x-reverse" wire:navigate>
                  <x-app-logo />
             </a>
             @endcan
@@ -39,7 +39,7 @@
                     @endcan
 
                     @can('estudiante.dashboard')
-                    <flux:navlist.item icon="home" :href="route('estudiante.dashboard')" :current="request()->routeIs('estudiante.dashboard')" wire:navigate>Panel del Estudiante
+                    <flux:navlist.item icon="home" :href="route('estudiante.dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>Panel del Estudiante
                     </flux:navlist.item>
                     @endcan
 
@@ -50,7 +50,7 @@
          @can('admin.usuarios')
             <flux:navlist >
                 <flux:navlist.group :heading="__('Usuarios')" class="grid ">
-                    <flux:navlist.item icon="users" :href="route('admin.usuarios.index')" :current="request()->routeIs('admin.usuarios.index')" wire:navigate>{{ __('Usuarios') }}</flux:navlist.item>
+                    <flux:navlist.item icon="users" :href="route('usuarios.index')" :current="request()->routeIs('usuarios.index')" wire:navigate>{{ __('Usuarios') }}</flux:navlist.item>
                 </flux:navlist.group>
             </flux:navlist>
             @endcan
@@ -58,7 +58,7 @@
          @can('admin.licenciaturas')
             <flux:navlist >
                 <flux:navlist.group :heading="__('Licenciaturas')" class="grid ">
-                    <flux:navlist.item icon="book" :href="route('admin.licenciaturas.index')" :current="request()->routeIs('admin.licenciaturas.index')" wire:navigate>{{ __('Licenciaturas') }}</flux:navlist.item>
+                    <flux:navlist.item icon="book" :href="route('licenciaturas.index')" :current="request()->routeIs('licenciaturas.index')" wire:navigate>{{ __('Licenciaturas') }}</flux:navlist.item>
                 </flux:navlist.group>
             </flux:navlist>
             @endcan
