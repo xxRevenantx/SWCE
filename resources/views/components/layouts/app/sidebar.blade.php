@@ -8,16 +8,10 @@
             <flux:sidebar.toggle class="lg:hidden" icon="x-mark" />
 
             @can('admin.dashboard')
-            <a href="{{ route('dashboard') }}" class="me-5 flex items-center space-x-2 rtl:space-x-reverse" wire:navigate>
+            <a href="{{ route('admin.dashboard') }}" class="me-5 flex items-center space-x-2 rtl:space-x-reverse" wire:navigate>
                  <x-app-logo />
             </a>
             @endcan
-            @can('estudiante.dashboard')
-                     <a href="{{ route('estudiante.dashboard') }}" class="me-5 flex items-center space-x-2 rtl:space-x-reverse" wire:navigate>
-                    <x-app-logo />
-                </a>
-            @endcan
-
 
             @can('profesor.dashboard')
             <a href="{{ route('profesor.dashboard') }}" class="me-5 flex items-center space-x-2 rtl:space-x-reverse" wire:navigate>
@@ -25,19 +19,27 @@
             </a>
             @endcan
 
+             @can('estudiante.dashboard')
+                     <a href="{{ route('estudiante.dashboard') }}" class="me-5 flex items-center space-x-2 rtl:space-x-reverse" wire:navigate>
+                    <x-app-logo />
+                </a>
+            @endcan
+
+
             <flux:navlist variant="outline">
-                <flux:navlist.group :heading="__('Platform')" class="grid">
+                <flux:navlist.group :heading="__('Platforma')" class="grid">
 
                         @can('admin.dashboard')
-                    <flux:navlist.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>Dashboard</flux:navlist.item>
+                    <flux:navlist.item icon="home" :href="route('admin.dashboard')" :current="request()->routeIs('admin.dashboard')" wire:navigate>Dashboard</flux:navlist.item>
                         @endcan
 
                     @can('profesor.dashboard')
-                    <flux:navlist.item icon="home" :href="route('profesor.dashboard')" :current="request()->routeIs('profesor.dashboard')" wire:navigate>Dashboard Profesor</flux:navlist.item>
+                    <flux:navlist.item icon="home" :href="route('profesor.dashboard')" :current="request()->routeIs('profesor.dashboard')" wire:navigate>Panel del Profesor</flux:navlist.item>
+                    <flux:navlist.item icon="home"  wire:navigate>Mi horario</flux:navlist.item>
                     @endcan
 
                     @can('estudiante.dashboard')
-                    <flux:navlist.item icon="home" :href="route('estudiante.dashboard')" :current="request()->routeIs('estudiante.dashboard')" wire:navigate>Mi panel
+                    <flux:navlist.item icon="home" :href="route('estudiante.dashboard')" :current="request()->routeIs('estudiante.dashboard')" wire:navigate>Panel del Estudiante
                     </flux:navlist.item>
                     @endcan
 

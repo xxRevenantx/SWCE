@@ -22,7 +22,7 @@
     <!-- Header -->
     <div class="flex flex-col gap-1">
         <h1 class="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Buscar Licenciatura</h1>
-        <p class="text-sm text-gray-600 dark:text-gray-400">Administra, exporta y edita las licenciaturas registradas.</p>
+        <p class="text-sm text-gray-600 dark:text-gray-400">Administra y edita las licenciaturas registradas.</p>
     </div>
 
     <!-- Toolbar -->
@@ -48,39 +48,7 @@
             </div>
         </div>
 
-        <div class="flex items-center gap-2 md:ml-auto">
-            @if($licenciaturas->isNotEmpty())
-                <flux:button
-                    wire:click="exportarLicenciaturas"
-                    variant="primary"
-                    class="cursor-pointer bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500"
-                >
-                    <div class="flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
-                             viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                  d="M12 16V4m0 12l-3-3m3 3 3-3M4 20h16"/>
-                        </svg>
-                        <span>Exportar</span>
-                    </div>
-                </flux:button>
-            @else
-                <flux:button
-                    disabled
-                    variant="primary"
-                    class="bg-gray-200 text-gray-600 dark:bg-neutral-800 dark:text-gray-400"
-                >
-                    <div class="flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5"
-                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                  d="M12 16V4m0 12l-3-3m3 3 3-3M4 20h16"/>
-                        </svg>
-                        <span>Exportar</span>
-                    </div>
-                </flux:button>
-            @endif
-        </div>
+
     </div>
 
     <!-- List / Table container -->

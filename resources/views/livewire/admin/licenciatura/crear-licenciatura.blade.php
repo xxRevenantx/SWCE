@@ -33,7 +33,7 @@
         </button>
 
         <span class="text-xs text-gray-500 dark:text-gray-400">
-            Tip: Puedes adjuntar un LOGO cuadrada (PNG/JPG) para el sello de la licenciatura.
+            Tip: Puedes adjuntar un logo (PNG/JPG)
         </span>
     </div>
 

@@ -12,9 +12,10 @@ use App\Http\Requests\UpdateDashboardProfesorRequest;
 class DashboardProfesorController extends Controller
 {
 
+
     public function index()
     {
-        // Mostrar el dashboard del profesor
+        return view('profesor.dashboard');
     }
 
 
