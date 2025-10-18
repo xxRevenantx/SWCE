@@ -96,14 +96,14 @@
                     wire:model.live="rol"
                     class="{{ $errors->has('rol') ? 'ring-1 ring-red-500 rounded-xl' : '' }}"
                 >
-                  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                    @foreach ($roles as $rolItem)
-                      <label class="flex items-center gap-2 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-neutral-50/60 dark:bg-neutral-900/30 px-3 py-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 cursor-pointer">
-                        <flux:checkbox value="{{ $rolItem->id }}" />
-                        <span class="text-sm text-neutral-800 dark:text-neutral-100">{{ $rolItem->name }}</span>
-                      </label>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-2">
+                    @foreach ($roles->where('name', '!=', 'Admin') as $rolItem)
+                        <label class="flex items-center gap-2 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-neutral-50/60 dark:bg-neutral-900/30 px-3 py-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 cursor-pointer">
+                            <flux:checkbox value="{{ $rolItem->id }}" />
+                            <span class="text-sm text-neutral-800 dark:text-neutral-100">{{ $rolItem->name }}</span>
+                        </label>
                     @endforeach
-                  </div>
+                </div>
                 </flux:checkbox.group>
 
                 @error('rol')

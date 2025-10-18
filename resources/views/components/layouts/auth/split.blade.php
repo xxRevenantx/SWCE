@@ -17,7 +17,7 @@
                         <x-app-logo-icon class="me-2 h-7 fill-current text-white" />
                     </span> --}}
                     {{-- {{ config('app.name', 'SWCE') }} --}}
-                        <img src="{{ asset('storage/default.png') }}" alt="Logo" class="h-24 w-24 object-contain">
+                        <img src="{{ asset('storage/logo.png') }}" alt="Logo" class="w-80 object-contain">
 
                     <div class="ms-1 grid flex-1 text-start text-sm">
                         <span class="mb-0.5 truncate leading-tight font-semibold">Sistema Web de Control Escolar para el Centro Universitario Moctezuma A.C.</span>
@@ -44,7 +44,7 @@
                     <a href="{{ route('home') }}" class="z-20 flex flex-col items-center gap-2 font-medium lg:hidden" wire:navigate>
 
                         <img
-                        src="{{ asset('storage/default.png') }}"
+                        src="{{ asset('storage/logo.png') }}"
                         class="h-20 w-auto object-cover  dark:bg-neutral-950 dark:shadow-xs"
     />
 

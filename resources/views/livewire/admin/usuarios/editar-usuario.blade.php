@@ -93,50 +93,31 @@
 
           <!-- Status -->
           <div class="space-y-2">
-            <flux:label>Status</flux:label>
 
-            @if($rol_name == "Admin")
-              <div class="flex items-center gap-3">
-                @if($toggle === true)
-                  <flux:switch wire:model.live="status" badge="Requerido" />
-                @else
-                  <flux:switch variant="filled" disabled wire:model.live="status" />
-                @endif
 
-                <flux:button
-                  wire:click="toggleStatus"
-                  variant="primary"
-                  class="cursor-pointer"
-                  wire:loading.attr="disabled"
-                  wire:target="toggleStatus"
-                >
-                  <span wire:loading.remove wire:target="toggleStatus">Activar status</span>
-                  <span wire:loading wire:target="toggleStatus" class="inline-flex items-center gap-2">
-                    <span class="w-4 h-4 rounded-full border-2 border-white/70 border-t-transparent animate-spin"></span>
-                    Procesando…
-                  </span>
-                </flux:button>
-              </div>
-            @else
+            @if($rol_name !== "Admin")
+             <flux:label>Status</flux:label>
               <flux:switch wire:model.live="status" />
             @endif
           </div>
 
+           @if($rol_name !== "Admin")
           <!-- Roles -->
           <div class="space-y-2">
             <flux:checkbox.group wire:model.live="rol" badge="Requerido" label="Listado de roles">
-              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                @foreach ($roles as $rol)
-                  <label class="flex items-center gap-2 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-neutral-50/50 dark:bg-neutral-900/30 px-3 py-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 cursor-pointer">
-                    <flux:checkbox value="{{ $rol->id }}" />
-                    <span class="text-sm text-neutral-800 dark:text-neutral-100">{{ $rol->name }}</span>
-                  </label>
-                @endforeach
-              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-2">
+                    @foreach ($roles->where('name', '!=', 'Admin') as $rolItem)
+                        <label class="flex items-center gap-2 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-neutral-50/60 dark:bg-neutral-900/30 px-3 py-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 cursor-pointer">
+                            <flux:checkbox value="{{ $rolItem->id }}" />
+                            <span class="text-sm text-neutral-800 dark:text-neutral-100">{{ $rolItem->name }}</span>
+                        </label>
+                    @endforeach
+                </div>
             </flux:checkbox.group>
 
           </div>
 
+          @endif
           <!-- Acciones -->
           <div class="mt-2 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2">
             <button
