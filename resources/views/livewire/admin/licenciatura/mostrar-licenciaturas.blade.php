@@ -48,7 +48,6 @@
             </div>
         </div>
 
-
     </div>
 
     <!-- List / Table container -->
@@ -252,3 +251,5 @@
     <!-- Modal editar -->
     <livewire:admin.licenciatura.editar-licenciatura />
 </div>
+
+

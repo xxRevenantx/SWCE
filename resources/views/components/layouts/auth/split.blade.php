@@ -8,7 +8,7 @@
             <div class="bg-muted relative hidden h-full flex-col pt-5 pb-10 px-10  text-white lg:flex dark:border-e dark:border-neutral-800">
                <div class="absolute inset-0 ">
                     <img
-                        src="{{ asset('storage/banner.jpg') }}"
+                        src="{{ asset('imagenes_publicas/banner.jpg') }}"
                         class="h-full w-full object-cover  shadow-sm dark:bg-neutral-950 dark:shadow-xs"
                     />
                 </div>
@@ -17,7 +17,7 @@
                         <x-app-logo-icon class="me-2 h-7 fill-current text-white" />
                     </span> --}}
                     {{-- {{ config('app.name', 'SWCE') }} --}}
-                        <img src="{{ asset('storage/logo.png') }}" alt="Logo" class="w-80 object-contain">
+                        <img src="{{ asset('imagenes_publicas/logo.png') }}" alt="Logo" class="w-80 object-contain">
 
                     <div class="ms-1 grid flex-1 text-start text-sm">
                         <span class="mb-0.5 truncate leading-tight font-semibold">Sistema Web de Control Escolar para el Centro Universitario Moctezuma A.C.</span>
@@ -44,7 +44,7 @@
                     <a href="{{ route('home') }}" class="z-20 flex flex-col items-center gap-2 font-medium lg:hidden" wire:navigate>
 
                         <img
-                        src="{{ asset('storage/logo.png') }}"
+                        src="{{ asset('imagenes_publicas/logo.png') }}"
                         class="h-20 w-auto object-cover  dark:bg-neutral-950 dark:shadow-xs"
     />
 
