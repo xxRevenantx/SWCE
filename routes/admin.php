@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\LicenciaturaController;
+use App\Http\Controllers\CuatrimestreController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -16,4 +17,5 @@ Route::middleware(['auth'])->group(function () {
         // Rutas del Admin
     Route::resource('usuarios', UserController::class)->middleware('can:admin.usuarios')->names('usuarios');
     Route::resource('licenciaturas', LicenciaturaController::class)->middleware('can:admin.licenciaturas')->names('licenciaturas');
+    Route::resource('cuatrimestres', CuatrimestreController::class)->middleware('can:admin.cuatrimestres')->names('cuatrimestres');
 });

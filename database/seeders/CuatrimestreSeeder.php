@@ -5,7 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
-class LicenciaturaSeeder extends Seeder
+class CuatrimestreSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -14,7 +14,6 @@ class LicenciaturaSeeder extends Seeder
     {
 
 
-
-
-    }
+//
+        }
 }

@@ -62,6 +62,13 @@
                 </flux:navlist.group>
             </flux:navlist>
             @endcan
+         @can('admin.cuatrimestres')
+            <flux:navlist >
+                <flux:navlist.group :heading="__('Cuatrimestres')" class="grid ">
+                    <flux:navlist.item icon="book" :href="route('cuatrimestres.index')" :current="request()->routeIs('cuatrimestres.index')" wire:navigate>{{ __('Cuatrimestres') }}</flux:navlist.item>
+                </flux:navlist.group>
+            </flux:navlist>
+            @endcan
 
             <flux:spacer />
 
