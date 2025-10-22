@@ -65,7 +65,7 @@
 
     <!-- Filtros -->
     <div class="rounded-2xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 shadow-lg overflow-hidden mb-4">
-      <div class="h-1.5 w-full bg-gradient-to-r from-indigo-500 via-violet-500 to-fuchsia-500"></div>
+      <div class="h-1.5 w-full"></div>
       <div class="p-4 sm:p-5">
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <flux:field>

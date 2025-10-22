@@ -134,7 +134,8 @@
                                         <flux:input
                                             badge="Requerido"
                                             wire:model="slug"
-                                            readonly
+
+                                            readonly variant="filled"
                                             :label="__('URL')"
                                             type="text"
                                             placeholder="generado-automaticamente"

@@ -1,9 +1,12 @@
 <div class="w-full mx-auto ">
 
   <!-- BARRA SUPERIOR -->
-  <div class="w-full flex flex-wrap items-center justify-between gap-4 rounded-2xl p-4 sm:p-5 bg-white/90 dark:bg-neutral-800/90 shadow-lg border border-neutral-200 dark:border-neutral-700 mb-4 relative overflow-visible">
-    <div class="pointer-events-none absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-indigo-500 via-violet-500 to-fuchsia-500"></div>
 
+
+    <div class="rounded-2xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 shadow-lg overflow-hidden mb-4">
+      <div class="h-1.5 w-full bg-gradient-to-r from-indigo-500 via-violet-500 to-fuchsia-500"></div>
+  <div class="p-3 sm:p-3">
+      <div class="md:flex md:justify-between gap-4">
     <!-- Fecha -->
     <div class="flex items-center gap-2 w-full sm:w-auto justify-center lg:justify-start text-neutral-700 dark:text-neutral-100">
       <div class="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300">
@@ -26,7 +29,7 @@
 
       </div>
 
-   
+
       <!-- Avatar -->
     @if(auth()->user()->photo)
       <div class="relative w-10 h-10 hidden lg:block">
@@ -50,6 +53,8 @@
       </div>
     @endif
     </div>
+  </div>
+  </div>
   </div>
 
   </div>

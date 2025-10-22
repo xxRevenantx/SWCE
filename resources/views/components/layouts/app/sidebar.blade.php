@@ -47,15 +47,18 @@
             </flux:navlist>
 
 
-         @can('admin.usuarios')
+         @can('admin.administracion')
             <flux:navlist >
-                <flux:navlist.group :heading="__('Usuarios')" class="grid ">
+                <flux:navlist.group :heading="__('Administración')" class="grid ">
                     <flux:navlist.item icon="users" :href="route('usuarios.index')" :current="request()->routeIs('usuarios.index')" wire:navigate>{{ __('Usuarios') }}</flux:navlist.item>
+                     <flux:navlist.item icon="book" :href="route('licenciaturas.index')" :current="request()->routeIs('licenciaturas.index')" wire:navigate>{{ __('Licenciaturas') }}</flux:navlist.item>
+                    <flux:navlist.item icon="book" :href="route('cuatrimestres.index')" :current="request()->routeIs('cuatrimestres.index')" wire:navigate>{{ __('Cuatrimestres') }}</flux:navlist.item>
+
                 </flux:navlist.group>
             </flux:navlist>
             @endcan
 
-         @can('admin.licenciaturas')
+         {{-- @can('admin.licenciaturas')
             <flux:navlist >
                 <flux:navlist.group :heading="__('Licenciaturas')" class="grid ">
                     <flux:navlist.item icon="book" :href="route('licenciaturas.index')" :current="request()->routeIs('licenciaturas.index')" wire:navigate>{{ __('Licenciaturas') }}</flux:navlist.item>
@@ -68,7 +71,7 @@
                     <flux:navlist.item icon="book" :href="route('cuatrimestres.index')" :current="request()->routeIs('cuatrimestres.index')" wire:navigate>{{ __('Cuatrimestres') }}</flux:navlist.item>
                 </flux:navlist.group>
             </flux:navlist>
-            @endcan
+            @endcan --}}
 
             <flux:spacer />
 
