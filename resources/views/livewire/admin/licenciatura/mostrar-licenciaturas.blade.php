@@ -29,7 +29,7 @@
     <div
         class="flex flex-col md:flex-row md:items-center gap-3 md:gap-4 rounded-2xl border border-gray-200 dark:border-neutral-800 bg-white/70 dark:bg-neutral-900/60 p-3 md:p-4 shadow-sm"
     >
-        <div class="w-full md:max-w-xl">
+        <div class="w-full ">
             <label for="buscar-lic" class="sr-only">Buscar Licenciatura</label>
             <div class="relative">
                 <div class="pointer-events-none absolute inset-y-0 left-3 flex items-center">
@@ -71,14 +71,14 @@
         <div class="hidden md:block overflow-hidden rounded-2xl border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 shadow">
             <div class="overflow-x-auto">
                 <table class="min-w-full text-sm">
-                    <thead class="bg-gray-50 dark:bg-neutral-800/70 text-gray-600 dark:text-gray-300">
+                   <thead class="sticky top-0 z-10 bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow">
                         <tr>
-                            <th class="px-4 py-3 text-center font-semibold">#</th>
-                            <th class="px-4 py-3 text-center font-semibold">Imagen</th>
-                            <th class="px-4 py-3 text-left font-semibold">Licenciatura</th>
-                            <th class="px-4 py-3 text-left font-semibold">Nombre corto</th>
-                            <th class="px-4 py-3 text-left font-semibold">RVOE</th>
-                            <th class="px-4 py-3 text-center font-semibold">Acciones</th>
+                            <th class="px-4 py-3 text-center text-[11px] font-semibold uppercase">#</th>
+                            <th class="px-4 py-3 text-center text-[11px] font-semibold uppercase">Logo</th>
+                            <th class="px-4 py-3 text-left text-[11px] font-semibold uppercase">Nombre de la Licenciatura</th>
+                            <th class="px-4 py-3 text-left text-[11px] font-semibold uppercase">Nombre corto</th>
+                            <th class="px-4 py-3 text-left text-[11px] font-semibold uppercase">RVOE</th>
+                            <th class="px-4 py-3 text-center text-[11px] font-semibold uppercase">Acciones</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100 dark:divide-neutral-800">
@@ -104,7 +104,7 @@
                                                      alt="{{ $licenciatura->nombre }}"
                                                      class="h-10 w-10 rounded-lg object-cover ring-1 ring-gray-200 dark:ring-neutral-700">
                                             @else
-                                                <img src="{{ asset('storage/default.png') }}"
+                                                <img src="{{ asset('imagenes_publicas/logo-letra.png') }}"
                                                      alt="Default"
                                                      class="h-10 w-10 rounded-lg object-cover ring-1 ring-gray-200 dark:ring-neutral-700">
                                             @endif

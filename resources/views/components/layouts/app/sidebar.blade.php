@@ -4,7 +4,7 @@
         @include('partials.head')
     </head>
     <body class="min-h-screen bg-white dark:bg-zinc-800">
-        <flux:sidebar sticky stashable class="border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
+        <flux:sidebar sticky stashable class="border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 ">
             <flux:sidebar.toggle class="lg:hidden" icon="x-mark" />
 
             @can('admin.dashboard')
@@ -26,37 +26,74 @@
             @endcan
 
 
-            <flux:navlist variant="outline">
-                <flux:navlist.group :heading="__('Plataforma')" class="grid">
-
-                        @can('admin.dashboard')
-                    <flux:navlist.item icon="home" :href="route('admin.dashboard')" :current="request()->routeIs('admin.dashboard')" wire:navigate>Dashboard</flux:navlist.item>
-                        @endcan
-
-                    @can('profesor.dashboard')
-                    <flux:navlist.item icon="home" :href="route('profesor.dashboard')" :current="request()->routeIs('profesor.dashboard')" wire:navigate>Panel del Profesor</flux:navlist.item>
-                    <flux:navlist.item icon="home"  wire:navigate>Mi horario</flux:navlist.item>
-                    @endcan
-
-                    @can('estudiante.dashboard')
-                    <flux:navlist.item icon="home" :href="route('estudiante.dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>Panel del Estudiante
+            <!-- Plataforma -->
+                <flux:navlist variant="outline" class="text-[15px] sm:text-base">
+                <flux:navlist.group :heading="__('Plataforma')" class="grid gap-y-2.5 sm:gap-y-3">
+                    @can('admin.dashboard')
+                    <flux:navlist.item class="py-4" icon="home" :href="route('admin.dashboard')" :current="request()->routeIs('admin.dashboard')" wire:navigate>
+                        Dashboard
                     </flux:navlist.item>
                     @endcan
 
+                    @can('profesor.dashboard')
+                    <flux:navlist.item class="py-4" icon="home" :href="route('profesor.dashboard')" :current="request()->routeIs('profesor.dashboard')" wire:navigate>
+                        Panel del Profesor
+                    </flux:navlist.item>
+                    <flux:navlist.item class="py-4" icon="home" wire:navigate>
+                        Mi horario
+                    </flux:navlist.item>
+                    @endcan
+
+                    @can('estudiante.dashboard')
+                    <flux:navlist.item class="py-4" icon="home" :href="route('estudiante.dashboard')" :current="request()->routeIs('estudiante.dashboard')" wire:navigate>
+                        Panel del Estudiante
+                    </flux:navlist.item>
+                    @endcan
                 </flux:navlist.group>
-            </flux:navlist>
+                </flux:navlist>
 
+                <!-- Administración -->
+                @can('admin.administracion')
+                <flux:navlist class="text-[15px] sm:text-base">
+                    <flux:navlist.group :heading="__('Administración')" class="grid gap-y-4 sm:gap-y-3">
+                    <flux:navlist.item class="py-4" icon="users" :href="route('usuarios.index')" :current="request()->routeIs('usuarios.index')" wire:navigate>
+                        {{ __('Usuarios') }}
+                    </flux:navlist.item>
 
-         @can('admin.administracion')
-            <flux:navlist class="text-2xl" >
-                <flux:navlist.group :heading="__('Administración')" class="grid ">
-                    <flux:navlist.item icon="users" :href="route('usuarios.index')" :current="request()->routeIs('usuarios.index')" wire:navigate>{{ __('Usuarios') }}</flux:navlist.item>
+                    <flux:navlist.item class="py-4" icon="book" :href="route('licenciaturas.index')" :current="request()->routeIs('licenciaturas.index')" wire:navigate>
+                        {{ __('Licenciaturas') }}
+                    </flux:navlist.item>
 
+                    <flux:navlist.item class="py-4" icon="graduation-cap" :href="route('licenciaturas.index')" :current="request()->routeIs('licenciaturas.index')" wire:navigate>
+                        {{ __('Cuatrimestres') }}
+                    </flux:navlist.item>
 
+                    <flux:navlist.item class="py-4" icon="users-round" :href="route('licenciaturas.index')" :current="request()->routeIs('licenciaturas.index')" wire:navigate>
+                        {{ __('Generaciones') }}
+                    </flux:navlist.item>
 
-                </flux:navlist.group>
-            </flux:navlist>
-            @endcan
+                    <flux:navlist.item class="py-4" icon="user-plus" :href="route('licenciaturas.index')" :current="request()->routeIs('licenciaturas.index')" wire:navigate>
+                        {{ __('Inscripciones') }}
+                    </flux:navlist.item>
+
+                    <flux:navlist.item class="py-4" icon="teachers" :href="route('licenciaturas.index')" :current="request()->routeIs('licenciaturas.index')" wire:navigate>
+                        {{ __('Profesores') }}
+                    </flux:navlist.item>
+
+                    <flux:navlist.item class="py-4" icon="book" :href="route('licenciaturas.index')" :current="request()->routeIs('licenciaturas.index')" wire:navigate>
+                        {{ __('Materias') }}
+                    </flux:navlist.item>
+
+                    <flux:navlist.item class="py-4" icon="calendar-days" :href="route('licenciaturas.index')" :current="request()->routeIs('licenciaturas.index')" wire:navigate>
+                        {{ __('Horarios') }}
+                    </flux:navlist.item>
+
+                    <flux:navlist.item class="py-4" icon="book-check" :href="route('licenciaturas.index')" :current="request()->routeIs('licenciaturas.index')" wire:navigate>
+                        {{ __('Calificaciones') }}
+                    </flux:navlist.item>
+                    </flux:navlist.group>
+                </flux:navlist>
+                @endcan
 
          {{-- @can('admin.licenciaturas')
             <flux:navlist >

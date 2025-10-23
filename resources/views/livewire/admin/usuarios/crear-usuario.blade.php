@@ -8,7 +8,7 @@
   </div>
 
   <!-- Contenedor plegable -->
-  <div x-data="{ open: false }" class="my-4">
+  <div x-data="{ open: false }" class="my-4 bg-gray">
     <!-- Botón toggle -->
     <button
       @click="open = !open"

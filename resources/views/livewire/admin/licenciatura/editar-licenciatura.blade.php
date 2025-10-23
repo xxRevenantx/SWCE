@@ -28,7 +28,7 @@
     class="relative w-full max-w-3xl rounded-2xl bg-white dark:bg-neutral-900 shadow-2xl ring-1 ring-black/5 dark:ring-white/10 overflow-hidden"
   >
     <!-- Acento -->
-    <div class="h-1 w-full bg-gradient-to-r from-sky-500 via-blue-600 to-indigo-600"></div>
+     <div class="h-1.5 w-full bg-gradient-to-r from-indigo-500 via-violet-500 to-fuchsia-500"></div>
 
     <!-- Header -->
     <div class="flex items-start justify-between gap-4 px-5 py-4 sm:px-6 sm:py-5">

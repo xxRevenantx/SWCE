@@ -124,7 +124,7 @@
                                             wire:model.live="nombre"
                                             :label="__('Licenciatura')"
                                             type="text"
-                                            placeholder="Ej. Ingeniería en Sistemas Computacionales"
+                                            placeholder="Ingresa el nombre de la Licenciatura"
                                             autofocus
                                             autocomplete="nombre"
                                         />
@@ -138,7 +138,7 @@
                                             readonly variant="filled"
                                             :label="__('URL')"
                                             type="text"
-                                            placeholder="generado-automaticamente"
+                                            placeholder="Url de la licenciatura"
                                             autocomplete="slug"
                                         />
                                     </div>
@@ -149,7 +149,7 @@
                                             wire:model="nombre_corto"
                                             :label="__('Nombre corto')"
                                             type="text"
-                                            placeholder="Ej. ISC"
+                                            placeholder="Nombre corto"
                                             autocomplete="nombre_corto"
                                         />
                                     </div>
@@ -160,7 +160,7 @@
                                             wire:model="RVOE"
                                             :label="__('RVOE')"
                                             type="text"
-                                            placeholder="Clave RVOE (si aplica)"
+                                            placeholder="Clave RVOE"
                                             autocomplete="RVOE"
                                         />
                                     </div>
