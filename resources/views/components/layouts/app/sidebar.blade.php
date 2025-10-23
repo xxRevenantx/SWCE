@@ -27,7 +27,7 @@
 
 
             <flux:navlist variant="outline">
-                <flux:navlist.group :heading="__('Platforma')" class="grid">
+                <flux:navlist.group :heading="__('Plataforma')" class="grid">
 
                         @can('admin.dashboard')
                     <flux:navlist.item icon="home" :href="route('admin.dashboard')" :current="request()->routeIs('admin.dashboard')" wire:navigate>Dashboard</flux:navlist.item>
@@ -48,11 +48,11 @@
 
 
          @can('admin.administracion')
-            <flux:navlist >
+            <flux:navlist class="text-2xl" >
                 <flux:navlist.group :heading="__('Administración')" class="grid ">
                     <flux:navlist.item icon="users" :href="route('usuarios.index')" :current="request()->routeIs('usuarios.index')" wire:navigate>{{ __('Usuarios') }}</flux:navlist.item>
-                     <flux:navlist.item icon="book" :href="route('licenciaturas.index')" :current="request()->routeIs('licenciaturas.index')" wire:navigate>{{ __('Licenciaturas') }}</flux:navlist.item>
-                    <flux:navlist.item icon="book" :href="route('cuatrimestres.index')" :current="request()->routeIs('cuatrimestres.index')" wire:navigate>{{ __('Cuatrimestres') }}</flux:navlist.item>
+
+
 
                 </flux:navlist.group>
             </flux:navlist>
