@@ -4,7 +4,7 @@
   <!-- Encabezado -->
   <div class="flex flex-col gap-1">
     <h1 class="text-xl sm:text-2xl font-bold text-neutral-900 dark:text-white">Crear Usuarios</h1>
-    <p class="text-sm text-neutral-500 dark:text-neutral-400">Formulario para crear usuarios.</p>
+    <p class="text-sm text-neutral-500 dark:text-neutral-400">Formulario para crear un nuevo usuario.</p>
   </div>
 
   <!-- Contenedor plegable -->

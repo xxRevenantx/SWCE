@@ -172,7 +172,6 @@
             </flux:modal.trigger>
           @else
             <!-- Estados deshabilitados cuando no hay usuarios -->
-            <flux:button disabled variant="primary" class="bg-neutral-200 text-neutral-700">Exportar</flux:button>
             <flux:button disabled variant="primary" class="bg-neutral-200 text-neutral-700">Inactivar</flux:button>
             <flux:button disabled variant="primary" class="bg-neutral-200 text-neutral-700">Activar</flux:button>
             <flux:button wire:click="limpiarFiltros" variant="primary" class="bg-neutral-200 text-neutral-900">Limpiar Filtros</flux:button>
@@ -265,12 +264,12 @@
                     @foreach ($usuario->roles as $role)
                       @php
                         $roleColors = [
-                          'SuperAdmin' => 'red', 'Admin' => 'blue', 'Profesor' => 'green',
-                          'Estudiante' => 'yellow', 'Invitado' => 'purple',
+                           'Admin' => 'blue', 'Profesor' => 'indigo',
+                          'Estudiante' => 'yellow',
                         ];
                         $color = $roleColors[$role->name] ?? 'zinc';
                       @endphp
-                      @if ($role->name !== 'SuperAdmin' || auth()->user()->hasRole('SuperAdmin'))
+                      @if ($role->name !== 'Admin' || auth()->user()->hasRole('Admin'))
                         <flux:badge color="{{ $color }}">{{ $role->name }}</flux:badge>
                       @endif
                     @endforeach
@@ -281,14 +280,14 @@
                     <flux:button variant="primary"
                       class="bg-yellow-500 hover:bg-yellow-600"
                       @click="Livewire.dispatch('abrirModal', { id: {{ $usuario->id }} })">
-                      Editar
+                      <flux:icon.square-pen />
                     </flux:button>
-                    <!-- Si quieres mostrar eliminar:
-                    <flux:button class="bg-red-600 hover:bg-red-700 text-white"
+
+                    <flux:button variant="primary" class="bg-red-600 hover:bg-red-700 text-white"
                       @click="destroyUsuario({{ $usuario->id }}, '{{ $usuario->username }}')">
-                      Eliminar
+                      <flux:icon.trash-2 />
                     </flux:button>
-                    -->
+
                   </div>
                 </td>
               </tr>
