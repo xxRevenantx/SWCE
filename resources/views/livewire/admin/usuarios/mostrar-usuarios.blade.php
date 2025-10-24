@@ -278,14 +278,15 @@
                 <td class="px-3 py-2 align-middle">
                   <div class="flex items-center gap-2">
                     <flux:button variant="primary"
-                      class="bg-yellow-500 hover:bg-yellow-600"
+                          class="cursor-pointer bg-amber-500 hover:bg-amber-600 text-white p-1"
                       @click="Livewire.dispatch('abrirModal', { id: {{ $usuario->id }} })">
-                      <flux:icon.square-pen />
+                          <flux:icon.square-pen class="w-3.5 h-3.5" />
                     </flux:button>
 
-                    <flux:button variant="primary" class="bg-red-600 hover:bg-red-700 text-white"
+                    <flux:button variant="primary"
+                     class="cursor-pointer bg-rose-600 hover:bg-rose-700 text-white p-1"
                       @click="destroyUsuario({{ $usuario->id }}, '{{ $usuario->username }}')">
-                      <flux:icon.trash-2 />
+                      <flux:icon.trash-2 class="w-3.5 h-3.5" />
                     </flux:button>
 
                   </div>

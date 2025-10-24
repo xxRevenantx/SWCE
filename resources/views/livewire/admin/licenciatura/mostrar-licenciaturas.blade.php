@@ -129,33 +129,21 @@
                                         @endif
                                     </td>
                                     <td class="px-4 py-3">
-                                        <div class="flex items-center justify-center gap-2">
+                                        <div class="flex items-center justify-center gap-1">
                                             <flux:button
                                                 variant="primary"
-                                                class="cursor-pointer bg-amber-500 hover:bg-amber-600 text-white"
+                                                class="cursor-pointer bg-amber-500 hover:bg-amber-600 text-white p-1"
                                                 @click="Livewire.dispatch('abrirModal', { id: {{ $licenciatura->id }} })"
                                             >
-                                                <div class="flex items-center gap-1">
-                                                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
-                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                              d="M16.862 4.487l1.688-1.688a1.875 1.875 0 112.652 2.652L6.75 19.9 3 21l1.1-3.75L16.862 4.487Z"/>
-                                                    </svg>
-
-                                                </div>
+                                                 <flux:icon.square-pen class="w-3.5 h-3.5" />
                                             </flux:button>
 
                                             <flux:button
                                                 variant="danger"
-                                                class="cursor-pointer bg-rose-600 hover:bg-rose-700 text-white"
+                                                class="cursor-pointer bg-rose-600 hover:bg-rose-700 text-white p-1"
                                                 @click="destroyLicenciatura({{ $licenciatura->id }}, '{{ $licenciatura->nombre }}')"
                                             >
-                                                <div class="flex items-center gap-1">
-                                                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
-                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5-3h4m-6 0a1 1 0 001 1h6a1 1 0 001-1m-8 0V4a2 2 0 012-2h2a2 2 0 012 2v0"/>
-                                                    </svg>
-
-                                                </div>
+                                                 <flux:icon.trash-2 class="w-3.5 h-3.5" />
                                             </flux:button>
                                         </div>
                                     </td>
@@ -212,13 +200,7 @@
                                         class="cursor-pointer bg-amber-500 hover:bg-amber-600 text-white"
                                         @click="Livewire.dispatch('abrirModal', { id: {{ $licenciatura->id }} })"
                                     >
-                                        <div class="flex items-center gap-1">
-                                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                      d="M16.862 4.487l1.688-1.688a1.875 1.875 0 112.652 2.652L6.75 19.9 3 21l1.1-3.75L16.862 4.487Z"/>
-                                            </svg>
-
-                                        </div>
+                                         <flux:icon.square-pen />
                                     </flux:button>
 
                                     <flux:button
@@ -226,13 +208,7 @@
                                         class="cursor-pointer bg-rose-600 hover:bg-rose-700 text-white"
                                         @click="destroyLicenciatura({{ $licenciatura->id }}, '{{ $licenciatura->nombre }}')"
                                     >
-                                        <div class="flex items-center gap-1">
-                                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5-3h4m-6 0a1 1 0 001 1h6a1 1 0 001-1m-8 0V4a2 2 0 012-2h2a2 2 0 012 2v0"/>
-                                            </svg>
-
-                                        </div>
+                                         <flux:icon.trash-2 />
                                     </flux:button>
                                 </div>
                             </div>
