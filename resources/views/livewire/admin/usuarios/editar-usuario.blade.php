@@ -131,7 +131,7 @@
             <flux:button
               variant="primary"
               type="submit"
-              class="min-w-[150px] cursor-pointer"
+              class="min-w-[150px] cursor-pointer guardar-btn"
               wire:loading.attr="disabled"
               wire:target="actualizarUsuario"
             >

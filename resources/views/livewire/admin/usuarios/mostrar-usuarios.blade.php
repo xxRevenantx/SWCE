@@ -6,8 +6,8 @@
       destroyUsuario(id, username) {
         Swal.fire({
           title: '¿Estás seguro?',
-          text: `El usuario '${username}' se eliminará de forma permanente`,
-          icon: 'info',
+          text: `Esta acción no podrá revertirse`,
+          icon: 'warning',
           showCancelButton: true,
           confirmButtonColor: '#3085d6',
           cancelButtonColor: '#d33',
@@ -196,7 +196,7 @@
         </div>
 
         <div class="overflow-x-auto rounded-xl ring-1 ring-neutral-200 dark:ring-neutral-700">
-          <table class="min-w-full text-sm">
+          <table class="min-w-full text-sm table-striped">
             <thead class="bg-neutral-100 dark:bg-neutral-700/60 text-neutral-700 dark:text-neutral-100">
               <tr>
                 <th class="px-4 py-2 text-left">#</th>
@@ -228,8 +228,8 @@
     <!-- Tabla principal -->
     <div class="overflow-x-auto rounded-2xl ring-1 ring-neutral-200 dark:ring-neutral-700 bg-white dark:bg-neutral-800 shadow-lg">
       @if ($usuarios->count())
-        <table class="min-w-full text-sm">
-          <thead class="sticky top-0 z-10 bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow">
+        <table class="min-w-full text-sm table-striped">
+          <thead>
             <tr>
               <th class="px-3 py-3 text-left text-[11px] tracking-wider uppercase w-10">
                 <input type="checkbox" wire:model.live="selectAll" class="rounded">

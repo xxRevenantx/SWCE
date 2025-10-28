@@ -3,7 +3,7 @@
         destroyLicenciatura(id, nombre) {
             Swal.fire({
                 title: '¿Estás seguro?',
-                text: `La Licenciatura en ${nombre} se eliminará de forma permanente`,
+                text: `Esta acción no podrá revertirse`,
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#2563EB',

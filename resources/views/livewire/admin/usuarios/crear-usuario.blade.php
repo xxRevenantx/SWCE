@@ -127,7 +127,7 @@
                 <flux:button
                   variant="primary"
                   type="submit"
-                  class="cursor-pointer"
+                  class="cursor-pointer guardar-btn"
                   wire:loading.attr="disabled"
                   wire:target="guardarUsuario"
                 >

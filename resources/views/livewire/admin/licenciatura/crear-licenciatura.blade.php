@@ -183,7 +183,7 @@
                         </button>
 
 
-                            <flux:button variant="primary" type="submit" class="w-full sm:w-auto cursor-pointer">
+                            <flux:button variant="primary" type="submit" class="w-full sm:w-auto cursor-pointer guardar-btn">
                                 {{ __('Guardar') }}
                             </flux:button>
 

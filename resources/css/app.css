@@ -77,9 +77,18 @@ button{
     cursor: pointer;
 }
 
+button.guardar-btn{
+    @apply bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-150;
+}
+
 
 /* Clase personalizada table-striped */
 @layer components {
+
+    table thead{
+        @apply sticky top-0 z-10 bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow;
+    }
+
     .table-striped tbody tr:nth-child(odd) {
       @apply bg-white;
     }
@@ -96,4 +105,7 @@ button{
     .dark .table-striped tbody tr:nth-child(even) {
       @apply bg-neutral-700;
     }
+
+
+
   }

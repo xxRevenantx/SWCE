@@ -46,7 +46,7 @@
                         <img
                         src="{{ asset('imagenes_publicas/logo.png') }}"
                         class="h-20 w-auto object-cover  dark:bg-neutral-950 dark:shadow-xs"
-    />
+             />
 
                         {{-- <span class="flex h-9 w-9 items-center justify-center rounded-md">
                             <x-app-logo-icon class="size-9 fill-current text-black dark:text-white" />
