@@ -1,10 +1,9 @@
-<!-- listado-pro -->
 <div
     x-data="{
         destroyCuatrimestre(id, nombre) {
             Swal.fire({
                 title: '¿Estás seguro?',
-                text: `El ${nombre}° Cuatrimestre se eliminará de forma permanente`,
+                text: `Esta acción no podrá revertirse.`,
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#2563EB',
@@ -13,18 +12,6 @@
                 confirmButtonText: 'Sí, eliminar'
             }).then((r) => r.isConfirmed && @this.call('eliminarCuatrimestre', id))
         },
-        confirmarEliminacionSeleccionados(selected) {
-            Swal.fire({
-                title: '¿Estás seguro?',
-                text: `Se eliminarán ${selected} cuatrimestres de forma permanente`,
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#2563EB',
-                cancelButtonColor: '#EF4444',
-                cancelButtonText: 'Cancelar',
-                confirmButtonText: 'Sí, eliminar'
-            }).then((r) => r.isConfirmed && @this.call('eliminarCuatrimestreSeleccionados'))
-        }
     }"
     class="space-y-5"
 >
@@ -53,41 +40,10 @@
                         icon="magnifying-glass"
                         class="w-full"
                     />
-                    <div class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                        Resultados:
-                        <strong>{{ method_exists($cuatrimestres, 'total') ? $cuatrimestres->total() : $cuatrimestres->count() }}</strong>
-                    </div>
+
                 </div>
 
-                <!-- Acciones masivas -->
-                <div class="flex items-center gap-2">
-                    @if(count($selected) > 0)
-                        <flux:button
-                            variant="danger"
-                            class="cursor-pointer bg-rose-600 hover:bg-rose-700 text-white"
-                            @click="confirmarEliminacionSeleccionados({{ count($selected) }})"
-                            title="Eliminar seleccionados"
-                        >
-                            <div class="flex items-center gap-2">
-                                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5-3h4m-6 0a1 1 0 001 1h6a1 1 0 001-1m-8 0V4a2 2 0 012-2h2a2 2 0 012 2v0"/>
-                                </svg>
-                                Eliminar seleccionados ({{ count($selected) }})
-                            </div>
-                        </flux:button>
-                    @else
-                        <flux:button disabled variant="primary" class="bg-gray-200 text-gray-600 dark:bg-neutral-800 dark:text-gray-400">
-                            <div class="flex items-center gap-2">
-                                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5-3h4m-6 0a1 1 0 001 1h6a1 1 0 001-1m-8 0V4a2 2 0 012-2h2a2 2 0 012 2v0"/>
-                                </svg>
-                                Eliminar seleccionados
-                            </div>
-                        </flux:button>
-                    @endif
-                </div>
+
             </div>
         </div>
 
@@ -97,7 +53,7 @@
                 <!-- Loader overlay -->
                 <div
                     wire:loading.delay
-                    wire:target="search, eliminarCuatrimestre, eliminarCuatrimestreSeleccionados, selected, selectAll"
+                    wire:target="search, eliminarCuatrimestre"
                     class="absolute inset-0 z-10 grid place-items-center rounded-xl bg-white/70 dark:bg-neutral-900/70 backdrop-blur"
                     aria-live="polite"
                     aria-busy="true"
@@ -115,20 +71,18 @@
                 <div
                     class="transition ease-out duration-200"
                     wire:loading.class="blur-sm opacity-80 pointer-events-none"
-                    wire:target="search, eliminarCuatrimestre, eliminarCuatrimestreSeleccionados, selected, selectAll"
+                    wire:target="search, eliminarCuatrimestre, eliminarCuatrimestreSeleccionado"
                 >
                     <!-- Tabla (desktop) -->
                     <div class="hidden md:block overflow-hidden rounded-xl border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900">
                         <div class="overflow-x-auto max-h-[70vh]">
-                            <table class="min-w-full text-sm">
-                                <thead class="sticky top-0 z-10 bg-gray-50/95 dark:bg-neutral-900/95 backdrop-blur text-gray-700 dark:text-gray-300 border-b border-gray-200 dark:border-neutral-800">
+                            <table class="min-w-full text-sm table-striped">
+                                <thead>
                                     <tr>
-                                        <th class="px-4 py-3 text-center font-semibold">
-                                            <input type="checkbox" wire:model.live="selectAll" aria-label="Seleccionar todos" />
-                                        </th>
-                                        <th class="px-4 py-3 text-center font-semibold">ID</th>
+
+                                        <th class="px-4 py-3 text-center font-semibold">#</th>
                                         <th class="px-4 py-3 text-center font-semibold">Cuatrimestre</th>
-                                        <th class="px-4 py-3 text-left font-semibold">Nombre cuatrimestre</th>
+                                        <th class="px-4 py-3 text-left font-semibold">Nombre de cuatrimestre</th>
                                         <th class="px-4 py-3 text-center font-semibold">Meses</th>
                                         <th class="px-4 py-3 text-center font-semibold">Acciones</th>
                                     </tr>
@@ -136,43 +90,37 @@
 
                                 <tbody class="divide-y divide-gray-100 dark:divide-neutral-800">
                                     @forelse($cuatrimestres as $cuatrimestre)
-                                        <tr class="transition-colors hover:bg-gray-50/70 dark:hover:bg-neutral-800/50 {{ in_array($cuatrimestre->id, $selected) ? 'bg-blue-50 dark:bg-[#0b3a55]/40' : '' }}">
-                                            <td class="px-4 py-3 text-center">
-                                                <input type="checkbox" wire:model.live="selected" value="{{ $cuatrimestre->id }}" aria-label="Seleccionar cuatrimestre {{ $cuatrimestre->id }}" />
-                                            </td>
+                                        <tr class="transition-colors hover:bg-gray-50/70 dark:hover:bg-neutral-800/50 }}">
+
                                             <td class="px-4 py-3 text-center text-gray-800 dark:text-gray-200">{{ $cuatrimestre->id }}</td>
-                                            <td class="px-4 py-3 text-center text-gray-900 dark:text-white">{{ $cuatrimestre->cuatrimestre }}</td>
+                                            <td class="px-4 py-3 text-center text-gray-900 dark:text-white">{{ $cuatrimestre->no_cuatrimestre }}</td>
                                             <td class="px-4 py-3 text-gray-900 dark:text-white">{{ $cuatrimestre->nombre_cuatrimestre }}</td>
                                             <td class="px-4 py-3 text-center text-gray-800 dark:text-gray-200">
                                                 {{ optional($cuatrimestre->mes)->meses ?? 'Sin asignar' }}
                                             </td>
                                             <td class="px-4 py-3">
                                                 <div class="flex items-center justify-center gap-2">
-                                                    <flux:button
-                                                        variant="primary"
-                                                        class="cursor-pointer bg-amber-500 hover:bg-amber-600 text-white"
-                                                        @click="Livewire.dispatch('abrirCuatrimestre', { id: {{ $cuatrimestre->id }} })"
-                                                        title="Editar"
-                                                        aria-label="Editar cuatrimestre"
-                                                    >
-                                                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
-                                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                                  d="M16.862 4.487l1.688-1.688a1.875 1.875 0 112.652 2.652L6.75 19.9 3 21l1.1-3.75L16.862 4.487Z"/>
-                                                        </svg>
-                                                    </flux:button>
 
-                                                    <flux:button
-                                                        variant="danger"
-                                                        class="cursor-pointer bg-rose-600 hover:bg-rose-700 text-white"
-                                                        @click="destroyCuatrimestre({{ $cuatrimestre->id }}, '{{ $cuatrimestre->cuatrimestre }}')"
-                                                        title="Eliminar"
-                                                        aria-label="Eliminar cuatrimestre"
-                                                    >
-                                                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
-                                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5-3h4m-6 0a1 1 0 001 1h6a1 1 0 001-1m-8 0V4a2 2 0 012-2h2a2 2 0 012 2v0"/>
-                                                        </svg>
-                                                    </flux:button>
+
+                                                            <flux:button
+                                                            variant="primary"
+                                                            class="cursor-pointer bg-amber-500 hover:bg-amber-600 text-white"
+                                                            @click="$dispatch('abrir-modal-cuatrimestre');
+                                                                Livewire.dispatch('editarCuatrimestre', { id: {{ $cuatrimestre->id }} });
+                                                            "
+                                                            >
+                                                           <flux:icon.square-pen class="w-3.5 h-3.5" />
+                                                            <!-- ícono -->
+                                                            </flux:button>
+
+                                                     <flux:button
+                                                            variant="danger"
+                                                            class="cursor-pointer bg-rose-600 hover:bg-rose-700 text-white p-1"
+                                                              @click="destroyCuatrimestre({{ $cuatrimestre->id }}, '{{ $cuatrimestre->nombre_cuatrimestre }}')"
+                                                        >
+                                                            <flux:icon.trash-2 class="w-3.5 h-3.5" />
+                                                        </flux:button>
+
                                                 </div>
                                             </td>
                                         </tr>
@@ -200,7 +148,7 @@
                                 <div class="flex items-start justify-between gap-3">
                                     <div class="min-w-0">
                                         <div class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-                                            <input type="checkbox" wire:model.live="selected" value="{{ $c->id }}" aria-label="Seleccionar cuatrimestre {{ $c->id }}" />
+
                                             <span>#{{ $c->id }}</span>
                                             <span class="inline-flex items-center rounded-full border border-sky-300/60 bg-sky-50 px-2 py-0.5 text-[10px] font-medium text-sky-700 dark:bg-sky-900/20 dark:text-sky-300 dark:border-sky-700/50">
                                                 {{ $c->cuatrimestre }}° Cuatrimestre
@@ -216,17 +164,15 @@
 
                                     <div class="shrink-0 flex flex-col gap-2">
                                         <flux:button
-                                            variant="primary"
-                                            class="cursor-pointer bg-amber-500 hover:bg-amber-600 text-white"
-                                            @click="Livewire.dispatch('abrirCuatrimestre', { id: {{ $c->id }} })"
-                                            title="Editar"
-                                            aria-label="Editar"
+                                        variant="primary"
+                                        class="cursor-pointer bg-amber-500 hover:bg-amber-600 text-white"
+                                        @click="$dispatch('abrir-modal-cuatrimestre');
+                                            Livewire.dispatch('editarCuatrimestre', { id: {{ $c->id }} });
+                                        "
                                         >
-                                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                      d="M16.862 4.487l1.688-1.688a1.875 1.875 0 112.652 2.652L6.75 19.9 3 21l1.1-3.75L16.862 4.487Z"/>
-                                            </svg>
+                                         <flux:icon.square-pen class="w-3.5 h-3.5" />
                                         </flux:button>
+
 
                                         <flux:button
                                             variant="danger"
@@ -235,10 +181,7 @@
                                             title="Eliminar"
                                             aria-label="Eliminar"
                                         >
-                                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5-3h4m-6 0a1 1 0 001 1h6a1 1 0 001-1m-8 0V4a2 2 0 012-2h2a2 2 0 012 2v0"/>
-                                            </svg>
+                                            <flux:icon.trash-2 class="w-3.5 h-3.5" />
                                         </flux:button>
                                     </div>
                                 </div>
@@ -251,21 +194,14 @@
                         @endforelse
                     </div>
                 </div>
-                <!-- /WRAPPER -->
             </div>
-
             <!-- Paginación -->
             <div class="mt-5">
                 {{ $cuatrimestres->links() }}
-            </div>
-
-            <!-- Resumen selección -->
-            <div class="mt-3 text-xs sm:text-sm text-gray-600 dark:text-gray-300">
-                Cuatrimestres seleccionados: <strong>{{ count($selected) }}</strong>
             </div>
         </div>
     </div>
 
     <!-- Modal editar -->
-    {{-- <livewire:admin.cuatrimestre.editar-cuatrimestre /> --}}
+    <livewire:admin.cuatrimestre.editar-cuatrimestres />
 </div>

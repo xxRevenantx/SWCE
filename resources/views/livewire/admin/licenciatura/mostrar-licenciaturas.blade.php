@@ -70,15 +70,15 @@
         <!-- Desktop table -->
         <div class="hidden md:block overflow-hidden rounded-2xl border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 shadow">
             <div class="overflow-x-auto">
-                <table class="min-w-full text-sm">
-                   <thead class="sticky top-0 z-10 bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow">
+                <table class="min-w-full text-sm table-striped">
+                   <thead >
                         <tr>
-                            <th class="px-4 py-3 text-center text-[11px] font-semibold uppercase">#</th>
-                            <th class="px-4 py-3 text-center text-[11px] font-semibold uppercase">Logo</th>
-                            <th class="px-4 py-3 text-left text-[11px] font-semibold uppercase">Nombre de la Licenciatura</th>
-                            <th class="px-4 py-3 text-left text-[11px] font-semibold uppercase">Nombre corto</th>
-                            <th class="px-4 py-3 text-left text-[11px] font-semibold uppercase">RVOE</th>
-                            <th class="px-4 py-3 text-center text-[11px] font-semibold uppercase">Acciones</th>
+                            <th class="px-4 py-3 text-center  font-semibold uppercase">#</th>
+                            <th class="px-4 py-3 text-center  font-semibold uppercase">Logo</th>
+                            <th class="px-4 py-3 text-left  font-semibold uppercase">Nombre de la Licenciatura</th>
+                            <th class="px-4 py-3 text-left  font-semibold uppercase">Nombre corto</th>
+                            <th class="px-4 py-3 text-left  font-semibold uppercase">RVOE</th>
+                            <th class="px-4 py-3 text-center  font-semibold uppercase">Acciones</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100 dark:divide-neutral-800">
@@ -130,13 +130,16 @@
                                     </td>
                                     <td class="px-4 py-3">
                                         <div class="flex items-center justify-center gap-1">
-                                            <flux:button
-                                                variant="primary"
-                                                class="cursor-pointer bg-amber-500 hover:bg-amber-600 text-white p-1"
-                                                @click="Livewire.dispatch('abrirModal', { id: {{ $licenciatura->id }} })"
-                                            >
-                                                 <flux:icon.square-pen class="w-3.5 h-3.5" />
-                                            </flux:button>
+                                             <flux:button
+                                                            variant="primary"
+                                                            class="cursor-pointer bg-amber-500 hover:bg-amber-600 text-white"
+                                                            @click="$dispatch('abrir-modal');
+                                                                Livewire.dispatch('editarModal', { id: {{ $licenciatura->id }} });
+                                                            "
+                                                            >
+                                                           <flux:icon.square-pen class="w-3.5 h-3.5" />
+                                                            <!-- ícono -->
+                                                            </flux:button>
 
                                             <flux:button
                                                 variant="danger"

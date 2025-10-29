@@ -20,8 +20,8 @@ class EditarLicenciatura extends Component
     public $open = false;
 
     // Método para abrir el modal con datos
-    #[On('abrirModal')]
-    public function abrirModal($id)
+    #[On('editarModal')]
+    public function editarModal($id)
     {
         $lic = Licenciatura::findOrFail($id);
 
@@ -31,7 +31,9 @@ class EditarLicenciatura extends Component
         $this->RVOE = $lic->RVOE;
         $this->slug = $lic->slug;
         $this->logo = $lic->logo;
-        $this->open = true;
+        // $this->open = true;
+                 // avisa al front que ya hay datos
+        $this->dispatch('editar-cargado');
     }
 
     public function updatedNombre($value)

@@ -14,43 +14,6 @@ class MostrarCuatrimestres extends Component
 
     public $search = '';
 
-    public $selected = [];
-    public $selectAll = false;
-
-    public function updatedSelectAll($value)
-    {
-        if ($value) {
-            $this->selected = Cuatrimestre::pluck('id')->toArray();
-        } else {
-            $this->selected = [];
-        }
-    }
-
-    public function eliminarCuatrimestreSeleccionados()
-    {
-        if (count($this->selected) > 0) {
-            Cuatrimestre::whereIn('id', $this->selected)->delete();
-
-            $this->dispatch('swal', [
-                'title' => '¡Cuatrimestres eliminados correctamente!',
-                'icon' => 'success',
-                'position' => 'top-end',
-            ]);
-
-            $this->selected = []; // Reset selected items
-            $this->selectAll = false; // Reset select all checkbox
-        } else {
-            $this->dispatch('swal', [
-                'title' => '¡No se han seleccionado cuatrimestres!',
-                'icon' => 'warning',
-                'position' => 'top-end',
-            ]);
-        }
-
-        $this->dispatch('refreshCuatrimestre');
-    }
-
-
     public function updatingSearch()
     {
         $this->resetPage();
@@ -59,8 +22,6 @@ class MostrarCuatrimestres extends Component
 
     public function eliminarCuatrimestre($id)
     {
-        $this->selected = []; // Reset selected items
-        $this->selectAll = false; // Reset select all checkbox
 
 
         $cuatrimestre = Cuatrimestre::find($id);

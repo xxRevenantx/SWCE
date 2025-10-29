@@ -60,11 +60,11 @@
                         {{ __('Usuarios') }}
                     </flux:navlist.item>
 
-                    <flux:navlist.item class="py-4" icon="book" :href="route('licenciaturas.index')" :current="request()->routeIs('licenciaturas.index')" wire:navigate>
+                    <flux:navlist.item class="py-4" icon="graduation-cap" :href="route('licenciaturas.index')" :current="request()->routeIs('licenciaturas.index')" wire:navigate>
                         {{ __('Licenciaturas') }}
                     </flux:navlist.item>
 
-                    <flux:navlist.item class="py-4" icon="graduation-cap" :href="route('licenciaturas.index')" :current="request()->routeIs('licenciaturas.index')" wire:navigate>
+                    <flux:navlist.item class="py-4" icon="layout-dashboard" :href="route('cuatrimestres.index')" :current="request()->routeIs('cuatrimestres.index')" wire:navigate>
                         {{ __('Cuatrimestres') }}
                     </flux:navlist.item>
 

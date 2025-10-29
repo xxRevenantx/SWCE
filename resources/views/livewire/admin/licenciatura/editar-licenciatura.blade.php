@@ -1,21 +1,24 @@
 <div
-  x-data="{ show: @entangle('open') }"
+  x-data="{ show: false, loading: false }"
   x-cloak
-  x-effect="document.body.classList.toggle('overflow-hidden', show)"
-  @keydown.escape.window="show = false; $wire.cerrarModal()"
-  class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 md:p-8"
-  role="dialog"
-  aria-modal="true"
+  x-trap.noscroll="show"
   x-show="show"
+  @abrir-modal-editar.window="show = true; loading = true"
+  @editar-cargado.window="loading = false"
+  @cerrar-modal-editar.window="
+      show = false;
+      loading = false;
+      // limpia los props en Livewire después de iniciar el cierre
+      $wire.cerrarModal()
+  "
+  @keydown.escape.window="show = false; $wire.cerrarModal()"
+  class="fixed inset-0 z-50 flex items-center justify-center"
+  aria-live="polite"
 >
-  <!-- Overlay con fade/blur -->
-  <div
-    x-show="show"
-    x-transition.opacity.duration.200ms
-    class="absolute inset-0 bg-black/40 backdrop-blur-sm"
-    @click="show = false; $wire.cerrarModal()"
-  ></div>
-
+  <!-- Overlay -->
+  <div class="absolute inset-0 bg-neutral-900/70 backdrop-blur-sm"
+       x-show="show" x-transition.opacity
+       @click.self="show = false; $wire.cerrarModal()"></div>
   <!-- Panel con entrada/salida (scale + translate + blur) -->
   <div
     x-show="show"

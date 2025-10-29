@@ -86,7 +86,7 @@ button.guardar-btn{
 @layer components {
 
     table thead{
-        @apply sticky top-0 z-10 bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow;
+        @apply sticky top-0 z-10 bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow uppercase;
     }
 
     .table-striped tbody tr:nth-child(odd) {
