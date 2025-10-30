@@ -58,26 +58,7 @@
 
                 <!-- Content -->
                 <div class="p-5 sm:p-6 lg:p-8">
-                    <!-- Title row -->
-                    <div class="mb-5 flex items-center justify-between">
-                        <div class="flex items-center gap-3">
-                            <div class="h-9 w-9 rounded-xl bg-blue-50 dark:bg-blue-900/30 grid place-items-center">
-                                <svg class="h-5 w-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75"
-                                          d="M12 6v12m6-6H6"/>
-                                </svg>
-                            </div>
-                            <div>
-                                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Nueva Licenciatura</h2>
-                                <p class="text-xs text-gray-500 dark:text-gray-400">Completa los campos y guarda los cambios.</p>
-                            </div>
-                        </div>
 
-                        <!-- Submit (top for desktop) -->
-                        <div class="hidden md:block">
-
-                        </div>
-                    </div>
 
                     <!-- Grid: responsive -->
                     <flux:field>
@@ -174,13 +155,14 @@
 
                     <!-- Actions bottom (mobile-first) -->
                       <div class="mt-6 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2">
-                        <button
-                            type="button"
-                            @click="open = false"
-                            class="inline-flex justify-center rounded-xl px-4 py-2.5 border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-700 dark:text-neutral-100 hover:bg-neutral-50 dark:hover:bg-neutral-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-300 dark:focus:ring-offset-neutral-900"
+                                <flux:button
+                        variant="primary"
+                        type="button"
+                        class="cancelar-btn"
+                            @click="open=false"
                         >
-                            Cancelar
-                        </button>
+                        Cancelar
+                        </flux:button>
 
 
                             <flux:button variant="primary" type="submit" class="w-full sm:w-auto cursor-pointer guardar-btn">

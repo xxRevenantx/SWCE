@@ -48,18 +48,7 @@
                     <div class="h-1.5 w-full bg-gradient-to-r from-indigo-500 via-violet-500 to-fuchsia-500"></div>
 
                     <div class="p-5 sm:p-6 lg:p-8">
-                        <!-- Título interno -->
-                        <div class="mb-5 flex items-center gap-3">
-                            <div class="h-9 w-9 rounded-xl bg-blue-50 dark:bg-blue-900/30 grid place-items-center">
-                                <svg class="h-5 w-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 6v12m6-6H6"/>
-                                </svg>
-                            </div>
-                            <div>
-                                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Nuevo cuatrimestre</h2>
-                                <p class="text-xs text-gray-500 dark:text-gray-400">Completa los campos y guarda los cambios.</p>
-                            </div>
-                        </div>
+
 
                         <!-- Grid de inputs -->
                         <flux:field>

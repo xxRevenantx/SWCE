@@ -116,18 +116,23 @@
             <div class="mt-6 border-t border-gray-200 dark:border-neutral-800"></div>
               <!-- Acciones -->
               <div class="mt-6 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2">
-                <button
+
+
+                <flux:button
+                  variant="primary"
                   type="button"
-                  @click="open=false"
-                  class="inline-flex justify-center rounded-xl px-4 py-2.5 border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-700 dark:text-neutral-100 hover:bg-neutral-50 dark:hover:bg-neutral-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-300 dark:focus:ring-offset-neutral-900"
+                  class="cancelar-btn"
+                    @click="open=false"
                 >
                   Cancelar
-                </button>
+                </flux:button>
+
+
 
                 <flux:button
                   variant="primary"
                   type="submit"
-                  class="cursor-pointer guardar-btn"
+                  class="guardar-btn"
                   wire:loading.attr="disabled"
                   wire:target="guardarUsuario"
                 >

@@ -11,7 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400..800&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-  <link rel="icon" href="{{ asset('storage/letra.png') }}" type="image/png">
+  <link rel="icon" href="{{ asset('imagenes_publicas/logo-letra.png') }}" type="image/png">
   @vite(['resources/css/app.css', 'resources/js/app.js'])
   @fluxAppearance
 
@@ -58,7 +58,7 @@
       <!-- Header -->
       <header class="mb-10 flex items-center justify-center lg:justify-between">
         <a href="{{ url('/') }}" class="inline-flex items-center gap-3">
-          <img src="{{ asset('storage/default.png') }}" alt="Logo" class="h-12 w-auto sm:h-14" loading="eager" decoding="async">
+          <img src="{{ asset('imagenes_publicas/logo.png') }}" alt="Logo" class="h-15 w-auto sm:h-14" loading="eager" decoding="async">
           <span class="sr-only">Ir al inicio</span>
         </a>
         <div class="hidden lg:flex items-center gap-2 text-sm text-zinc-300">

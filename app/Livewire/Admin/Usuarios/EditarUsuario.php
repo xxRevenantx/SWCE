@@ -25,11 +25,11 @@ class EditarUsuario extends Component
     public $toggle = false;
 
 
-      // Método para abrir el modal con datos
-      #[On('abrirModal')]
-      public function abrirModal($id)
-      {
-            $this->usuario = User::findOrFail($id);
+          // Método para abrir el modal con datos
+    #[On('editarModal')]
+    public function editarModal($id)
+    {
+         $this->usuario = User::findOrFail($id);
             $user = User::findOrFail($id);
 
             $this->userId = $user->id;
@@ -40,8 +40,8 @@ class EditarUsuario extends Component
 
             $this->rol_name = $user->roles->pluck('name')->implode(', ');
 
-          $this->open = true;
-      }
+        $this->dispatch('editar-cargado');
+    }
 
 
       // TOGGLE STATUS
@@ -105,6 +105,9 @@ class EditarUsuario extends Component
 
     // Mantén este evento para que la lista se recalcule completa
     $this->dispatch('refreshUsuarios');
+
+      // 👉 Avisamos al front que debe cerrar el modal
+         $this->dispatch('cerrar-modal-editar');
 
     $this->cerrarModal();
 }

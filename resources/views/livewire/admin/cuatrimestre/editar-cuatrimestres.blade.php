@@ -8,7 +8,6 @@
   @cerrar-modal-cuatrimestre.window="
       show = false;
       loading = false;
-      // limpia los props en Livewire después de iniciar el cierre
       $wire.cerrarModal()
   "
   @keydown.escape.window="show = false; $wire.cerrarModal()"
@@ -141,6 +140,8 @@
                     <span class="text-sm text-neutral-800 dark:text-neutral-200">Cargando…</span>
                 </div>
                 </div>
+
+
             </div>
         </form>
 

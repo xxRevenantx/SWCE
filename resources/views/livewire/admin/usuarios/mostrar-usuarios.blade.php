@@ -195,9 +195,9 @@
           <flux:text class="mt-2">El Admin tiene acceso total a todas las funcionalidades del sistema.</flux:text>
         </div>
 
-        <div class="overflow-x-auto rounded-xl ring-1 ring-neutral-200 dark:ring-neutral-700">
+         <div class="overflow-hidden  rounded-2xl border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 shadow">
           <table class="min-w-full text-sm table-striped">
-            <thead class="bg-neutral-100 dark:bg-neutral-700/60 text-neutral-700 dark:text-neutral-100">
+            <thead>
               <tr>
                 <th class="px-4 py-2 text-left">#</th>
                 <th class="px-4 py-2 text-left">Username</th>
@@ -212,10 +212,18 @@
                   <td class="px-4 py-2">{{ $role->username }}</td>
                   <td class="px-4 py-2"><flux:badge color="red">Admin</flux:badge></td>
                   <td class="px-4 py-2">
+
+
                     <flux:button variant="primary" class="bg-yellow-500 hover:bg-yellow-600"
-                      @click="Livewire.dispatch('abrirModal', { id: {{ $role->id }} })">
-                      Editar
+
+
+                                         @click="$dispatch('abrir-modal-editar');
+                                                    Livewire.dispatch('editarModal', { id: {{ $role->id }} }); ">
+                                             <flux:icon.square-pen class="w-3.5 h-3.5" />
                     </flux:button>
+
+
+
                   </td>
                 </tr>
               @endforeach
@@ -277,17 +285,23 @@
                 </td>
                 <td class="px-3 py-2 align-middle">
                   <div class="flex items-center gap-2">
-                    <flux:button variant="primary"
-                          class="cursor-pointer bg-amber-500 hover:bg-amber-600 text-white p-1"
-                      @click="Livewire.dispatch('abrirModal', { id: {{ $usuario->id }} })">
-                          <flux:icon.square-pen class="w-3.5 h-3.5" />
-                    </flux:button>
 
-                    <flux:button variant="primary"
-                     class="cursor-pointer bg-rose-600 hover:bg-rose-700 text-white p-1"
-                      @click="destroyUsuario({{ $usuario->id }}, '{{ $usuario->username }}')">
-                      <flux:icon.trash-2 class="w-3.5 h-3.5" />
-                    </flux:button>
+
+                                    <flux:button
+                                            variant="primary"
+                                            class="cursor-pointer bg-amber-500 hover:bg-amber-600 text-white"
+                                            @click="$dispatch('abrir-modal-editar');
+                                                    Livewire.dispatch('editarModal', { id: {{ $usuario->id }} }); ">
+                                             <flux:icon.square-pen class="w-3.5 h-3.5" />
+                                                            <!-- ícono -->
+                                        </flux:button>
+
+                                            <flux:button
+                                                variant="danger"
+                                                class="cursor-pointer bg-rose-600 hover:bg-rose-700 text-white p-1"
+                                                @click="destroyUsuario({{ $usuario->id }}, '{{ $usuario->username }}')">
+                                                 <flux:icon.trash-2 class="w-3.5 h-3.5" />
+                                            </flux:button>
 
                   </div>
                 </td>

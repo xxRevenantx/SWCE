@@ -88,6 +88,9 @@ class EditarLicenciatura extends Component
 
         $this->dispatch('refreshLicenciaturas');
 
+          // 👉 Avisamos al front que debe cerrar el modal
+         $this->dispatch('cerrar-modal-editar');
+
         $this->cerrarModal();
     }
 

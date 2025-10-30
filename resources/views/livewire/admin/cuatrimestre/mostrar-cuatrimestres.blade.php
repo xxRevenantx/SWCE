@@ -21,34 +21,34 @@
         <p class="text-sm text-gray-600 dark:text-gray-400">Busca, edita o elimina cuatrimestres y gestiona acciones masivas.</p>
     </div>
 
-    <!-- Contenedor listado -->
-    <div class="relative overflow-hidden rounded-2xl border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 shadow">
-        <!-- Acabado superior -->
-        <div class="h-1 w-full bg-gradient-to-r from-blue-600 via-sky-400 to-indigo-600"></div>
 
-        <!-- Toolbar -->
-        <div class="p-4 sm:p-5 lg:p-6 space-y-4">
-            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <!-- Buscador -->
-                <div class="w-full sm:max-w-xl">
-                    <label for="buscar-cuatrimestre" class="sr-only">Buscar cuatrimestre</label>
-                    <flux:input
-                        id="buscar-cuatrimestre"
-                        type="text"
-                        wire:model.live="search"
-                        placeholder="Buscar por número, nombre o meses…"
-                        icon="magnifying-glass"
-                        class="w-full"
-                    />
-
+    <!-- Busqueda -->
+    <div
+        class="flex flex-col md:flex-row md:items-center gap-3 md:gap-4 rounded-2xl border border-gray-200 dark:border-neutral-800 bg-white/70 dark:bg-neutral-900/60 p-3 md:p-4 shadow-sm"
+    >
+        <div class="w-full ">
+            <label for="buscar-lic" class="sr-only">Buscar Cuatrimestre</label>
+            <div class="relative">
+                <div class="pointer-events-none absolute inset-y-0 left-3 flex items-center">
+                    <svg class="h-5 w-5 text-gray-400 dark:text-gray-500" viewBox="0 0 24 24" fill="none">
+                        <path stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"
+                              d="m21 21-4.3-4.3M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z"/>
+                    </svg>
                 </div>
-
-
+                <flux:input
+                    id="buscar-cuatrimestre"
+                    type="text"
+                    wire:model.live="search"
+                    placeholder="Buscar cuatrimestre..."
+                    class="pl-10 w-full"
+                />
             </div>
         </div>
 
-        <!-- Área de resultados -->
-        <div class="px-4 pb-4 sm:px-5 sm:pb-6 lg:px-6">
+    </div>
+
+
+
             <div class="relative">
                 <!-- Loader overlay -->
                 <div
@@ -74,9 +74,9 @@
                     wire:target="search, eliminarCuatrimestre, eliminarCuatrimestreSeleccionado"
                 >
                     <!-- Tabla (desktop) -->
-                    <div class="hidden md:block overflow-hidden rounded-xl border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900">
+                    <div class="overflow-hidden  rounded-xl border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900">
                         <div class="overflow-x-auto max-h-[70vh]">
-                            <table class="min-w-full text-sm table-striped">
+                            <table class="w-full text-sm table-striped">
                                 <thead>
                                     <tr>
 
@@ -141,66 +141,14 @@
                         </div>
                     </div>
 
-                    <!-- Tarjetas (mobile) -->
-                    <div class="md:hidden space-y-3">
-                        @forelse($cuatrimestres as $c)
-                            <div class="rounded-xl border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-4 shadow-sm">
-                                <div class="flex items-start justify-between gap-3">
-                                    <div class="min-w-0">
-                                        <div class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-
-                                            <span>#{{ $c->id }}</span>
-                                            <span class="inline-flex items-center rounded-full border border-sky-300/60 bg-sky-50 px-2 py-0.5 text-[10px] font-medium text-sky-700 dark:bg-sky-900/20 dark:text-sky-300 dark:border-sky-700/50">
-                                                {{ $c->cuatrimestre }}° Cuatrimestre
-                                            </span>
-                                        </div>
-                                        <div class="mt-1 font-semibold text-gray-900 dark:text-white truncate">
-                                            {{ $c->nombre_cuatrimestre }}
-                                        </div>
-                                        <div class="text-xs text-gray-600 dark:text-gray-300">
-                                            <span class="font-medium">Meses:</span> {{ optional($c->mes)->meses ?? 'Sin asignar' }}
-                                        </div>
-                                    </div>
-
-                                    <div class="shrink-0 flex flex-col gap-2">
-                                        <flux:button
-                                        variant="primary"
-                                        class="cursor-pointer bg-amber-500 hover:bg-amber-600 text-white"
-                                        @click="$dispatch('abrir-modal-cuatrimestre');
-                                            Livewire.dispatch('editarCuatrimestre', { id: {{ $c->id }} });
-                                        "
-                                        >
-                                         <flux:icon.square-pen class="w-3.5 h-3.5" />
-                                        </flux:button>
-
-
-                                        <flux:button
-                                            variant="danger"
-                                            class="cursor-pointer bg-rose-600 hover:bg-rose-700 text-white"
-                                            @click="destroyCuatrimestre({{ $c->id }}, '{{ $c->cuatrimestre }}')"
-                                            title="Eliminar"
-                                            aria-label="Eliminar"
-                                        >
-                                            <flux:icon.trash-2 class="w-3.5 h-3.5" />
-                                        </flux:button>
-                                    </div>
-                                </div>
-                            </div>
-                        @empty
-                            <div class="rounded-xl border border-dashed border-gray-300 dark:border-neutral-700 p-6 text-center">
-                                <div class="mb-1 font-semibold text-gray-700 dark:text-gray-200">No hay cuatrimestres</div>
-                                <p class="text-sm text-gray-500 dark:text-gray-400">Ajusta tu búsqueda.</p>
-                            </div>
-                        @endforelse
-                    </div>
                 </div>
             </div>
             <!-- Paginación -->
             <div class="mt-5">
                 {{ $cuatrimestres->links() }}
             </div>
-        </div>
-    </div>
+
+
 
     <!-- Modal editar -->
     <livewire:admin.cuatrimestre.editar-cuatrimestres />

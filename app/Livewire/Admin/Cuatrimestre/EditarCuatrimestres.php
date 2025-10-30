@@ -73,7 +73,7 @@ class EditarCuatrimestres extends Component
         $this->cerrarModal();
 
             // 👉 Avisamos al front que debe cerrar el modal
-             $this->dispatch('cerrar-modal-cuatrimestre');
+        $this->dispatch('cerrar-modal-cuatrimestre');
     }
 
 

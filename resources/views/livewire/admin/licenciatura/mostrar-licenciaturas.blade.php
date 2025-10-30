@@ -25,7 +25,7 @@
         <p class="text-sm text-gray-600 dark:text-gray-400">Administra y edita las licenciaturas registradas.</p>
     </div>
 
-    <!-- Toolbar -->
+    <!-- Busqueda -->
     <div
         class="flex flex-col md:flex-row md:items-center gap-3 md:gap-4 rounded-2xl border border-gray-200 dark:border-neutral-800 bg-white/70 dark:bg-neutral-900/60 p-3 md:p-4 shadow-sm"
     >
@@ -53,25 +53,34 @@
     <!-- List / Table container -->
     <div class="relative">
         <!-- Loader -->
-        <div
-            wire:loading.delay
-            wire:target="search, exportarLicenciaturas"
-            class="absolute inset-0 z-10 grid place-items-center rounded-2xl bg-white/60 dark:bg-neutral-900/60"
-        >
-            <div class="flex items-center gap-3 rounded-xl bg-white dark:bg-neutral-900 px-4 py-3 ring-1 ring-gray-200 dark:ring-neutral-800 shadow">
-                <svg class="h-5 w-5 animate-spin text-blue-600 dark:text-blue-400" viewBox="0 0 24 24" fill="none">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
-                </svg>
-                <span class="text-sm text-gray-700 dark:text-gray-200">Cargando…</span>
-            </div>
-        </div>
+
+         <div
+                    wire:loading.delay
+                   wire:target="search"
+                    class="absolute inset-0 z-10 grid place-items-center rounded-xl bg-white/70 dark:bg-neutral-900/70 backdrop-blur"
+                    aria-live="polite"
+                    aria-busy="true"
+                >
+                    <div class="flex items-center gap-3 rounded-xl bg-white dark:bg-neutral-900 px-4 py-3 ring-1 ring-gray-200 dark:ring-neutral-800 shadow">
+                        <svg class="h-5 w-5 animate-spin text-blue-600 dark:text-blue-400" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+                        </svg>
+                        <span class="text-sm text-gray-700 dark:text-gray-200">Cargando…</span>
+                    </div>
+                </div>
+
 
         <!-- Desktop table -->
-        <div class="hidden md:block overflow-hidden rounded-2xl border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 shadow">
+                    <div
+                    class="transition ease-out duration-200"
+                    wire:loading.class="blur-sm opacity-80 pointer-events-none"
+                    wire:target="search"
+                >
+        <div class="overflow-hidden  rounded-2xl border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 shadow">
             <div class="overflow-x-auto">
                 <table class="min-w-full text-sm table-striped">
-                   <thead >
+                   <thead>
                         <tr>
                             <th class="px-4 py-3 text-center  font-semibold uppercase">#</th>
                             <th class="px-4 py-3 text-center  font-semibold uppercase">Logo</th>
@@ -131,23 +140,21 @@
                                     <td class="px-4 py-3">
                                         <div class="flex items-center justify-center gap-1">
                                              <flux:button
-                                                            variant="primary"
-                                                            class="cursor-pointer bg-amber-500 hover:bg-amber-600 text-white"
-                                                            @click="$dispatch('abrir-modal');
-                                                                Livewire.dispatch('editarModal', { id: {{ $licenciatura->id }} });
-                                                            "
-                                                            >
-                                                           <flux:icon.square-pen class="w-3.5 h-3.5" />
+                                                        variant="primary"
+                                                        class="cursor-pointer bg-amber-500 hover:bg-amber-600 text-white"
+                                                        @click="$dispatch('abrir-modal-editar');
+                                                         Livewire.dispatch('editarModal', { id: {{ $licenciatura->id }} }); ">
+                                                        <flux:icon.square-pen class="w-3.5 h-3.5" />
                                                             <!-- ícono -->
-                                                            </flux:button>
+                                                </flux:button>
 
                                             <flux:button
                                                 variant="danger"
                                                 class="cursor-pointer bg-rose-600 hover:bg-rose-700 text-white p-1"
-                                                @click="destroyLicenciatura({{ $licenciatura->id }}, '{{ $licenciatura->nombre }}')"
-                                            >
+                                                @click="destroyLicenciatura({{ $licenciatura->id }}, '{{ $licenciatura->nombre }}')">
                                                  <flux:icon.trash-2 class="w-3.5 h-3.5" />
                                             </flux:button>
+
                                         </div>
                                     </td>
                                 </tr>
@@ -157,69 +164,9 @@
                 </table>
             </div>
         </div>
-
-        <!-- Mobile cards -->
-        <div class="md:hidden space-y-3">
-            @if($licenciaturas->isEmpty())
-                <div class="rounded-2xl border border-dashed border-gray-300 dark:border-neutral-700 p-6 text-center">
-                    <div class="mb-1 font-semibold text-gray-700 dark:text-gray-200">No hay licenciaturas</div>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Ajusta tu búsqueda o crea una nueva.</p>
-                </div>
-            @else
-                @foreach($licenciaturas as $key => $licenciatura)
-                    <div class="rounded-2xl border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-4 shadow-sm">
-                        <div class="flex items-start gap-3">
-                            <div class="shrink-0">
-                                @if ($licenciatura->logo)
-                                    <img src="{{ asset('storage/licenciaturas/' . $licenciatura->logo) }}"
-                                         alt="{{ $licenciatura->nombre }}"
-                                         class="h-12 w-12 rounded-xl object-cover ring-1 ring-gray-200 dark:ring-neutral-700">
-                                @else
-                                    <img src="{{ asset('storage/default.png') }}"
-                                         alt="Default"
-                                         class="h-12 w-12 rounded-xl object-cover ring-1 ring-gray-200 dark:ring-neutral-700">
-                                @endif
-                            </div>
-                            <div class="min-w-0 flex-1">
-                                <div class="flex items-center justify-between">
-                                    <span class="text-xs font-medium text-gray-500 dark:text-gray-400">#{{ $key+1 }}</span>
-                                    @if($licenciatura->RVOE)
-                                        <span class="ml-2 inline-flex items-center rounded-full border border-emerald-300/60 bg-emerald-50 px-2 py-0.5 text-[10px] font-medium text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300 dark:border-emerald-700/50">
-                                            RVOE: {{ $licenciatura->RVOE }}
-                                        </span>
-                                    @endif
-                                </div>
-                                <div class="mt-1 font-semibold text-gray-900 dark:text-white truncate">{{ $licenciatura->nombre }}</div>
-                                @if($licenciatura->nombre_corto)
-                                    <div class="text-xs text-gray-500 dark:text-gray-400">Corto: {{ $licenciatura->nombre_corto }}</div>
-                                @endif
-                                @if($licenciatura->slug)
-                                    <div class="text-xs text-gray-400 dark:text-gray-500">/{{ $licenciatura->slug }}</div>
-                                @endif
-
-                                <div class="mt-3 flex flex-wrap gap-2">
-                                    <flux:button
-                                        variant="primary"
-                                        class="cursor-pointer bg-amber-500 hover:bg-amber-600 text-white"
-                                        @click="Livewire.dispatch('abrirModal', { id: {{ $licenciatura->id }} })"
-                                    >
-                                         <flux:icon.square-pen />
-                                    </flux:button>
-
-                                    <flux:button
-                                        variant="danger"
-                                        class="cursor-pointer bg-rose-600 hover:bg-rose-700 text-white"
-                                        @click="destroyLicenciatura({{ $licenciatura->id }}, '{{ $licenciatura->nombre }}')"
-                                    >
-                                         <flux:icon.trash-2 />
-                                    </flux:button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                @endforeach
-            @endif
         </div>
+
+
     </div>
 
     <!-- Pagination -->

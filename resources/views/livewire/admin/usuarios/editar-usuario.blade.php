@@ -1,45 +1,40 @@
 <div
-  x-data="{ show: @entangle('open') }"
+  x-data="{ show: false, loading: false }"
   x-cloak
-  x-init="
-    const lock = v => document.documentElement.classList.toggle('overflow-hidden', v);
-    lock(show);
-    $watch('show', v => lock(v));
-  "
+  x-trap.noscroll="show"
   x-show="show"
+  @abrir-modal-editar.window="show = true; loading = true"
+  @editar-cargado.window="loading = false"
+  @cerrar-modal-editar.window="
+      show = false;
+      loading = false;
+      // limpia los props en Livewire después de iniciar el cierre
+      $wire.cerrarModal()
+  "
   @keydown.escape.window="show = false; $wire.cerrarModal()"
-  class="fixed inset-0 z-[10000] flex items-center justify-center p-3 sm:p-4"
-  role="dialog"
-  aria-modal="true"
-  aria-labelledby="editar-usuario-title"
+  class="fixed inset-0 z-50 flex items-center justify-center"
+  aria-live="polite"
 >
+  <!-- Overlay -->
+  <div class="absolute inset-0 bg-neutral-900/70 backdrop-blur-sm"
+       x-show="show" x-transition.opacity
+       @click.self="show = false; $wire.cerrarModal()"></div>
 
-  <!-- Backdrop -->
-  <div
-    class="absolute inset-0 bg-black/50 backdrop-blur-[1px]"
-    x-transition:enter="transition ease-out duration-150"
-    x-transition:enter-start="opacity-0"
-    x-transition:enter-end="opacity-100"
-    x-transition:leave="transition ease-in duration-150"
-    x-transition:leave-start="opacity-100"
-    x-transition:leave-end="opacity-0"
-    @click.self="show = false; $wire.cerrarModal()"
-  ></div>
 
-  <!-- Panel -->
-  <div
-    x-show="show"
-    x-transition:enter="transition ease-out duration-200"
-    x-transition:enter-start="opacity-0 translate-y-2 sm:translate-y-0 sm:scale-95"
-    x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
-    x-transition:leave="transition ease-in duration-150"
-    x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
-    x-transition:leave-end="opacity-0 translate-y-2 sm:translate-y-0 sm:scale-95"
-    class="relative w-full max-w-2xl sm:max-w-3xl bg-white dark:bg-neutral-800 rounded-2xl shadow-2xl ring-1 ring-neutral-200 dark:ring-neutral-700 overflow-hidden"
-  >
+    <div
+        class="relative w-[92vw] sm:w-[88vw] md:w-[70vw] max-w-2xl mx-4 sm:mx-6 bg-white dark:bg-neutral-900 rounded-2xl shadow-2xl ring-1 ring-black/5 dark:ring-white/10 overflow-hidden"
+        role="dialog" aria-modal="true" aria-labelledby="titulo-modal-cuatrimestre"
+        x-show="show"
+        x-transition:enter="transition ease-out duration-200"
+        x-transition:enter-start="opacity-0 scale-95 translate-y-2"
+        x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+        x-transition:leave="transition ease-in duration-150"
+        x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+        x-transition:leave-end="opacity-0 scale-95 translate-y-2"
+        wire:ignore.self
+    >
 
-    <!-- Acento superior -->
-    <div class="h-1.5 w-full bg-gradient-to-r from-indigo-500 via-violet-500 to-fuchsia-500"></div>
+    <div class="degradado"></div>
 
     <!-- Header -->
     <div class="px-4 sm:px-6 py-4 flex items-center justify-between border-b border-neutral-200 dark:border-neutral-700">
@@ -48,17 +43,23 @@
         <flux:badge color="indigo" class="ml-1 align-middle">{{ $username }}</flux:badge>
       </h2>
 
-      <button
+         <button
         @click="show = false; $wire.cerrarModal()"
-        class="p-2 rounded-full hover:bg-neutral-100 dark:hover:bg-neutral-700 text-neutral-500 hover:text-neutral-800 dark:text-neutral-300 dark:hover:text-white focus:outline-none focus:ring-2 focus:ring-indigo-400"
-        aria-label="Cerrar modal"
+        type="button"
+        class="inline-flex h-9 w-9 items-center justify-center rounded-full text-zinc-500 hover:text-zinc-800 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:text-zinc-200 dark:hover:bg-neutral-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+        aria-label="Cerrar"
       >
-        &times;
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
       </button>
     </div>
 
-    <!-- Formulario -->
-    <form wire:submit.prevent="actualizarUsuario" class="relative">
+        <form
+        x-on:submit="loading = true"
+        wire:submit.prevent="actualizarUsuario"
+        class="px-5 sm:px-6 pb-5"
+        >
       <flux:field>
         <div class="px-4 sm:px-6 py-5 space-y-6">
 
@@ -120,18 +121,21 @@
           @endif
           <!-- Acciones -->
           <div class="mt-2 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2">
-            <button
-              type="button"
-              @click="show = false; $wire.cerrarModal()"
-              class="inline-flex justify-center rounded-xl px-4 py-2.5 border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-700 dark:text-neutral-100 hover:bg-neutral-50 dark:hover:bg-neutral-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-300 dark:focus:ring-offset-neutral-900"
-            >
-              {{ __('Cancelar') }}
-            </button>
+
+
+             <flux:button
+                  variant="primary"
+                  type="button"
+                  class="cancelar-btn"
+                    @click="show = false; $wire.cerrarModal()"
+                >
+                  Cancelar
+                </flux:button>
 
             <flux:button
               variant="primary"
               type="submit"
-              class="min-w-[150px] cursor-pointer guardar-btn"
+              class="cursor-pointer guardar-btn "
               wire:loading.attr="disabled"
               wire:target="actualizarUsuario"
             >
@@ -145,18 +149,22 @@
         </div>
       </flux:field>
 
-      <!-- Loader/overlay durante acciones -->
-      <div
-        class="absolute inset-0 bg-white/70 dark:bg-neutral-900/60 backdrop-blur-[1px] flex items-center justify-center"
-        wire:loading
-        wire:target="actualizarUsuario,toggleStatus"
-        aria-live="assertive"
-      >
-        <span class="inline-flex items-center gap-3 px-4 py-2 rounded-xl ring-1 ring-neutral-200 dark:ring-neutral-700 bg-white dark:bg-neutral-800 shadow">
-          <span class="w-6 h-6 rounded-full border-2 border-neutral-300 dark:border-neutral-600 border-t-transparent animate-spin"></span>
-          <span class="text-sm font-medium text-neutral-800 dark:text-neutral-100">Procesando…</span>
-        </span>
-      </div>
+
+        <!-- Loader interno -->
+             <div x-show="loading"
+                    class="absolute inset-0 z-20 flex items-center justify-center bg-white/70 dark:bg-neutral-900/70 backdrop-blur rounded-2xl">
+                <div class="flex items-center gap-3 rounded-xl bg-white dark:bg-neutral-900 px-4 py-3 ring-1 ring-neutral-200 dark:ring-neutral-800 shadow">
+                    <svg class="h-5 w-5 animate-spin text-blue-600 dark:text-blue-400" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+                    </svg>
+                    <span class="text-sm text-neutral-800 dark:text-neutral-200">Cargando…</span>
+                </div>
+                </div>
+
+
+
+
     </form>
   </div>
 </div>
