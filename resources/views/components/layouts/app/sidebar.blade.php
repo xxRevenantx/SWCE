@@ -68,7 +68,7 @@
                         {{ __('Cuatrimestres') }}
                     </flux:navlist.item>
 
-                    <flux:navlist.item class="py-4" icon="users-round" :href="route('licenciaturas.index')" :current="request()->routeIs('licenciaturas.index')" wire:navigate>
+                    <flux:navlist.item class="py-4" icon="users-round" :href="route('generaciones.index')" :current="request()->routeIs('generaciones.index')" wire:navigate>
                         {{ __('Generaciones') }}
                     </flux:navlist.item>
 

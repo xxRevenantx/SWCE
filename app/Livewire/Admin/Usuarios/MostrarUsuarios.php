@@ -96,6 +96,17 @@ class MostrarUsuarios extends Component
 
     // Se ejecuta al iniciar el componente
 
+    #[On('refreshUsuarios')]
+    public function recargar()
+    {
+        // Si usas paginación o filtros, esto es útil:
+        $this->resetPage();
+
+        // Re-render “forzado” (Livewire 3 vuelve a ejecutar render de todos modos).
+        // Opcional: emite un evento de fin para Alpine (ver Opción 2):
+        $this->dispatch('usuariosRefrescados');
+    }
+
 
     #[On('refreshUsuarios')]
     public function onRefreshUsuarios(): void

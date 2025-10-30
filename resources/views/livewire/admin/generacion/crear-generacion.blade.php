@@ -1,8 +1,8 @@
 <div>
     <!-- Header -->
     <div class="flex flex-col gap-4">
-        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Crear Cuatrimestre</h1>
-        <p class="text-sm text-gray-600 dark:text-gray-400">Formulario para crear un nuevo cuatrimestre.</p>
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Crear Generaciones</h1>
+        <p class="text-sm text-gray-600 dark:text-gray-400">Formulario para crear una nueva generación.</p>
     </div>
 
     <div x-data="{ open: false }" class="my-4">
@@ -11,7 +11,7 @@
             type="button"
             @click="open = !open"
             :aria-expanded="open"
-            aria-controls="panel-crear-cuatrimestre"
+            aria-controls="panel-crear-generacion"
             class="group inline-flex items-center gap-2 rounded-2xl px-4 py-2.5
                    bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow
                    focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-400
@@ -22,7 +22,7 @@
                     <path d="M5 19h4l10-10-4-4L5 15v4m14.7-11.3a1 1 0 000-1.4l-2-2a1 1 0 00-1.4 0l-1.6 1.6 3.4 3.4 1.6-1.6z"/>
                 </svg>
             </span>
-            <span class="font-medium">{{ __('Nuevo cuatrimestre') }}</span>
+            <span class="font-medium">{{ __('Nueva Generación') }}</span>
             <span class="ml-1 transition-transform duration-200" :class="open ? 'rotate-180' : 'rotate-0'">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M12 15.5l-6-6h12l-6 6z"/>
@@ -32,7 +32,7 @@
 
         <!-- Panel -->
         <div
-            id="panel-crear-cuatrimestre"
+            id="panel-crear-generacion"
             x-show="open"
             x-cloak
             x-transition:enter="transition ease-out duration-250"
@@ -43,7 +43,7 @@
             x-transition:leave-end="opacity-0 translate-y-1 scale-[0.98]"
             class="relative mt-4"
         >
-            <form wire:submit.prevent="crearCuatrimestre" class="group">
+            <form wire:submit.prevent="crearGeneracion" class="group">
                 <div class="rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 shadow-lg overflow-hidden">
                     <div class="h-1.5 w-full bg-gradient-to-r from-indigo-500 via-violet-500 to-fuchsia-500"></div>
 
@@ -52,49 +52,29 @@
 
                         <!-- Grid de inputs -->
                         <flux:field>
-                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-start">
+                            <div class="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-1  gap-4 items-start">
                                 <flux:input
                                     badge="Requerido"
-                                    wire:model="no_cuatrimestre"
-                                    :label="__('No.  de Cuatrimestre')"
-                                    type="number"
-                                    min="1"
-                                    placeholder="No. de cuatrimestre"
-                                    autocomplete="cuatrimestre"
-                                />
-
-                                <flux:input
-                                    badge="Requerido"
-                                    wire:model="nombre_cuatrimestre"
-                                    :label="__('Nombre Cuatrimestre')"
+                                    wire:model="generacion"
+                                    :label="__('Asigna la Generación: ej. 2020-2023')"
                                     type="text"
-                                    placeholder="Ej. Primer cuatrimestre"
-                                    autocomplete="nombre_cuatrimestre"
+                                    placeholder="Ej. 2020-2023"
+                                    autocomplete="generacion"
                                 />
 
-                                <flux:select
-                                    badge="Requerido"
-                                    label="Selecciona los meses"
-                                    wire:model="mes_id"
-                                >
-                                    <flux:select.option value="0">--Selecciona los meses--</flux:select.option>
-                                    @foreach($meses as $mes)
-                                        <flux:select.option value="{{ $mes->id }}">{{ $mes->meses }}</flux:select.option>
-                                    @endforeach
-                                </flux:select>
                             </div>
                         </flux:field>
 
                         <!-- Acciones abajo de los inputs -->
                         <div class="mt-6 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2">
                             <flux:button
-                        variant="primary"
-                        type="button"
-                        class="cancelar-btn"
-                            @click="open=false"
-                        >
-                        Cancelar
-                        </flux:button>
+                                variant="primary"
+                                type="button"
+                                class="cancelar-btn"
+                                    @click="open=false"
+                                >
+                                Cancelar
+                                </flux:button>
 
                             <flux:button variant="primary" type="submit" class="w-full sm:w-auto cursor-pointer guardar-btn">
                                 {{ __('Guardar') }}

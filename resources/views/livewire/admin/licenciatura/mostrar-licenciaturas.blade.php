@@ -79,7 +79,7 @@
                 >
         <div class="overflow-hidden  rounded-2xl border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 shadow">
             <div class="overflow-x-auto">
-                <table class="min-w-full text-sm table-striped">
+                <table class="min-w-full text-sm">
                    <thead>
                         <tr>
                             <th class="px-4 py-3 text-center  font-semibold uppercase">#</th>

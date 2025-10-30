@@ -48,17 +48,6 @@ class MostrarLicenciaturas extends Component
         }
     }
 
-    public function exportarLicenciaturas()
-    {
-
-        $licenciaturasFiltradas = Licenciatura::where('nombre', 'like', '%' . $this->search . '%')
-            ->orWhere('nombre_corto', 'like', '%' . $this->search . '%')
-            ->orWhere('RVOE', 'like', '%' . $this->search . '%')
-            ->orderBy('id', 'desc')
-            ->get(['id','nombre', 'nombre_corto', 'RVOE']); // columnas deseadas
-
-        return Excel::download(new LicenciaturaExport($licenciaturasFiltradas), 'licenciaturas_filtradas.xlsx');
-    }
 
 
     #[On('refreshLicenciaturas')]

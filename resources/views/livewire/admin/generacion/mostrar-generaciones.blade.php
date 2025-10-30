@@ -1,6 +1,6 @@
 <div
     x-data="{
-        destroyCuatrimestre(id, nombre) {
+        destroyGeneracion(id, nombre) {
             Swal.fire({
                 title: '¿Estás seguro?',
                 text: `Esta acción no podrá revertirse.`,
@@ -10,15 +10,15 @@
                 cancelButtonColor: '#EF4444',
                 cancelButtonText: 'Cancelar',
                 confirmButtonText: 'Sí, eliminar'
-            }).then((r) => r.isConfirmed && @this.call('eliminarCuatrimestre', id))
+            }).then((r) => r.isConfirmed && @this.call('eliminarGeneracion', id))
         },
     }"
     class="space-y-5"
 >
     <!-- Encabezado -->
     <div class="flex flex-col gap-1">
-        <h1 class="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Cuatrimestres</h1>
-        <p class="text-sm text-gray-600 dark:text-gray-400">Busca, edita o elimina cuatrimestres y gestiona acciones masivas.</p>
+        <h1 class="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Generaciones</h1>
+        <p class="text-sm text-gray-600 dark:text-gray-400">Busca, edita o elimina generaciones.</p>
     </div>
 
 
@@ -27,7 +27,7 @@
         class="flex flex-col md:flex-row md:items-center gap-3 md:gap-4 rounded-2xl border border-gray-200 dark:border-neutral-800 bg-white/70 dark:bg-neutral-900/60 p-3 md:p-4 shadow-sm"
     >
         <div class="w-full ">
-            <label for="buscar-lic" class="sr-only">Buscar Cuatrimestre</label>
+            <label for="buscar-generacion" class="sr-only">Buscar Generación</label>
             <div class="relative">
                 <div class="pointer-events-none absolute inset-y-0 left-3 flex items-center">
                     <svg class="h-5 w-5 text-gray-400 dark:text-gray-500" viewBox="0 0 24 24" fill="none">
@@ -36,10 +36,10 @@
                     </svg>
                 </div>
                 <flux:input
-                    id="buscar-cuatrimestre"
+                    id="buscar-generacion"
                     type="text"
                     wire:model.live="search"
-                    placeholder="Buscar cuatrimestre..."
+                    placeholder="Buscar generación..."
                     class="pl-10 w-full"
                 />
             </div>
@@ -71,7 +71,7 @@
                 <div
                     class="transition ease-out duration-200"
                     wire:loading.class="blur-sm opacity-80 pointer-events-none"
-                    wire:target="search, eliminarCuatrimestre, eliminarCuatrimestreSeleccionado"
+                    wire:target="search, eliminarGeneracion"
                 >
                     <!-- Tabla (desktop) -->
                     <div class="overflow-hidden  rounded-xl border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900">
@@ -81,23 +81,27 @@
                                     <tr>
 
                                         <th class="px-4 py-3 text-center font-semibold">#</th>
-                                        <th class="px-4 py-3 text-center font-semibold">Cuatrimestre</th>
-                                        <th class="px-4 py-3 text-left font-semibold">Nombre de cuatrimestre</th>
-                                        <th class="px-4 py-3 text-center font-semibold">Meses</th>
+                                        <th class="px-4 py-3 text-center font-semibold">Generacion</th>
+                                        <th class="px-4 py-3 text-center font-semibold">Status</th>
                                         <th class="px-4 py-3 text-center font-semibold">Acciones</th>
                                     </tr>
                                 </thead>
 
                                 <tbody class="divide-y divide-gray-100 dark:divide-neutral-800">
-                                    @forelse($cuatrimestres as $cuatrimestre)
+                                    @forelse($generaciones as $key => $generacion)
                                         <tr class="transition-colors hover:bg-gray-50/70 dark:hover:bg-neutral-800/50 }}">
 
-                                            <td class="px-4 py-3 text-center text-gray-800 dark:text-gray-200">{{ $cuatrimestre->id }}</td>
-                                            <td class="px-4 py-3 text-center text-gray-900 dark:text-white">{{ $cuatrimestre->no_cuatrimestre }}</td>
-                                            <td class="px-4 py-3 text-gray-900 dark:text-white">{{ $cuatrimestre->nombre_cuatrimestre }}</td>
-                                            <td class="px-4 py-3 text-center text-gray-800 dark:text-gray-200">
-                                                {{ optional($cuatrimestre->mes)->meses ?? 'Sin asignar' }}
+                                            <td class="px-4 py-3 text-center text-gray-800 dark:text-gray-200">{{ $key + 1 }}</td>
+                                            <td class="px-4 py-3 text-center text-gray-900 dark:text-white">{{ $generacion->generacion }}</td>
+                                            <td class="px-4 py-3 text-center text-gray-900 dark:text-white">
+                                                @if($generacion->status === 'true')
+                                                    <x-badge>Activo</x-badge>
+                                                @else
+                                                    <x-badge color="red">Inactivo</x-badge>
+                                                @endif
+
                                             </td>
+
                                             <td class="px-4 py-3">
                                                 <div class="flex items-center justify-center gap-2">
 
@@ -105,8 +109,8 @@
                                                             <flux:button
                                                             variant="primary"
                                                             class="cursor-pointer bg-amber-500 hover:bg-amber-600 text-white"
-                                                            @click="$dispatch('abrir-modal-cuatrimestre');
-                                                                Livewire.dispatch('editarCuatrimestre', { id: {{ $cuatrimestre->id }} });
+                                                            @click="$dispatch('abrir-modal-editar');
+                                                                Livewire.dispatch('editarModal', { id: {{ $generacion->id }} });
                                                             "
                                                             >
                                                            <flux:icon.square-pen class="w-3.5 h-3.5" />
@@ -116,7 +120,7 @@
                                                      <flux:button
                                                             variant="danger"
                                                             class="cursor-pointer bg-rose-600 hover:bg-rose-700 text-white p-1"
-                                                              @click="destroyCuatrimestre({{ $cuatrimestre->id }}, '{{ $cuatrimestre->nombre_cuatrimestre }}')"
+                                                              @click="destroyGeneracion({{ $generacion->id }}, '{{ $generacion->generacion }}')"
                                                         >
                                                             <flux:icon.trash-2 class="w-3.5 h-3.5" />
                                                         </flux:button>
@@ -129,7 +133,7 @@
                                             <td colspan="6" class="px-6 py-10 text-center text-gray-500 dark:text-gray-400">
                                                 <div class="mx-auto w-full max-w-md">
                                                     <div class="rounded-2xl border border-dashed border-gray-300 dark:border-neutral-700 p-6">
-                                                        <div class="mb-1 text-base font-semibold">No hay cuatrimestres disponibles</div>
+                                                        <div class="mb-1 text-base font-semibold">No hay generaciones disponibles</div>
                                                         <p class="text-sm">Ajusta tu búsqueda o crea un nuevo registro.</p>
                                                     </div>
                                                 </div>
@@ -145,11 +149,11 @@
             </div>
             <!-- Paginación -->
             <div class="mt-5">
-                {{ $cuatrimestres->links() }}
+                {{ $generaciones->links() }}
             </div>
 
 
 
     <!-- Modal editar -->
-    <livewire:admin.cuatrimestre.editar-cuatrimestres />
+    <livewire:admin.generacion.editar-generacion />
 </div>
