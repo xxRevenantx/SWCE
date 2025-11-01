@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\LicenciaturaController;
 use App\Http\Controllers\CuatrimestreController;
 use App\Http\Controllers\GeneracionController;
+use App\Http\Controllers\InscripcionController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -20,4 +21,9 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('licenciaturas', LicenciaturaController::class)->middleware('can:admin.licenciaturas')->names('licenciaturas');
     Route::resource('cuatrimestres', CuatrimestreController::class)->middleware('can:admin.cuatrimestres')->names('cuatrimestres');
     Route::resource('generaciones', GeneracionController::class)->middleware('can:admin.generaciones')->names('generaciones');
+
+
+    //Inscripción
+    Route::resource('inscripciones', InscripcionController::class)->middleware('can:admin.inscripciones')->names('inscripciones');
+
 });

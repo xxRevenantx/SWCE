@@ -72,7 +72,7 @@
                         {{ __('Generaciones') }}
                     </flux:navlist.item>
 
-                    <flux:navlist.item class="py-4" icon="user-plus" :href="route('licenciaturas.index')" :current="request()->routeIs('licenciaturas.index')" wire:navigate>
+                    <flux:navlist.item class="py-4" icon="user-plus" :href="route('inscripciones.index')" :current="request()->routeIs('inscripciones.index')" wire:navigate>
                         {{ __('Inscripciones') }}
                     </flux:navlist.item>
 
