@@ -1,115 +1,88 @@
 <div
-  x-data="tabsSlide({
+  x-data="wizard({
     initial: (localStorage.getItem('alumnoTabs') || 'generales'),
     persistKey: 'alumnoTabs'
   })"
   x-id="['tab']"
-  class="w-full "
   x-init="init()"
+  class="w-full"
 >
+  <style>
+    .no-scrollbar::-webkit-scrollbar{display:none}
+    .no-scrollbar{-ms-overflow-style:none;scrollbar-width:none}
+    [x-cloak]{ display:none !important; }
+  </style>
 
-<style>
-  /* Oculta scrollbar del tablist */
-  .no-scrollbar::-webkit-scrollbar{display:none}
-  .no-scrollbar{-ms-overflow-style:none;scrollbar-width:none}
+  <!-- Encabezado -->
+  <header class="sticky top-0 z-20 mb-4 w-full">
+    <div class="rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-gradient-to-r from-[#E4F6FF] to-[#F2EFFF] backdrop-blur">
+      <div class="px-4 py-4">
+        <h1 class="text-lg font-bold text-neutral-900">
+          INSCRIPCIÓN DE ESTUDIANTES
+        </h1>
+        <p class="text-sm text-neutral-700">
+          Formulario para registrar nuevos estudiantes
+        </p>
+      </div>
 
-  /* Evita parpadeos al inicializar Alpine */
-  [x-cloak]{ display: none !important; }
-</style>
-
-{{-- Encabezado + Tablist --}}
-<div class="sticky top-0 z-10 mb-4 w-full ">
-    <div >
-        <div class="flex items-center justify-between py-3">
-            <h1 class="text-lg font-bold  dark:text-neutral-900 p-4  w-full rounded-2xl bg-gradient-to-r from-[#E4F6FF] to-[#F2EFFF] backdrop-blur border-b border-neutral-200 dark:border-neutral-800 ">
-                INSCRIPCIÓN DE ESTUDIANTES <br>|
-                <span class="text-sm font-normal text-neutral-600 dark:text-neutral-900">Formulario para registrar nuevos estudiantes</span>
-            </h1>
+      <!-- Stepper + Progreso -->
+      <div class="px-4 pb-4">
+        <div class="relative">
+          <div class="h-1 w-full rounded-full bg-neutral-200 dark:bg-neutral-800"></div>
+          <div
+            class="absolute inset-y-0 left-0 h-1 rounded-full bg-gradient-to-r from-sky-500 via-blue-600 to-indigo-600 transition-all duration-300"
+            :style="`width: ${progress}%`"
+            aria-hidden="true"
+          ></div>
         </div>
 
-        <div
-            class="relative overflow-x-auto no-scrollbar"
-            role="tablist"
-            aria-label="Secciones del formulario"
-            x-on:keydown.right.prevent="focusNext()"
-            x-on:keydown.left.prevent="focusPrev()"
+        <nav
+          class="mt-3 relative overflow-x-auto no-scrollbar"
+          role="tablist"
+          aria-label="Secciones del formulario"
+          @keydown.right.prevent="focusNext()"
+          @keydown.left.prevent="focusPrev()"
         >
-            <div class="inline-flex ">
-
-                {{-- TAB: Generales --}}
+          <ul class="inline-flex items-center gap-2 md:gap-3">
+            <template x-for="step in steps" :key="step.name">
+              <li>
                 <button
-                    :id="tabId('generales')"
-                    :aria-controls="panelId('generales')"
-                    :aria-selected="is('generales')"
-                    x-on:click="set('generales')"
-                    x-on:keydown.enter.prevent="set('generales')"
-                    role="tab"
-                    :tabindex="is('generales') ? 0 : -1"
-                    class="group relative whitespace-nowrap rounded-xl px-3.5 py-2 text-sm font-medium
-                                 text-neutral-600 hover:text-neutral-900 dark:text-neutral-300 dark:hover:text-white
-                   focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
-          >
-            <span class="flex items-center gap-2">
-              <svg class="h-4 w-4 opacity-70" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5Zm0 2c-4.33 0-8 1.94-8 4.33V21h16v-2.67C20 15.94 16.33 14 12 14Z"/></svg>
-              Datos generales
-            </span>
-            <span class="absolute inset-x-2 -bottom-[3px] h-[3px] rounded-full bg-gradient-to-r from-sky-500 via-blue-600 to-indigo-600 transition-opacity duration-200"
-                  :class="is('generales') ? 'opacity-100' : 'opacity-0'"></span>
-          </button>
+                  class="group relative flex items-center gap-2 rounded-xl px-3.5 py-2 text-sm font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
+                  role="tab"
+                  :tabindex="is(step.name) ? 0 : -1"
+                  :id="tabId(step.name)"
+                  :aria-controls="panelId(step.name)"
+                  :aria-selected="is(step.name)"
+                  @click="go(step.name)"
+                  @keydown.enter.prevent="go(step.name)"
+                >
+                  <span class="flex h-6 w-6 items-center justify-center rounded-full border text-xs font-semibold"
+                        :class="isCompleted(step.name)
+                          ? 'border-blue-600 bg-blue-600 text-white'
+                          : (is(step.name) ? 'border-blue-600 text-blue-600' : 'border-neutral-300 text-neutral-500 dark:border-neutral-700 dark:text-neutral-300')">
+                    <span x-text="indexOf(step.name)+1"></span>
+                  </span>
+                  <span class="whitespace-nowrap text-neutral-700 dark:text-neutral-200"
+                        :class="is(step.name) ? 'text-neutral-900 dark:text-white' : ''"
+                        x-text="step.label"></span>
 
-          {{-- TAB: Contacto --}}
-          <button
-            :id="tabId('contacto')"
-            :aria-controls="panelId('contacto')"
-            :aria-selected="is('contacto')"
-            x-on:click="set('contacto')"
-            role="tab"
-            :tabindex="is('contacto') ? 0 : -1"
-            class="group relative whitespace-nowrap rounded-xl px-3.5 py-2 text-sm font-medium
-                   text-neutral-600 hover:text-neutral-900 dark:text-neutral-300 dark:hover:text-white
-                   focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
-          >
-            <span class="flex items-center gap-2">
-              <svg class="h-4 w-4 opacity-70" viewBox="0 0 24 24" fill="currentColor"><path d="M21 8V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v1l9 5Z"/><path d="M3 9v8a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9l-9 5Z"/></svg>
-              Datos de contacto
-            </span>
-            <span class="absolute inset-x-2 -bottom-[3px] h-[3px] rounded-full bg-gradient-to-r from-sky-500 via-blue-600 to-indigo-600 transition-opacity duration-200"
-                  :class="is('contacto') ? 'opacity-100' : 'opacity-0'"></span>
-          </button>
-
-          {{-- TAB: Escolares --}}
-          <button
-            :id="tabId('escolares')"
-            :aria-controls="panelId('escolares')"
-            :aria-selected="is('escolares')"
-            x-on:click="set('escolares')"
-            role="tab"
-            :tabindex="is('escolares') ? 0 : -1"
-            class="group relative whitespace-nowrap rounded-xl px-3.5 py-2 text-sm font-medium
-                   text-neutral-600 hover:text-neutral-900 dark:text-neutral-300 dark:hover:text-white
-                   focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
-          >
-            <span class="flex items-center gap-2">
-              <svg class="h-4 w-4 opacity-70" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3 1 9l11 6 9-4.91V17h2V9z"/><path d="M11 12 3.12 7.69 3 12l8 4 8-4 .02-4.31z" opacity=".25"/></svg>
-              Datos escolares
-            </span>
-            <span class="absolute inset-x-2 -bottom-[3px] h-[3px] rounded-full bg-gradient-to-r from-sky-500 via-blue-600 to-indigo-600 transition-opacity duration-200"
-                  :class="is('escolares') ? 'opacity-100' : 'opacity-0'"></span>
-          </button>
-        </div>
+                  <span class="absolute inset-x-2 -bottom-[3px] h-[3px] rounded-full bg-gradient-to-r from-sky-500 via-blue-600 to-indigo-600 transition-opacity duration-200"
+                        :class="is(step.name) ? 'opacity-100' : 'opacity-0'"></span>
+                </button>
+              </li>
+            </template>
+          </ul>
+        </nav>
       </div>
     </div>
-  </div>
+  </header>
 
-  {{-- STAGE: contenedor que ajusta la altura y superpone paneles --}}
+  <!-- Contenido (stage con transición y auto-height) -->
   <div class="px-4 sm:px-6">
-    <div
-      class="relative overflow-hidden"
-      x-ref="stage"
-      style="height:auto; transition: height .28s ease;"
-    >
-      {{-- PANEL: Generales --}}
+    <div class="relative overflow-hidden" x-ref="stage" style="height:auto; transition:height .28s ease;">
+      <!-- Generales -->
       <section
+        x-cloak
         x-show="is('generales')"
         x-transition:enter="transition transform ease-out duration-300"
         x-transition:enter-start="opacity-0 translate-x-6"
@@ -117,7 +90,7 @@
         x-transition:leave="transition transform ease-in duration-250"
         x-transition:leave-start="opacity-100 translate-x-0"
         x-transition:leave-end="opacity-0 -translate-x-6"
-        x-on:transitionend.window="resize()"
+        @transitionend.window="resize()"
         role="tabpanel"
         :id="panelId('generales')"
         :aria-labelledby="tabId('generales')"
@@ -125,10 +98,11 @@
         class="absolute inset-0 will-change-transform"
       >
         <div class="rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 shadow-sm">
-          <div class="border-b border-neutral-200 dark:border-neutral-800 bg-gradient-to-r from-sky-500 via-blue-600 to-indigo-600 p-4 text-white rounded-t-2xl">
+          <div class="rounded-t-2xl border-b border-neutral-200 dark:border-neutral-800 bg-gradient-to-r from-sky-500 via-blue-600 to-indigo-600 p-4 text-white">
             <h2 class="font-semibold">Datos generales</h2>
           </div>
           <div class="p-4 sm:p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <!-- TODO: reemplaza por tus inputs con wire:model -->
             <label class="block">
               <span class="text-sm font-medium text-neutral-700 dark:text-neutral-200">Usuario <sup class="text-red-500">*</sup></span>
               <input type="text" class="mt-1 w-full rounded-xl border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-950 focus:ring-sky-500 focus:border-sky-500" placeholder="—Selecciona un usuario—">
@@ -142,11 +116,32 @@
               <input type="text" class="mt-1 w-full rounded-xl border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-950 uppercase tracking-wider focus:ring-sky-500 focus:border-sky-500" placeholder="CURP">
             </label>
           </div>
+
+          <!-- Controles -->
+          <div class="flex items-center justify-between gap-3 px-4 sm:px-6 pb-5">
+            <button
+              type="button"
+              class="rounded-xl border border-neutral-300 dark:border-neutral-700 px-4 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-200 hover:bg-neutral-50 dark:hover:bg-neutral-800 disabled:opacity-50"
+              disabled
+            >
+              Anterior
+            </button>
+            <div class="flex items-center gap-3">
+              <button
+                type="button"
+                class="rounded-xl bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 px-4 py-2 text-sm font-semibold hover:opacity-90"
+                @click="next()"
+              >
+                Siguiente
+              </button>
+            </div>
+          </div>
         </div>
       </section>
 
-      {{-- PANEL: Contacto --}}
+      <!-- Contacto -->
       <section
+        x-cloak
         x-show="is('contacto')"
         x-transition:enter="transition transform ease-out duration-300"
         x-transition:enter-start="opacity-0 translate-x-6"
@@ -154,7 +149,7 @@
         x-transition:leave="transition transform ease-in duration-250"
         x-transition:leave-start="opacity-100 translate-x-0"
         x-transition:leave-end="opacity-0 -translate-x-6"
-        x-on:transitionend.window="resize()"
+        @transitionend.window="resize()"
         role="tabpanel"
         :id="panelId('contacto')"
         :aria-labelledby="tabId('contacto')"
@@ -162,7 +157,7 @@
         class="absolute inset-0 will-change-transform"
       >
         <div class="rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 shadow-sm">
-          <div class="border-b border-neutral-200 dark:border-neutral-800 bg-gradient-to-r from-sky-500 via-blue-600 to-indigo-600 p-4 text-white rounded-t-2xl">
+          <div class="rounded-t-2xl border-b border-neutral-200 dark:border-neutral-800 bg-gradient-to-r from-sky-500 via-blue-600 to-indigo-600 p-4 text-white">
             <h2 class="font-semibold">Datos de contacto</h2>
           </div>
           <div class="p-4 sm:p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -175,11 +170,32 @@
               <input type="text" class="mt-1 w-full rounded-xl border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-950 focus:ring-sky-500 focus:border-sky-500" placeholder="Municipio">
             </label>
           </div>
+
+          <!-- Controles -->
+          <div class="flex items-center justify-between gap-3 px-4 sm:px-6 pb-5">
+            <button
+              type="button"
+              class="rounded-xl border border-neutral-300 dark:border-neutral-700 px-4 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-200 hover:bg-neutral-50 dark:hover:bg-neutral-800"
+              @click="prev()"
+            >
+              Anterior
+            </button>
+            <div class="flex items-center gap-3">
+              <button
+                type="button"
+                class="rounded-xl bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 px-4 py-2 text-sm font-semibold hover:opacity-90"
+                @click="next()"
+              >
+                Siguiente
+              </button>
+            </div>
+          </div>
         </div>
       </section>
 
-      {{-- PANEL: Escolares --}}
+      <!-- Escolares -->
       <section
+        x-cloak
         x-show="is('escolares')"
         x-transition:enter="transition transform ease-out duration-300"
         x-transition:enter-start="opacity-0 translate-x-6"
@@ -187,7 +203,7 @@
         x-transition:leave="transition transform ease-in duration-250"
         x-transition:leave-start="opacity-100 translate-x-0"
         x-transition:leave-end="opacity-0 -translate-x-6"
-        x-on:transitionend.window="resize()"
+        @transitionend.window="resize()"
         role="tabpanel"
         :id="panelId('escolares')"
         :aria-labelledby="tabId('escolares')"
@@ -195,7 +211,7 @@
         class="absolute inset-0 will-change-transform"
       >
         <div class="rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 shadow-sm">
-          <div class="border-b border-neutral-200 dark:border-neutral-800 bg-gradient-to-r from-sky-500 via-blue-600 to-indigo-600 p-4 text-white rounded-t-2xl">
+          <div class="rounded-t-2xl border-b border-neutral-200 dark:border-neutral-800 bg-gradient-to-r from-sky-500 via-blue-600 to-indigo-600 p-4 text-white">
             <h2 class="font-semibold">Datos escolares</h2>
           </div>
           <div class="p-4 sm:p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -216,7 +232,7 @@
               <div class="rounded-2xl border border-dashed border-neutral-300 dark:border-neutral-700 p-4 sm:p-5">
                 <p class="text-sm font-medium text-neutral-700 dark:text-neutral-200 mb-3">Foto del estudiante</p>
                 <input type="file" accept="image/png,image/jpeg"
-                       class="block w-full text-sm file:mr-4 file:rounded-lg file:border-0 file:bg-neutral-100 file:px-3 file:py-2 hover:file:bg-neutral-200 dark:file:bg-neutral-800 dark:hover:file:bg-neutral-700" />
+                  class="block w-full text-sm file:mr-4 file:rounded-lg file:border-0 file:bg-neutral-100 file:px-3 file:py-2 hover:file:bg-neutral-200 dark:file:bg-neutral-800 dark:hover:file:bg-neutral-700" />
                 <p class="mt-2 text-xs text-neutral-500">Subir una imagen JPG o PNG</p>
 
                 <div class="mt-4">
@@ -231,72 +247,148 @@
 
                 <div class="mt-5">
                   <button type="button"
-                    class="w-full rounded-xl bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 px-4 py-2 text-sm font-medium shadow hover:opacity-90">
+                    class="w-full rounded-xl bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 px-4 py-2 text-sm font-semibold shadow hover:opacity-90"
+                    @click="submit()"
+                  >
                     Guardar
                   </button>
                 </div>
               </div>
             </div>
           </div>
+
+          <!-- Controles -->
+          <div class="flex items-center justify-between gap-3 px-4 sm:px-6 pb-5">
+            <button
+              type="button"
+              class="rounded-xl border border-neutral-300 dark:border-neutral-700 px-4 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-200 hover:bg-neutral-50 dark:hover:bg-neutral-800"
+              @click="prev()"
+            >
+              Anterior
+            </button>
+            <div class="flex items-center gap-3">
+              <button
+                type="button"
+                class="rounded-xl bg-blue-600 text-white px-4 py-2 text-sm font-semibold hover:opacity-90"
+                @click="submit()"
+              >
+                Finalizar
+              </button>
+            </div>
+          </div>
         </div>
       </section>
-
-    </div> {{-- /stage --}}
-  </div> {{-- /px --}}
+    </div>
+  </div>
 </div>
 
-{{-- Alpine logic --}}
 <script>
   document.addEventListener('alpine:init', () => {
-    Alpine.data('tabsSlide', ({ initial = 'generales', persistKey = null } = {}) => ({
+    Alpine.data('wizard', ({ initial = 'generales', persistKey = null } = {}) => ({
+      // Estado
       current: initial,
       persistKey,
-      order: ['generales','contacto','escolares'],
+      steps: [
+        { name: 'generales', label: 'Datos generales' },
+        { name: 'contacto',   label: 'Datos de contacto' },
+        { name: 'escolares',  label: 'Datos escolares' },
+      ],
 
+      // ---------------- Lifecycle ----------------
       init() {
-        // Leer hash si existe
-        const hash = location.hash?.replace('#','');
-        if (hash && this.order.includes(hash)) this.current = hash;
+        // 1) HASH si existe
+        const hash = (location.hash || '').replace('#','');
+        if (hash && this.names().includes(hash)) this.current = hash;
+
+        // 2) Persistencia previa
+        try {
+          const saved = localStorage.getItem(this.persistKey);
+          if (saved && this.names().includes(saved)) this.current = saved;
+        } catch {}
+
         this.$nextTick(() => this.resize());
       },
 
-      set(name) {
-        if (name === this.current) return;
+      // ---------------- Getters ----------------
+      names(){ return this.steps.map(s => s.name); },
+      index(){ return this.names().indexOf(this.current); },
+      indexOf(name){ return this.names().indexOf(name); },
+      is(name){ return this.current === name; },
+      isCompleted(name){ return this.indexOf(name) < this.index(); },
+
+      get progress(){
+        const i = this.index();
+        const total = this.steps.length - 1;
+        return (i <= 0) ? 0 : Math.round((i / total) * 100);
+      },
+
+      // ---------------- IDs / ARIA ----------------
+      panelId(name){ return `${this.$id('tab')}-panel-${name}`; },
+      tabId(name){ return `${this.$id('tab')}-tab-${name}`; },
+
+      // ---------------- Navegación ----------------
+      go(name){
+        if (!this.names().includes(name) || name === this.current) return;
         this.current = name;
         this.persist();
         history.replaceState(null, '', `#${name}`);
         this.$nextTick(() => this.resize());
       },
+      next(){
+        // Hook de validación por paso:
+        if (!this.validate(this.current)) return;
 
-      is(name) { return this.current === name; },
-
-      panelId(name) { return `${this.$id('tab')}-panel-${name}`; },
-      tabId(name) { return `${this.$id('tab')}-tab-${name}`; },
-
-      focusNext() {
-        const i = (this.order.indexOf(this.current) + 1) % this.order.length;
-        this.set(this.order[i]);
+        const i = this.index();
+        if (i < this.steps.length - 1) this.go(this.steps[i+1].name);
       },
-      focusPrev() {
-        const i = (this.order.indexOf(this.current) - 1 + this.order.length) % this.order.length;
-        this.set(this.order[i]);
+      prev(){
+        const i = this.index();
+        if (i > 0) this.go(this.steps[i-1].name);
+      },
+      focusNext(){
+        const i = (this.index() + 1) % this.steps.length;
+        this.go(this.steps[i].name);
+      },
+      focusPrev(){
+        const i = (this.index() - 1 + this.steps.length) % this.steps.length;
+        this.go(this.steps[i].name);
       },
 
-      persist() {
+      // ---------------- Persistencia ----------------
+      persist(){
         if (!this.persistKey) return;
         try { localStorage.setItem(this.persistKey, this.current); } catch {}
       },
 
-      resize() {
-        // Ajusta la altura del contenedor al panel visible
+      // ---------------- Altura dinámica ----------------
+      resize(){
         const visible = this.$root.querySelector(`section[data-panel="${this.current}"]`);
-        const stage = this.$refs.stage;
+        const stage   = this.$refs.stage;
         if (!visible || !stage) return;
-        // medimos el alto del contenido interno (card)
         const card = visible.firstElementChild;
         const h = (card?.scrollHeight || visible.scrollHeight || 0);
         stage.style.height = h + 'px';
-      }
+      },
+
+      // ---------------- Validación / Envío ----------------
+      validate(step){
+        // TODO: Coloca aquí tus validaciones por paso.
+        // Ejemplo mínimo:
+        // if (step === 'generales' && !this.$root.querySelector('input[placeholder="Matrícula"]').value.trim()) {
+        //   alert('La matrícula es obligatoria');
+        //   return false;
+        // }
+        // Si usas Livewire, dispara un evento y espera respuesta:
+        // this.$dispatch('validar-paso', { step });
+        return true;
+      },
+      submit(){
+        // TODO: Integra con Livewire:
+        // this.$wire.guardarInscripcion()...
+        // También puedes validar todo antes:
+        // if (this.validate('generales') && this.validate('contacto') && this.validate('escolares')) { ... }
+        alert('Formulario enviado (demo). Integra aquí tu acción Livewire.');
+      },
     }));
   });
 </script>
