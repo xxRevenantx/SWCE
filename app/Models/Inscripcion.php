@@ -22,5 +22,23 @@ class Inscripcion extends Model
         return $this->belongsTo(User::class);
     }
 
+    //COUNTRIES
+    public function country()
+    {
+        return $this->belongsTo(Country::class);
+    }
+
+    // CITIES
+    public function city()
+    {
+        return $this->belongsTo(City::class);
+    }
+
+    // STATES
+    public function state()
+    {
+        return $this->belongsTo(State::class);
+    }
+
 
 }
