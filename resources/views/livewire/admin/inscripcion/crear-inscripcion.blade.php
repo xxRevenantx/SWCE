@@ -78,8 +78,8 @@
   </header>
 
   <!-- Contenido (stage con transición y auto-height) -->
-  <div class="px-4 sm:px-6">
-    <div class="relative overflow-hidden" x-ref="stage" style="height:auto; transition:height .28s ease;">
+  <div>
+    <div class="relative " x-ref="stage" style="transition:height .28s ease;">
       <!-- Generales -->
       <section
         x-cloak
@@ -95,48 +95,134 @@
         :id="panelId('generales')"
         :aria-labelledby="tabId('generales')"
         data-panel="generales"
-        class="absolute inset-0 will-change-transform"
+        class="absolute inset-0 will-change-transform w-full"
       >
-        <div class="rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 shadow-sm">
-          <div class="rounded-t-2xl border-b border-neutral-200 dark:border-neutral-800 bg-gradient-to-r from-sky-500 via-blue-600 to-indigo-600 p-4 text-white">
+        <div class="rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 shadow-sm w-full">
+          <div class="w-full rounded-t-2xl border-b border-neutral-200 dark:border-neutral-800 bg-gradient-to-r from-sky-500 via-blue-600 to-indigo-600 p-4 text-white">
             <h2 class="font-semibold">Datos generales</h2>
           </div>
-          <div class="p-4 sm:p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <!-- TODO: reemplaza por tus inputs con wire:model -->
-            <label class="block">
-              <span class="text-sm font-medium text-neutral-700 dark:text-neutral-200">Usuario <sup class="text-red-500">*</sup></span>
-              <input type="text" class="mt-1 w-full rounded-xl border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-950 focus:ring-sky-500 focus:border-sky-500" placeholder="—Selecciona un usuario—">
-            </label>
-            <label class="block">
-              <span class="text-sm font-medium text-neutral-700 dark:text-neutral-200">Matrícula <sup class="text-red-500">*</sup></span>
-              <input type="text" class="mt-1 w-full rounded-xl border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-950 focus:ring-sky-500 focus:border-sky-500" placeholder="Matrícula">
-            </label>
-            <label class="block">
-              <span class="text-sm font-medium text-neutral-700 dark:text-neutral-200">CURP <sup class="text-red-500">*</sup></span>
-              <input type="text" class="mt-1 w-full rounded-xl border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-950 uppercase tracking-wider focus:ring-sky-500 focus:border-sky-500" placeholder="CURP">
-            </label>
-          </div>
+          <div class="p-4 sm:p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+             <flux:field>
+                    <flux:label>Usuario</flux:label>
+                    <flux:select wire:model="user_id" placeholder="Selecciona un usuario...">
+                        <flux:select.option>Usuario 1</flux:select.option>
+                        <flux:select.option>Usuario 2</flux:select.option>
+                        <flux:select.option>Usuario 3</flux:select.option>
+                        <flux:select.option>Usuario 4</flux:select.option>
+                        <flux:select.option>Usuario 5</flux:select.option>
+                    </flux:select>
+                    <flux:error name="username" />
+
+            </flux:field>
+              {{-- CURP --}}
+                    <flux:field>
+                        <flux:label>CURP</flux:label>
+                        <flux:input wire:model="curp" placeholder="CURP" />
+                        <flux:error name="curp" />
+                    </flux:field>
+                    {{-- MATRICULA --}}
+                    <flux:field>
+                        <flux:label>Matrícula</flux:label>
+                        <flux:input wire:model="matricula" placeholder="Matrícula" />
+                        <flux:error name="matricula" />
+                    </flux:field>
+
+                    {{-- FOLIO --}}
+                    <flux:field>
+                        <flux:label>Folio</flux:label>
+                        <flux:input wire:model="folio" placeholder="Folio" />
+                        <flux:error name="folio" />
+                    </flux:field>
+            </div>
+          <div class="px-4 sm:px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+             <flux:field>
+                {{-- NOMBRE --}}
+                    <flux:label>Nombre</flux:label>
+                    <flux:input wire:model="nombre" placeholder="Nombre" />
+                    <flux:error name="nombre" />
+
+            </flux:field>
+
+                <flux:field>
+                    {{-- APELLIDO PATERNO --}}
+                        <flux:label>Apellido paterno</flux:label>
+                        <flux:input wire:model="apellido_paterno" placeholder="Apellido paterno" />
+                        <flux:error name="apellido_paterno" />
+                </flux:field>
+                <flux:field>
+                    {{-- APELLIDO MATERNO --}}
+                        <flux:label>Apellido materno</flux:label>
+                        <flux:input wire:model="apellido_materno" placeholder="Apellido materno" />
+                        <flux:error name="apellido_materno" />
+                </flux:field>
+
+                {{-- FECHA DE NACIMIENTO --}}
+                <flux:field>
+                    <flux:label>Fecha de nacimiento</flux:label>
+                    <flux:input wire:model="fecha_nacimiento" type="date" />
+                    <flux:error name="fecha_nacimiento" disabled />
+                </flux:field>
+
+            </div>
+
+             <div class="px-4 sm:px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 pt-4">
+
+                {{-- SEXO --}}
+                <flux:field>
+                    <flux:label>Sexo</flux:label>
+                    <flux:select wire:model="sexo" placeholder="Selecciona una opción...">
+                        <flux:select.option value="M">Masculino</flux:select.option>
+                        <flux:select.option value="F">Femenino</flux:select.option>
+                        <flux:select.option value="O">Otro</flux:select.option>
+                    </flux:select>
+                    <flux:error name="sexo" />
+                </flux:field>
+
+                {{-- PAIS DE NACIMIENTO --}}
+                <flux:field>
+                    <flux:label>País de nacimiento</flux:label>
+                    <flux:select wire:model="pais_nacimiento" placeholder="Selecciona un país...">
+                        <flux:select.option value="MX">México</flux:select.option>
+                        <flux:select.option value="US">Estados Unidos</flux:select.option>
+                        <flux:select.option value="CA">Canadá</flux:select.option>
+                        <flux:select.option value="ES">España</flux:select.option>
+                    </flux:select>
+                </flux:field>
+                {{-- ESTADO DE NACIMIENTO --}}
+                <flux:field>
+                    <flux:label>Estado de nacimiento</flux:label>
+                    <flux:select wire:model="estado_nacimiento" placeholder="Selecciona un estado...">
+                        
+                    </flux:select>
+                </flux:field>
+                {{-- LUGAR DE NACIMIENTO --}}
+                <flux:field>
+                    <flux:label>Lugar de nacimiento</flux:label>
+                    <flux:input wire:model="lugar_nacimiento" placeholder="Lugar de nacimiento" />
+                    <flux:error name="lugar_nacimiento" />
+                </flux:field>
+            </div>
 
           <!-- Controles -->
-          <div class="flex items-center justify-between gap-3 px-4 sm:px-6 pb-5">
-            <button
+          <div class="flex items-center justify-between gap-3 px-4 sm:px-6 pt-5 pb-2">
+            <flux:button
               type="button"
-              class="rounded-xl border border-neutral-300 dark:border-neutral-700 px-4 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-200 hover:bg-neutral-50 dark:hover:bg-neutral-800 disabled:opacity-50"
+              class="cancelar-btn"
               disabled
             >
               Anterior
-            </button>
+            </flux:button>
             <div class="flex items-center gap-3">
-              <button
+              <flux:button
                 type="button"
-                class="rounded-xl bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 px-4 py-2 text-sm font-semibold hover:opacity-90"
+                class="guardar-btn"
                 @click="next()"
               >
                 Siguiente
-              </button>
+              </flux:button>
             </div>
           </div>
-        </div>
+
       </section>
 
       <!-- Contacto -->
@@ -154,10 +240,10 @@
         :id="panelId('contacto')"
         :aria-labelledby="tabId('contacto')"
         data-panel="contacto"
-        class="absolute inset-0 will-change-transform"
+        class="absolute inset-0 will-change-transform w-full"
       >
-        <div class="rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 shadow-sm">
-          <div class="rounded-t-2xl border-b border-neutral-200 dark:border-neutral-800 bg-gradient-to-r from-sky-500 via-blue-600 to-indigo-600 p-4 text-white">
+        <div class="rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 shadow-sm w-full">
+          <div class="w-full  rounded-t-2xl border-b border-neutral-200 dark:border-neutral-800 bg-gradient-to-r from-sky-500 via-blue-600 to-indigo-600 p-4 text-white">
             <h2 class="font-semibold">Datos de contacto</h2>
           </div>
           <div class="p-4 sm:p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
