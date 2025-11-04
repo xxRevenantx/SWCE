@@ -398,7 +398,7 @@
 
           <!-- Controles -->
           <div class="flex items-center justify-between gap-3 px-4 sm:px-6 pt-5 pb-2">
-            <flux:button type="button" class="cancelar-btn" disabled>Anterior</flux:button>
+            <flux:button type="button"  @click="prev()" class="cancelar-btn">Anterior</flux:button>
             <div class="flex items-center gap-3">
               <flux:button type="button" class="guardar-btn" @click="next()">Siguiente</flux:button>
             </div>
