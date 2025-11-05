@@ -1,18 +1,6 @@
 <div class="flex w-full flex-1 flex-col gap-6 ">
 
 
-<div class="grid gap-4 md:grid-cols-1">
-  <div class="relative overflow-hidden rounded-2xl p-5 sm:p-6 hover:shadow-lg transition-shadow
-              bg-gradient-to-br from-emerald-400 via-teal-500 to-sky-500">
-
-      {{-- Burbujas decorativas --}}
-      <span class="pointer-events-none absolute -right-16 -top-14 h-48 w-48 rounded-full bg-white/25 blur-3xl"></span>
-      <span class="pointer-events-none absolute left-10 -bottom-10 h-56 w-56 rounded-full bg-white/20 blur-3xl"></span>
-      <span class="pointer-events-none absolute right-28 bottom-6 h-32 w-32 rounded-full bg-white/20 blur-2xl"></span>
-
-
-  </div>
-</div>
 
 
     {{-- 2) TARJETAS RESUMEN SUPERIOR --}}
@@ -31,7 +19,7 @@
             <flux:icon.user class="w-5 h-5" />
         </div>
         <div class="flex-1">
-            <p class="text-sm text-white/90">Profesores Activos</p>
+            <p class=" text-white/90">Profesores Activos</p>
             <p class="text-3xl font-extrabold text-white leading-tight drop-shadow-sm">
                 10
             </p>
@@ -50,22 +38,22 @@
     <span class="pointer-events-none absolute left-10 bottom-0 h-48 w-48 rounded-full bg-white/20 blur-3xl"></span>
     <span class="pointer-events-none absolute right-24 bottom-8 h-28 w-28 rounded-full bg-white/20 blur-2xl"></span>
 
-    <p class="relative text-sm text-white/90 mb-3">Generaciones Activas</p>
+    <p class="relative  text-white/90 mb-3">Generaciones Activas</p>
     <div class="relative flex flex-wrap gap-2">
-        {{-- @foreach ($generacionesActivas as $generaciones)
-            <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase
+        @foreach ($generacionesActivas as $generaciones)
+            <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-sm font-bold uppercase
                          bg-white/20 ring-1 ring-white/30 text-white">
                 {{ $generaciones->generacion }}
             </span>
-        @endforeach --}}
+        @endforeach
     </div>
 </div>
 
     </div>
 
-    {{-- 3) LOCALES: ACTIVOS / BAJAS --}}
+    {{--  ACTIVOS / BAJAS --}}
     <div class="grid auto-rows-min md:grid-cols-2 gap-4">
-        {{-- Locales Activos --}}
+        {{-- Activos --}}
         <div
             x-data="{
                 open: JSON.parse(localStorage.getItem('localesActivos')) ?? false,
@@ -74,17 +62,50 @@
             class="relative rounded-2xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 p-5 sm:p-6"
         >
             <div class="flex items-start justify-between gap-4">
+                <div class="w-full rounded-2xl border border-slate-700/60 dark:bg-[#183c6c3c] text-slate-100 shadow-lg shadow-slate-950/20 p-5
+            hover:shadow-xl hover:shadow-slate-950/30 transition-all bg-[#eff6ff]  dark:text-slate-200 dark:shadow-black/20 dark:hover:shadow-black/30">
+  <!-- Header -->
+  <div class="flex items-center gap-3">
+    <!-- Icono -->
+    <div class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-blue-500/15 ring-1 ring-blue-400/30">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="9" cy="7" r="4"/>
+        <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+      </svg>
+    </div>
+    <h3 class="text-lg font-semibold tracking-tight">Alumnos Activos</h3>
+  </div>
+
+  <!-- Valor -->
+  <div class="mt-3 flex items-baseline gap-3">
+    <span class="text-5xl font-extrabold leading-none tracking-tight">4</span>
+    <span class="text-sm text-slate-400">34H | 39M</span>
+  </div>
+
+  <!-- Acción -->
+  <button type="button"
+          class="mt-3 inline-flex items-center gap-1 text-sm font-medium text-blue-400 hover:text-blue-300
+                 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60 rounded px-1">
+    Ocultar
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="m18 15-6-6-6 6"/>
+    </svg>
+  </button>
+</div>
+
                 <flux:callout icon="user" class="w-full" color="blue" inline>
-                    <h2 class="font-bold text-xl sm:text-2xl">Alumnos Locales Activos</h2>
+                    <h2 class="font-bold text-xl sm:text-2xl">Alumnos Activos</h2>
                     <div class="mt-1 flex items-baseline gap-2">
                         <span class="text-3xl sm:text-4xl font-extrabold">4</span>
                         <span class="text-xs sm:text-sm text-neutral-500 dark:text-neutral-400">
                             {{-- {{ $totalHombresLocalesActivos }} H | {{ $totalMujeresLocalesActivos }} M --}}
+                            34H | 39M
                         </span>
                     </div>
-                </flux:callout>
 
-                <button @click="toggle"
+                       <button @click="toggle"
                     class="shrink-0 inline-flex items-center gap-1 text-sm font-medium text-indigo-600 hover:text-indigo-700 dark:text-indigo-300 dark:hover:text-indigo-200 focus:outline-none">
                     <template x-if="!open"><span class="flex items-center">Ver detalle
                         <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
@@ -93,6 +114,9 @@
                         <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7"/></svg>
                     </span></template>
                 </button>
+                </flux:callout>
+
+
             </div>
 
             <div x-show="open" x-collapse class="mt-4">
@@ -134,11 +158,12 @@
         >
             <div class="flex items-start justify-between gap-4">
                 <flux:callout icon="user" class="w-full" color="red" inline>
-                    <h2 class="font-bold text-xl sm:text-2xl">Alumnos Locales Bajas</h2>
+                    <h2 class="font-bold text-xl sm:text-2xl">Alumnos inactivos</h2>
                     <div class="mt-1 flex items-baseline gap-2">
                         <span class="text-3xl sm:text-4xl font-extrabold">2</span>
                         <span class="text-xs sm:text-sm text-neutral-500 dark:text-neutral-400">
                             {{-- {{ $totalHombresLocalesBaja }} H | {{ $totalMujeresLocalesBaja }} M --}}
+                            3H | 2M
                         </span>
                     </div>
                 </flux:callout>
@@ -196,7 +221,7 @@
         class="bg-white rounded-2xl p-6 shadow border border-neutral-200 dark:bg-neutral-800 dark:border-neutral-700 mt-2"
     >
         <h2 class="text-xl sm:text-2xl font-bold mb-4 text-neutral-800 dark:text-white">
-            Comparativa por Licenciatura (Locales y Foráneos)
+            Gráfica de Alumnos por Licenciatura
         </h2>
         <div class="relative h-[360px] sm:h-[420px] lg:h-[520px]">
             <canvas id="graficaAlumnos" class="!w-full !h-full"></canvas>

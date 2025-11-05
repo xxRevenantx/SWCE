@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin\Dashboard;
 
+use App\Models\Generacion;
 use Livewire\Component;
 
 class AdminDashboard extends Component
@@ -9,13 +10,15 @@ class AdminDashboard extends Component
 
 
     public $licenciaturas;
+    public $generacionesActivas;
+
 
     public function mount()
     {
 
         $this->licenciaturas = \App\Models\Licenciatura::all() ?? '';
 
-        // $this->generacionesActivas = Generacion::where('activa', 'true')->get();
+        $this->generacionesActivas = Generacion::where('status', 'true')->get();
 
         // $this->profesoresActivos = Profesor::whereHas('user', function ($query) {
         //     $query->where('status', 'true');
