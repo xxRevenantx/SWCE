@@ -3,6 +3,7 @@
 namespace App\Livewire\Admin\Dashboard;
 
 use App\Models\Generacion;
+use App\Models\Inscripcion;
 use Livewire\Component;
 
 class AdminDashboard extends Component
@@ -12,6 +13,7 @@ class AdminDashboard extends Component
     public $licenciaturas;
     public $generacionesActivas;
 
+      public $resumenPorLicenciatura = [];
 
     public function mount()
     {
