@@ -76,7 +76,7 @@
                         {{ __('Inscripciones') }}
                     </flux:navlist.item>
 
-                    <flux:navlist.item class="py-4" icon="teachers" :href="route('licenciaturas.index')" :current="request()->routeIs('licenciaturas.index')" wire:navigate>
+                    <flux:navlist.item class="py-4" icon="teachers" :href="route('profesores.index')" :current="request()->routeIs('profesores.index')" wire:navigate>
                         {{ __('Profesores') }}
                     </flux:navlist.item>
 
