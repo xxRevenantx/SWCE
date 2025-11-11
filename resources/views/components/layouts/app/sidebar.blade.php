@@ -80,15 +80,15 @@
                         {{ __('Profesores') }}
                     </flux:navlist.item>
 
-                    <flux:navlist.item class="py-4" icon="book" :href="route('licenciaturas.index')" :current="request()->routeIs('licenciaturas.index')" wire:navigate>
+                    <flux:navlist.item class="py-4" icon="book" :href="route('materias.index')" :current="request()->routeIs('materias.index')" wire:navigate>
                         {{ __('Materias') }}
                     </flux:navlist.item>
 
-                    <flux:navlist.item class="py-4" icon="calendar-days" :href="route('licenciaturas.index')" :current="request()->routeIs('licenciaturas.index')" wire:navigate>
+                    <flux:navlist.item class="py-4" icon="calendar-days" :href="route('horarios.index')" :current="request()->routeIs('horarios.index')" wire:navigate>
                         {{ __('Horarios') }}
                     </flux:navlist.item>
 
-                    <flux:navlist.item class="py-4" icon="book-check" :href="route('licenciaturas.index')" :current="request()->routeIs('licenciaturas.index')" wire:navigate>
+                    <flux:navlist.item class="py-4" icon="book-check" wire:navigate>
                         {{ __('Calificaciones') }}
                     </flux:navlist.item>
                     </flux:navlist.group>

@@ -1,7 +1,9 @@
 <?php
 
+use App\Http\Controllers\Admin\HorarioController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\LicenciaturaController;
+use App\Http\Controllers\Admin\MateriaController;
 use App\Http\Controllers\Admin\ProfesorController;
 use App\Http\Controllers\CuatrimestreController;
 use App\Http\Controllers\GeneracionController;
@@ -23,6 +25,11 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('cuatrimestres', CuatrimestreController::class)->middleware('can:admin.cuatrimestres')->names('cuatrimestres');
     Route::resource('generaciones', GeneracionController::class)->middleware('can:admin.generaciones')->names('generaciones');
     Route::resource('profesores', ProfesorController::class)->middleware('can:admin.profesores')->names('profesores');
+    //MATERIA
+    Route::resource('materias', MateriaController::class)->middleware('can:admin.materias')->names('materias');
+
+    //HORARIO
+    Route::resource('horarios', HorarioController::class)->middleware('can:admin.horarios')->names('horarios');
 
 
     //Inscripción

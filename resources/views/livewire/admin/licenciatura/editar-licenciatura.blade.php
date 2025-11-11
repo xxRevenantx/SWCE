@@ -58,7 +58,6 @@
     <div class="px-5 sm:px-6 pb-4 sm:pb-6 max-h-[75vh] overflow-y-auto">
 
         <form
-        x-on:submit="loading = true"
         wire:submit.prevent="actualizarLicenciatura"
         class="px-5 sm:px-6 pb-5"
         >

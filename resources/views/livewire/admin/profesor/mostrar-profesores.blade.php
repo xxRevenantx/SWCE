@@ -154,7 +154,7 @@
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="6" class="px-6 py-10 text-center text-gray-500 dark:text-gray-400">
+                                            <td colspan="8" class="px-6 py-10 text-center text-gray-500 dark:text-gray-400">
                                                 <div class="mx-auto w-full max-w-md">
                                                     <div class="rounded-2xl border border-dashed border-gray-300 dark:border-neutral-700 p-6">
                                                         <div class="mb-1 text-base font-semibold">No hay profesores disponibles</div>
@@ -179,5 +179,5 @@
 
 
     <!-- Modal editar -->
-    {{-- <livewire:admin.profesor.editar-profesor /> --}}
+    <livewire:admin.profesor.editar-profesor />
 </div>

@@ -89,6 +89,10 @@ button.cancelar-btn{
 .degradado{
     @apply h-1.5 w-full bg-gradient-to-r from-indigo-500 via-violet-500 to-fuchsia-500;
 }
+.btn-azul{
+    @apply cursor-pointer bg-gradient-to-r from-[#00A3F4] to-[#4E39F4] text-white shadow focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00A3F4] dark:focus:ring-offset-neutral-900
+
+}
 
 /* Clase personalizada table-striped */
 @layer components {

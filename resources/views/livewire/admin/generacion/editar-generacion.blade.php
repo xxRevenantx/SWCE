@@ -64,7 +64,6 @@
 
         <!-- Body -->
        <form
-        x-on:submit="loading = true"
         wire:submit.prevent="actualizarGeneracion"
         class="px-5 sm:px-6 pb-5"
         >

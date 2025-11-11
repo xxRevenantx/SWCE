@@ -56,7 +56,6 @@
     </div>
 
         <form
-        x-on:submit="loading = true"
         wire:submit.prevent="actualizarUsuario"
         class="px-5 sm:px-6 pb-5"
         >
