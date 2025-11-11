@@ -57,7 +57,18 @@
           <div class="p-4 sm:p-6">
             <flux:field>
               <!-- Grid campos -->
-              <div class="grid grid-cols-2 sm:grid-cols-2 gap-4">
+              <div x-data="{ email: @entangle('email') }" class="grid grid-cols-2 sm:grid-cols-2 gap-4">
+
+                <div class="relative">
+                    <flux:input
+                    badge="Requerido"
+                    wire:model.live="email"
+                    :label="__('Correo electrónico')"
+                    type="email"
+                    placeholder="usuario@dominio.com"
+                />
+                </div>
+
 
                 <div class="relative">
                   <flux:input
@@ -67,20 +78,8 @@
                     type="text"
                     placeholder="Nombre de usuario"
                     autocomplete="username"
-                  />
-                </div>
-
-
-                <div class="relative">
-                  <flux:input
-                    badge="Requerido"
-                    wire:model.live="email"
-                    :label="__('Email')"
-                    type="email"
-                    value="{{ $email }}"
-                    placeholder="correo@ejemplo.com"
-                    autocomplete="email"
-                  />
+                    :disabled="!filled($email)"   {{-- <- clave --}}
+                    />
                 </div>
               </div>
 

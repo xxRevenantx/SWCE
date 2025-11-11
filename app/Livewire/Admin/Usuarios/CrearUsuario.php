@@ -4,21 +4,22 @@ namespace App\Livewire\Admin\Usuarios;
 
 use App\Models\User;
 use Illuminate\Support\Str;
-use Livewire\Attributes\On;
 use Livewire\Component;
 
 class CrearUsuario extends Component
 {
+    public string $username = '';
+    public string $email = '';
+    public array  $rol = [];
 
-    public $username;
-    public $email;
-   public $rol = [];
+    /** Si el usuario modificó manualmente el username, dejamos de autollenarlo desde el email */
+    public bool $usernameEdited = false;
 
     protected $rules = [
         'username' => 'required|unique:users,username|max:15',
         'email'    => 'required|email|unique:users,email',
-        'rol'      => 'required|array|min:1',     // validar que haya al menos 1
-        'rol.*'    => 'integer|exists:roles,id',  // validar cada id
+        'rol'      => 'required|array|min:1',
+        'rol.*'    => 'integer|exists:roles,id',
     ];
 
     protected $messages = [
@@ -31,64 +32,108 @@ class CrearUsuario extends Component
         'rol.*.exists'    => 'Algún rol seleccionado no existe.',
     ];
 
-
-    public function mount()
+    public function mount(): void
     {
-        $this->username = $this->generarUsernameUnico();
+        // username empieza vacío; se llenará al escribir el email
+        $this->username = '';
     }
 
-    private function generarUsernameUnico(): string
+    /** Sufijo aleatorio de 3 dígitos (000–999) */
+    private function sufijoTresDigitos(): string
     {
-        do {
-            $username = 'user_' . Str::random(5);
-        } while (User::where('username', $username)->exists());
-
-        return $username;
+        return str_pad((string) random_int(0, 999), 3, '0', STR_PAD_LEFT);
     }
 
-      // Validación “en vivo” por campo (incluye el grupo rol)
-    public function updated($field)
+  private function sugerirUsernameDesdeEmail(string $email): string
+{
+    // 1) Local-part del email
+    $local = strtolower(trim((string) \Illuminate\Support\Str::before($email, '@')));
+
+    // 2) Quita puntos y guiones explícitamente
+    $local = str_replace(['.', '-'], '', $local);
+
+    // 3) Deja solo letras, números y guion_bajo (sin puntos ni guiones)
+    $base = preg_replace('/[^a-z0-9]+/i', '', $local) ?: 'user';
+
+    $maxLen    = 15;
+    $suffixLen = 3;
+
+    // 4) Recorta base para dejar espacio al sufijo de 3 dígitos
+    $roomForBase = max(1, $maxLen - $suffixLen);
+    $base = substr($base, 0, $roomForBase);
+    if ($base === '') {
+        $base = substr('user', 0, $roomForBase);
+    }
+
+    // 5) Intenta con sufijos aleatorios primero
+    for ($try = 0; $try < 200; $try++) {
+        $candidate = $base . $this->sufijoTresDigitos();
+        if (!\App\Models\User::where('username', $candidate)->exists()) {
+            return $candidate;
+        }
+    }
+
+    // 6) Fallback determinista (000–999)
+    for ($i = 0; $i <= 999; $i++) {
+        $suffix = str_pad((string) $i, 3, '0', STR_PAD_LEFT);
+        $candidate = $base . $suffix;
+        if (!\App\Models\User::where('username', $candidate)->exists()) {
+            return $candidate;
+        }
+    }
+
+    // 7) Último recurso
+    $mini = substr($base, 0, max(1, $roomForBase - 1));
+    return $mini . strtolower(\Illuminate\Support\Str::random(1)) . $this->sufijoTresDigitos();
+}
+    /** Validación “en vivo”; además, reaccionamos a cambios específicos */
+    public function updated($field): void
     {
-        $this->validateOnly($field === 'rol' || str_starts_with($field, 'rol.')
-            ? 'rol'
-            : $field
+        // Marcar que el usuario editó manualmente el username
+        if ($field === 'username') {
+            $this->usernameEdited = true;
+        }
+
+        // Si cambia el email y aún no han editado el username a mano, sugerimos uno
+        if ($field === 'email' && !$this->usernameEdited) {
+            $this->username = $this->sugerirUsernameDesdeEmail($this->email);
+        }
+
+        // Validar el campo (rol como grupo)
+        $this->validateOnly(
+            $field === 'rol' || str_starts_with($field, 'rol.')
+                ? 'rol'
+                : $field
         );
     }
 
-
-
-
-    public function guardarUsuario(){
+    public function guardarUsuario()
+    {
         $this->validate();
-        // Aquí agregamos la lógica para guardar el usuario en la base de datos
+
         $user = User::create([
             'username' => trim($this->username),
-            'email' => trim($this->email),
-            'password' => bcrypt('12345678'), // Contraseña por defecto
-            'status' => 'true',
-            'photo' => null,
-
+            'email'    => trim($this->email),
+            'password' => bcrypt('12345678'),
+            'status'   => 'true',
+            'photo'    => null,
         ]);
 
-        // Asignar el rol al usuario
         $user->roles()->sync($this->rol);
 
-
         $this->dispatch('swal', [
-            'title' => '¡Usuario creado correctamente!',
-            'icon' => 'success',
+            'title'    => '¡Usuario creado correctamente!',
+            'icon'     => 'success',
             'position' => 'top-end',
         ]);
 
-        // Limpiar los campos después de guardar
-        $this->username = $this->generarUsernameUnico();
-        $this->email = '';
-        $this->rol = [];
+        // Reset para crear otro usuario
+        $this->reset(['email', 'rol']);
+        $this->username = '';      // vuelve a vaciar
+        $this->usernameEdited = false;
 
-       $this->dispatch('refreshUsuarios');
-
+        $this->dispatch('refreshUsuarios');
     }
-
 
     public function render()
     {
