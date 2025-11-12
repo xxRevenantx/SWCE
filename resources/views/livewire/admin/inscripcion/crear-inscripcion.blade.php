@@ -434,21 +434,28 @@
 
             {{-- BACHILLERATO PROCEDENTE --}}
             <flux:field>
-              <flux:label>Bachillerato procedente</flux:label>
+              <flux:label badge="Opcional">Bachillerato procedente</flux:label>
               <flux:input wire:model="bachillerato_procedente" placeholder="Ingresa el nombre del bachillerato" />
               <flux:error name="bachillerato_procedente" />
             </flux:field>
 
             {{-- LICENCIATURA --}}
             <flux:field>
-              <flux:label>Licenciatura</flux:label>
-              <flux:input wire:model="licenciatura" placeholder="Ingresa el nombre de la licenciatura" />
+              <flux:label badge="Requerido">Licenciatura</flux:label>
+                <flux:select wire:model="licenciatura" placeholder="Selecciona una licenciatura...">
+                    <flux:select.option>--Selecciona una licenciatura--</flux:select.option>
+                    @foreach($licenciaturas as $licenciatura)
+                    <flux:select.option value="{{ $licenciatura->id }}">
+                        {{ $licenciatura->nombre }}
+                    </flux:select.option>
+                    @endforeach
+                </flux:select>
               <flux:error name="licenciatura" />
             </flux:field>
             {{-- GENERACIÓN --}}
 
               <flux:field>
-                <flux:label>Generación</flux:label>
+                <flux:label badge="Requerido">Generación</flux:label>
                 <flux:select wire:model="generacion" placeholder="Selecciona una generación...">
                   <flux:select.option>--Selecciona una generación--</flux:select.option>
                   <flux:select.option value="2020-2024">2020-2024</flux:select.option>
@@ -461,7 +468,7 @@
 
               {{-- CUATRIMESTRE --}}
               <flux:field>
-                <flux:label>Cuatrimestre</flux:label>
+                <flux:label badge="Requerido">Cuatrimestre</flux:label>
                 <flux:select wire:model="cuatrimestre" placeholder="Selecciona un cuatrimestre...">
                   <flux:select.option>--Selecciona un cuatrimestre--</flux:select.option>
                   <flux:select.option value="1">1</flux:select.option>

@@ -17,6 +17,7 @@ class CrearInscripcion extends Component
     public array $countries = [];
     public array $states    = [];
     public array $cities    = [];
+    public  $licenciaturas;
 
     /** Selecciones del usuario (IDs) */
     public ?int $pais_nacimiento   = null; // country_id
@@ -66,6 +67,8 @@ class CrearInscripcion extends Component
             ->where('status', "true")
             ->orderBy('id', 'desc')
             ->get();
+
+            $this->licenciaturas = \App\Models\Licenciatura::orderBy('id')->get();
 
             // dd($this->usuarios);
     }

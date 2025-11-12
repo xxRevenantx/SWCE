@@ -72,9 +72,16 @@
                         {{ __('Generaciones') }}
                     </flux:navlist.item>
 
-                    <flux:navlist.item class="py-4" icon="user-plus" :href="route('inscripciones.index')" :current="request()->routeIs('inscripciones.index')" wire:navigate>
-                        {{ __('Inscripciones') }}
-                    </flux:navlist.item>
+
+                    <flux:navlist class="w-64">
+
+                        <flux:navlist.group icon="user-plus" heading="Inscripciones" expandable>
+                            <flux:navlist.item :href="route('inscripciones.index')" :current="request()->routeIs('inscripciones.index')" wire:navigate>Inscripción</flux:navlist.item>
+                            <flux:navlist.item href="#">Matrícula</flux:navlist.item>
+                        </flux:navlist.group>
+                    </flux:navlist>
+
+
 
                     <flux:navlist.item class="py-4" icon="teachers" :href="route('profesores.index')" :current="request()->routeIs('profesores.index')" wire:navigate>
                         {{ __('Profesores') }}
