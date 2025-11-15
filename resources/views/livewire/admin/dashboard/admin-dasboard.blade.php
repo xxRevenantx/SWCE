@@ -1,8 +1,5 @@
 <div class="flex w-full flex-1 flex-col gap-6 ">
 
-
-
-
     {{-- 2) TARJETAS RESUMEN SUPERIOR --}}
     <div class="grid gap-4 sm:grid-cols-2">
         {{-- Profesores activos --}}
@@ -216,112 +213,187 @@
     </div>
 
 
+{{-- 5) GRÁFICA (Chart.js) --}}
 
-
-
-    {{-- 5) GRÁFICA (Chart.js) --}}
+<div
+    x-data="graficaAlumnos()"
+    x-init="init()"
+    class="relative bg-white rounded-2xl p-6 shadow border border-neutral-200 dark:bg-neutral-800 dark:border-neutral-700 mt-2"
+>
+    {{-- Loader sobre la card --}}
     <div
-        x-data
-        x-init="$nextTick(() => renderGraficaAlumnos())"
-        class="bg-white rounded-2xl p-6 shadow border border-neutral-200 dark:bg-neutral-800 dark:border-neutral-700 mt-2"
+        x-show="loading"
+        x-transition.opacity
+        class="absolute inset-0 z-20 flex items-center justify-center bg-neutral-950/70 backdrop-blur-sm"
     >
-        <h2 class="text-xl sm:text-2xl font-bold mb-4 text-neutral-800 dark:text-white">
-            Gráfica de Alumnos por Licenciatura
-        </h2>
-        <div class="relative h-[360px] sm:h-[420px] lg:h-[520px]">
-            <canvas id="graficaAlumnos" class="!w-full !h-full"></canvas>
+        <div class="flex flex-col items-center gap-3">
+            <div class="h-10 w-10 rounded-full border-4 border-sky-500 border-t-transparent animate-spin"></div>
+            <p class="text-sm font-medium text-neutral-100">
+                Cargando gráfica de alumnos...
+            </p>
         </div>
     </div>
 
+    <h2 class="text-xl sm:text-2xl font-bold mb-4 text-neutral-800 dark:text-white">
+        Gráfica de Alumnos por Licenciatura
+    </h2>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-        function renderGraficaAlumnos() {
-            const ctx = document.getElementById('graficaAlumnos');
-            if (!ctx) return;
-
-            if (window.graficaAlumnosInstance) {
-                window.graficaAlumnosInstance.destroy();
-            }
-
-            // Datos ficticios de prueba
-            const labels = ['Nutrición', 'Administración Empresarial', 'Criminología', 'Ciencias de la Educación', 'Ciencias Políticas y Administración Pública', 'Cultura Física y Deportes'];
-            const dataHombres = [45, 32, 28, 38, 52, 25, 40, 30, 22, 35, 48];
-            const dataMujeres = [35, 28, 42, 45, 48, 38, 36, 28, 40, 32, 20];
-            const dataHombresBajas = [5, 3, 4, 6, 7, 2, 5, 3, 2, 4, 6];
-            const dataMujeresBajas = [3, 2, 5, 4, 6, 3, 4, 2, 3, 3, 2];
+    <div class="relative h-[360px] sm:h-[420px] lg:h-[520px]">
+        <canvas x-ref="canvas" class="!w-full !h-full"></canvas>
+    </div>
+</div>
 
 
-            window.graficaAlumnosInstance = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels,
-                    datasets: [
-                        { label: 'Activos Hombres', data: dataHombres, backgroundColor: '#3B82F6' },
-                        { label: 'Activos Mujeres', data: dataMujeres, backgroundColor: '#60A5FA' },
-                        { label: 'Bajas Hombres',   data: dataHombresBajas, backgroundColor: '#F87171' },
-                        { label: 'Bajas Mujeres',   data: dataMujeresBajas, backgroundColor: '#FCA5A5' },
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    interaction: { mode: 'index', intersect: false },
-                    plugins: {
-                        legend: { position: 'bottom', labels: { boxWidth: 12, usePointStyle: true } },
-                        tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y ?? 0}` } }
-                    },
-                    scales: {
-                        x: { stacked: true, ticks: { maxRotation: 0, autoSkip: true } },
-                        y: { stacked: true, beginAtZero: true, ticks: { precision: 0 } }
-                    }
+{{-- Idealmente pon este script en tu layout --}}
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+(function () {
+    const registerGrafica = () => {
+        if (!window.Alpine) return;
+
+        Alpine.data('graficaAlumnos', () => ({
+            loading: true,
+            chart: null,
+
+            init() {
+                // Espera a que el canvas exista y tenga tamaño
+                this.$nextTick(() => {
+                    requestAnimationFrame(() => this.crearGrafica());
+                });
+            },
+
+            crearGrafica() {
+                const canvas = /** @type {HTMLCanvasElement} */ (this.$refs.canvas);
+                if (!canvas || !window.Chart) {
+                    this.loading = false;
+                    return;
                 }
-            });
-        }
-    </script>
 
-
- {{-- <script>
-        function renderGraficaAlumnos() {
-            const ctx = document.getElementById('graficaAlumnos');
-            if (!ctx) return;
-
-            if (window.graficaAlumnosInstance) {
-                window.graficaAlumnosInstance.destroy();
-            }
-
-            const labels = @js($licenciaturas->pluck('nombre'));
-            const dataHombres         = @js(collect($resumenPorLicenciatura)->pluck('hombres'));
-            const dataMujeres        = @js(collect($resumenPorLicenciatura)->pluck('mujeres'));
-            const dataHombresBajas   = @js(collect($resumenPorLicenciaturaBaja)->pluck('hombres'));
-            const dataMujeresBajas    = @js(collect($resumenPorLicenciaturaBaja)->pluck('mujeres'));
-
-
-            window.graficaAlumnosInstance = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels,
-                    datasets: [
-                        { label: 'Activos Hombres', data: dataHombresLocales,      backgroundColor: '#3B82F6' },
-                        { label: 'Activos Mujeres', data: dataMujeresLocales,      backgroundColor: '#60A5FA' },
-                        { label: 'Bajas Hombres',   data: dataHombresBajasLocales, backgroundColor: '#F87171' },
-                        { label: 'Bajas Mujeres',   data: dataMujeresBajasLocales, backgroundColor: '#FCA5A5' },
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    interaction: { mode: 'index', intersect: false },
-                    plugins: {
-                        legend: { position: 'bottom', labels: { boxWidth: 12, usePointStyle: true } },
-                        tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y ?? 0}` } }
-                    },
-                    scales: {
-                        x: { stacked: true, ticks: { maxRotation: 0, autoSkip: true } },
-                        y: { stacked: true, beginAtZero: true, ticks: { precision: 0 } }
-                    }
+                // Si ya hay gráfica en este componente, no la recrees
+                if (this.chart) {
+                    this.loading = false;
+                    return;
                 }
-            });
-        }
-    </script> --}}
+
+                const ctx = canvas.getContext('2d');
+                if (!ctx) {
+                    console.error('No se pudo obtener el contexto 2D del canvas');
+                    this.loading = false;
+                    return;
+                }
+
+                // === DATOS DE PRUEBA (6 labels, 6 valores) ===
+                const labels = [
+                    'Nutrición',
+                    'Administración Empresarial',
+                    'Criminología',
+                    'Ciencias de la Educación',
+                    'Ciencias Políticas y Administración Pública',
+                    'Cultura Física y Deportes'
+                ];
+
+                const dataHombres      = [45, 32, 28, 38, 52, 25];
+                const dataMujeres      = [35, 28, 42, 45, 48, 38];
+                const dataHombresBajas = [5,  3,  4,  6,  7,  2];
+                const dataMujeresBajas = [3,  2,  5,  4,  6,  3];
+
+                this.chart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels,
+                        datasets: [
+                            {
+                                label: 'Activos Hombres',
+                                data: dataHombres,
+                                backgroundColor: '#3B82F6',
+                                borderColor: '#2563EB',
+                                borderWidth: 1
+                            },
+                            {
+                                label: 'Activos Mujeres',
+                                data: dataMujeres,
+                                backgroundColor: '#60A5FA',
+                                borderColor: '#3B82F6',
+                                borderWidth: 1
+                            },
+                            {
+                                label: 'Bajas Hombres',
+                                data: dataHombresBajas,
+                                backgroundColor: '#F87171',
+                                borderColor: '#EF4444',
+                                borderWidth: 1
+                            },
+                            {
+                                label: 'Bajas Mujeres',
+                                data: dataMujeresBajas,
+                                backgroundColor: '#FCA5A5',
+                                borderColor: '#FB7185',
+                                borderWidth: 1
+                            },
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: { mode: 'index', intersect: false },
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    boxWidth: 12,
+                                    usePointStyle: true,
+                                    color: '#e5e7eb'
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y ?? 0}`
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                stacked: true,
+                                ticks: {
+                                    maxRotation: 0,
+                                    autoSkip: true,
+                                    color: '#9ca3af'
+                                },
+                                grid: {
+                                    color: '#1f2937'
+                                }
+                            },
+                            y: {
+                                stacked: true,
+                                beginAtZero: true,
+                                ticks: {
+                                    precision: 0,
+                                    color: '#9ca3af'
+                                },
+                                grid: {
+                                    color: '#1f2937'
+                                }
+                            }
+                        }
+                    }
+                });
+
+                this.loading = false;
+            }
+        }));
+    };
+
+    if (window.Alpine) {
+        registerGrafica();
+    } else {
+        document.addEventListener('alpine:init', registerGrafica);
+    }
+})();
+</script>
+
+
+
+
+
 </div>

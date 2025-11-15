@@ -8,7 +8,7 @@
       document.getElementById(panelId($event.detail.step))?.scrollIntoView({behavior:'smooth', block:'start'});
   })"
   @errores-por-step.window="bad = $event.detail.summary; $nextTick(() => attachObserver())"
-  class="w-full"
+  class="relative w-full"
 >
   <style>
     .no-scrollbar::-webkit-scrollbar{display:none}
@@ -17,11 +17,11 @@
 
     /* Contenedor de paneles: aísla y optimiza el cambio de altura */
     .stage{
-    position: relative;
-    overflow: hidden;      /* importante si las secciones son absolute */
-    contain: layout paint style;
-    will-change: height;
-    transition: height .2s ease;
+      position: relative;
+      overflow: hidden;      /* importante si las secciones son absolute */
+      contain: layout paint style;
+      will-change: height;
+      transition: height .2s ease;
     }
 
     /* Mientras hay transición, simplifica pintura (menos costo) */
@@ -37,6 +37,20 @@
       .stage { transition: none; }
     }
   </style>
+
+  <!-- LOADER SOLO SOBRE EL WIZARD -->
+  <div
+    x-show="loading"
+    x-transition.opacity
+    class="absolute inset-0 z-[70] flex items-center justify-center bg-neutral-950/80 backdrop-blur-sm"
+  >
+    <div class="flex flex-col items-center gap-3">
+      <div class="h-12 w-12 rounded-full border-4 border-sky-500 border-t-transparent animate-spin"></div>
+      <p class="text-sm font-medium text-neutral-100">
+        Cargando inscripción de estudiantes...
+      </p>
+    </div>
+  </div>
 
   <!-- Encabezado -->
   <header class="sticky top-0 z-20 mb-4 w-full">
@@ -120,9 +134,7 @@
 
   <!-- Contenido -->
   <div>
-<div class="stage" x-ref="stage" wire:ignore.self>
-
-
+    <div class="stage" x-ref="stage" wire:ignore.self>
       <!-- Generales -->
       <section
         x-cloak
@@ -138,7 +150,6 @@
         :aria-labelledby="tabId('generales')"
         data-panel="generales"
         class="absolute inset-0 w-full"
-
       >
         <div  class="card-surface rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 shadow-sm w-full">
           <div class="w-full rounded-t-2xl border-b border-neutral-200 dark:border-neutral-800 bg-gradient-to-r from-sky-500 via-blue-600 to-indigo-600 p-4 text-white">
@@ -216,55 +227,53 @@
               <flux:error name="sexo" />
             </flux:field>
 
-             {{-- País --}}
-  <flux:field>
-    <flux:label badge="Opcional">País de nacimiento</flux:label>
-    <flux:select wire:model.live="pais_nacimiento"
-                 placeholder="Selecciona un país..."
-                 wire:key="country-select">
-       <flux:select.option value="">--Selecciona un país de Nacimiento--</flux:select.option>
-      @foreach($countries as $country)
-        <flux:select.option value="{{ $country['id'] }}">
-          {{ $country['name'] }}
-        </flux:select.option>
-      @endforeach
-    </flux:select>
-    <flux:error name="pais_nacimiento" />
-  </flux:field>
+            {{-- País --}}
+            <flux:field>
+              <flux:label badge="Opcional">País de nacimiento</flux:label>
+              <flux:select wire:model.live="pais_nacimiento"
+                           placeholder="Selecciona un país..."
+                           wire:key="country-select">
+                <flux:select.option value="">--Selecciona un país de Nacimiento--</flux:select.option>
+                @foreach($countries as $country)
+                  <flux:select.option value="{{ $country['id'] }}">
+                    {{ $country['name'] }}
+                  </flux:select.option>
+                @endforeach
+              </flux:select>
+              <flux:error name="pais_nacimiento" />
+            </flux:field>
 
-  {{-- Estado (depende de país) --}}
-  <flux:field>
-    <flux:label badge="Opcional">Estado de nacimiento</flux:label>
-    <flux:select wire:model.live="estado_nacimiento"
+            {{-- Estado (depende de país) --}}
+            <flux:field>
+              <flux:label badge="Opcional">Estado de nacimiento</flux:label>
+              <flux:select wire:model.live="estado_nacimiento"
+                           placeholder="{{ empty($states) ? 'Selecciona primero un país' : 'Selecciona un estado...' }}"
+                           wire:key="state-select-{{ $pais_nacimiento ?? 'none' }}">
+                <flux:select.option value="">--Selecciona un estado de Nacimiento--</flux:select.option>
+                @foreach($states as $state)
+                  <flux:select.option value="{{ $state['id'] }}">
+                    {{ $state['name'] }}
+                  </flux:select.option>
+                @endforeach
+              </flux:select>
+              <flux:error name="estado_nacimiento" />
+            </flux:field>
 
-                 placeholder="{{ empty($states) ? 'Selecciona primero un país' : 'Selecciona un estado...' }}"
-                 wire:key="state-select-{{ $pais_nacimiento ?? 'none' }}">
-      <flux:select.option value="">--Selecciona un estado de Nacimiento--</flux:select.option>
-      @foreach($states as $state)
-        <flux:select.option value="{{ $state['id'] }}">
-          {{ $state['name'] }}
-        </flux:select.option>
-      @endforeach
-    </flux:select>
-    <flux:error name="estado_nacimiento" />
-  </flux:field>
-
-  {{-- Ciudad (depende de estado) --}}
-  <flux:field>
-    <flux:label badge="Opcional">Lugar de nacimiento</flux:label>
-    <flux:select wire:model.live="lugar_nacimiento"
-
-                 placeholder="{{ empty($cities) ? 'Selecciona primero un estado' : 'Selecciona una ciudad...' }}"
-                 wire:key="city-select-{{ $estado_nacimiento ?? 'none' }}">
-        <flux:select.option value="">--Selecciona una ciudad de Nacimiento--</flux:select.option>
-      @foreach($cities as $city)
-        <flux:select.option value="{{ $city['id'] }}">
-          {{ $city['name'] }}
-        </flux:select.option>
-      @endforeach
-    </flux:select>
-    <flux:error name="lugar_nacimiento" />
-  </flux:field>
+            {{-- Ciudad (depende de estado) --}}
+            <flux:field>
+              <flux:label badge="Opcional">Lugar de nacimiento</flux:label>
+              <flux:select wire:model.live="lugar_nacimiento"
+                           placeholder="{{ empty($cities) ? 'Selecciona primero un estado' : 'Selecciona una ciudad...' }}"
+                           wire:key="city-select-{{ $estado_nacimiento ?? 'none' }}">
+                <flux:select.option value="">--Selecciona una ciudad de Nacimiento--</flux:select.option>
+                @foreach($cities as $city)
+                  <flux:select.option value="{{ $city['id'] }}">
+                    {{ $city['name'] }}
+                  </flux:select.option>
+                @endforeach
+              </flux:select>
+              <flux:error name="lugar_nacimiento" />
+            </flux:field>
           </div>
 
           <!-- Controles -->
@@ -311,27 +320,30 @@
               <flux:input wire:model="numero_exterior" placeholder="Ingresa el número exterior" />
               <flux:error name="numero_exterior" />
             </flux:field>
+
             {{-- NUMERO INTERIOR --}}
             <flux:field>
               <flux:label badge="Opcional">Número interior</flux:label>
               <flux:input wire:model="numero_interior" placeholder="Ingresa el número interior" />
               <flux:error name="numero_interior" />
             </flux:field>
-                           {{-- COLONIA  --}}
+
+            {{-- COLONIA --}}
             <flux:field>
               <flux:label badge="Opcional">Colonia</flux:label>
               <flux:input wire:model="colonia" placeholder="Ingresa la colonia" />
               <flux:error name="colonia" />
             </flux:field>
           </div>
-         <div class="px-4 sm:px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
 
+          <div class="px-4 sm:px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {{-- CODIGO POSTAL --}}
             <flux:field>
               <flux:label badge="Opcional">Código postal</flux:label>
               <flux:input wire:model="codigo_postal" placeholder="Ingresa el código postal" />
               <flux:error name="codigo_postal" />
             </flux:field>
+
             {{-- MUNICIPIO --}}
             <flux:field>
               <flux:label badge="Opcional">Municipio</flux:label>
@@ -342,58 +354,60 @@
             {{-- ESTADO DE RESIDENCIA --}}
             <flux:field>
               <flux:label badge="Opcional">Estado de residencia</flux:label>
-                <flux:select wire:model="estado_residencia"
-                             placeholder="Selecciona un estado...">
-                  <flux:select.option>--Selecciona un estado--</flux:select.option>
-                    @foreach($states as $state_residencia)
-                        <flux:select.option value="{{ $state_residencia['id'] }}">
-                        {{ $state_residencia['name'] }}
-                        </flux:select.option>
-                    @endforeach
-                </flux:select>
+              <flux:select wire:model="estado_residencia"
+                           placeholder="Selecciona un estado...">
+                <flux:select.option>--Selecciona un estado--</flux:select.option>
+                @foreach($states as $state_residencia)
+                  <flux:select.option value="{{ $state_residencia['id'] }}">
+                    {{ $state_residencia['name'] }}
+                  </flux:select.option>
+                @endforeach
+              </flux:select>
             </flux:field>
+
             {{-- CIUDAD DE RESIDENCIA --}}
             <flux:field>
               <flux:label badge="Opcional">Ciudad de residencia</flux:label>
-                <flux:select wire:model="ciudad_residencia"
-                             placeholder="Selecciona una ciudad...">
-                  <flux:select.option>--Selecciona una ciudad--</flux:select.option>
-                    @foreach($cities as $city_residencia)
-                        <flux:select.option value="{{ $city_residencia['id'] }}">
-                        {{ $city_residencia['name'] }}
-                        </flux:select.option>
-                    @endforeach
-                </flux:select>
+              <flux:select wire:model="ciudad_residencia"
+                           placeholder="Selecciona una ciudad...">
+                <flux:select.option>--Selecciona una ciudad--</flux:select.option>
+                @foreach($cities as $city_residencia)
+                  <flux:select.option value="{{ $city_residencia['id'] }}">
+                    {{ $city_residencia['name'] }}
+                  </flux:select.option>
+                @endforeach
+              </flux:select>
             </flux:field>
           </div>
 
-        <div class="p-6 sm:px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="p-6 sm:px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {{-- CELULAR --}}
             <flux:field>
               <flux:label badge="Opcional">Celular</flux:label>
               <flux:input wire:model="celular" placeholder="Ingresa el número de celular" />
               <flux:error name="celular" />
             </flux:field>
+
             {{-- TELÉFONO FIJO --}}
             <flux:field>
               <flux:label badge="Opcional">Teléfono fijo</flux:label>
               <flux:input wire:model="telefono_fijo" placeholder="Ingresa el número de teléfono fijo" />
               <flux:error name="telefono_fijo" />
             </flux:field>
+
             {{-- EMAIL --}}
             <flux:field>
               <flux:label badge="Requerido">Correo electrónico</flux:label>
               <flux:input wire:model="email" type="email" placeholder="Ingresa el correo electrónico" />
               <flux:error name="email" />
             </flux:field>
+
             {{-- TUTOR --}}
             <flux:field>
               <flux:label badge="Opcional" >Tutor</flux:label>
               <flux:input wire:model="tutor" placeholder="Ingresa el nombre del tutor" />
               <flux:error name="tutor" />
             </flux:field>
-
-
           </div>
 
           <!-- Controles -->
@@ -423,37 +437,35 @@
         class="absolute inset-0 w-full"
       >
         <div class="card-surface rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 shadow-sm">
-
-
-            <div class="rounded-t-2xl border-b border-neutral-200 dark:border-neutral-800 bg-gradient-to-r from-sky-500 via-blue-600 to-indigo-600 p-4 text-white">
+          <div class="rounded-t-2xl border-b border-neutral-200 dark:border-neutral-800 bg-gradient-to-r from-sky-500 via-blue-600 to-indigo-600 p-4 text-white">
             <h2 class="font-semibold">Datos escolares</h2>
           </div>
 
           <div class="p-4 sm:p-6 grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-4 items-center">
             <div class="p-4 sm:p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
 
-            {{-- BACHILLERATO PROCEDENTE --}}
-            <flux:field>
-              <flux:label badge="Opcional">Bachillerato procedente</flux:label>
-              <flux:input wire:model="bachillerato_procedente" placeholder="Ingresa el nombre del bachillerato" />
-              <flux:error name="bachillerato_procedente" />
-            </flux:field>
+              {{-- BACHILLERATO PROCEDENTE --}}
+              <flux:field>
+                <flux:label badge="Opcional">Bachillerato procedente</flux:label>
+                <flux:input wire:model="bachillerato_procedente" placeholder="Ingresa el nombre del bachillerato" />
+                <flux:error name="bachillerato_procedente" />
+              </flux:field>
 
-            {{-- LICENCIATURA --}}
-            <flux:field>
-              <flux:label badge="Requerido">Licenciatura</flux:label>
+              {{-- LICENCIATURA --}}
+              <flux:field>
+                <flux:label badge="Requerido">Licenciatura</flux:label>
                 <flux:select wire:model="licenciatura" placeholder="Selecciona una licenciatura...">
-                    <flux:select.option>--Selecciona una licenciatura--</flux:select.option>
-                    @foreach($licenciaturas as $licenciatura)
+                  <flux:select.option>--Selecciona una licenciatura--</flux:select.option>
+                  @foreach($licenciaturas as $licenciatura)
                     <flux:select.option value="{{ $licenciatura->id }}">
-                        {{ $licenciatura->nombre }}
+                      {{ $licenciatura->nombre }}
                     </flux:select.option>
-                    @endforeach
+                  @endforeach
                 </flux:select>
-              <flux:error name="licenciatura" />
-            </flux:field>
-            {{-- GENERACIÓN --}}
+                <flux:error name="licenciatura" />
+              </flux:field>
 
+              {{-- GENERACIÓN --}}
               <flux:field>
                 <flux:label badge="Requerido">Generación</flux:label>
                 <flux:select wire:model="generacion" placeholder="Selecciona una generación...">
@@ -482,9 +494,7 @@
                 </flux:select>
                 <flux:error name="cuatrimestre" />
               </flux:field>
-
             </div>
-
 
             <div class="md:col-span-2 lg:col-span-1">
               <div class="rounded-2xl border border-dashed border-neutral-300 dark:border-neutral-700 p-4 sm:p-5">
@@ -502,15 +512,11 @@
                     <span class="text-sm text-neutral-700 dark:text-neutral-300">Status</span>
                   </label>
                 </div>
-
-
               </div>
             </div>
+          </div>
 
-            </div>
-
-
-         <!-- Controles -->
+          <!-- Controles -->
           <div class="flex items-center justify-between gap-3 px-4 sm:px-6 pb-5">
             <button
               type="button"
@@ -536,105 +542,123 @@
 </div>
 
 <script>
-document.addEventListener('alpine:init', () => {
-  Alpine.data('wizard', ({ initial = 'generales', persistKey = null } = {}) => ({
-    current: initial,
-    persistKey,
-    steps: [
-      { name: 'generales', label: 'Datos generales' },
-      { name: 'contacto',  label: 'Datos de contacto' },
-      { name: 'escolares', label: 'Datos escolares' },
-    ],
+(function () {
+  const registerWizard = () => {
+    if (!window.Alpine) return;
 
-     bad: { generales:0, contacto:0, escolares:0 },
+    window.Alpine.data('wizard', ({ initial = 'generales', persistKey = null } = {}) => ({
+      current: initial,
+      persistKey,
+      loading: true, // loader activo al inicio
 
-    // --- NUEVO: observer ---
-    ro: null,
-    panelSel(name){ return `section[data-panel="${name}"]`; },
-    currentCard(){
-      const el = this.$root.querySelector(this.panelSel(this.current));
-      return el?.firstElementChild || el; // la .card-surface
-    },
-    attachObserver(){
-      // desconecta anterior
-      if (this.ro) this.ro.disconnect();
-      const card = this.currentCard();
-      const stage = this.$refs.stage;
-      if (!card || !stage) return;
+      steps: [
+        { name: 'generales', label: 'Datos generales' },
+        { name: 'contacto',  label: 'Datos de contacto' },
+        { name: 'escolares', label: 'Datos escolares' },
+      ],
 
-      // altura inicial inmediata
-      stage.style.height = (card.scrollHeight || card.offsetHeight || 0) + 'px';
+      bad: { generales:0, contacto:0, escolares:0 },
 
-      // observa cambios de tamaño del panel visible
-      this.ro = new ResizeObserver((entries) => {
-        for (const e of entries) {
-          // usar contentRect es más estable y sin reflow
-          const h = Math.ceil(e.contentRect.height);
-          if (h > 0) stage.style.height = h + 'px';
-        }
-      });
-      this.ro.observe(card);
-    },
+      // --- observer ---
+      ro: null,
+      panelSel(name){ return `section[data-panel="${name}"]`; },
+      currentCard(){
+        const el = this.$root.querySelector(this.panelSel(this.current));
+        return el?.firstElementChild || el; // la .card-surface
+      },
+      attachObserver(){
+        if (this.ro) this.ro.disconnect();
+        const card = this.currentCard();
+        const stage = this.$refs.stage;
+        if (!card || !stage) return;
 
-    // --- ciclo de vida ---
-    init(){
-      const hash = (location.hash || '').replace('#','');
-      if (hash && this.names().includes(hash)) this.current = hash;
+        stage.style.height = (card.scrollHeight || card.offsetHeight || 0) + 'px';
 
-      try {
-        const saved = localStorage.getItem(this.persistKey);
-        if (saved && this.names().includes(saved)) this.current = saved;
-      } catch {}
+        this.ro = new ResizeObserver((entries) => {
+          for (const e of entries) {
+            const h = Math.ceil(e.contentRect.height);
+            if (h > 0) stage.style.height = h + 'px';
+          }
+        });
+        this.ro.observe(card);
+      },
 
-      // espera a que quite x-cloak y pinte
-      this.$nextTick(() => {
-        requestAnimationFrame(() => this.attachObserver());
-      });
+      // --- ciclo de vida ---
+      init(){
+        const hash = (location.hash || '').replace('#','');
+        if (hash && this.names().includes(hash)) this.current = hash;
 
-      // reajusta en cambios de viewport
-      window.addEventListener('resize', () => this.$nextTick(() => this.attachObserver()));
-    },
+        try {
+          const saved = localStorage.getItem(this.persistKey);
+          if (saved && this.names().includes(saved)) this.current = saved;
+        } catch {}
 
-    // --- helpers ---
-    names(){ return this.steps.map(s => s.name); },
-    index(){ return this.names().indexOf(this.current); },
-    indexOf(n){ return this.names().indexOf(n); },
-    is(n){ return this.current === n; },
-    isCompleted(n){ return this.indexOf(n) < this.index(); },
-    get progress(){
-      const i = this.index(), total = this.steps.length - 1;
-      return (i <= 0) ? 0 : Math.round((i / total) * 100);
-    },
+        this.$nextTick(() => {
+          requestAnimationFrame(() => {
+            this.attachObserver();
+            this.loading = false;   // ocultar loader cuando ya se midió
+          });
+        });
 
-    // --- navegación ---
-    go(name){
-      if (!this.names().includes(name) || name === this.current) return;
-      const stage = this.$refs.stage;
-      const root  = this.$root;
+        window.addEventListener('resize', () =>
+          this.$nextTick(() => this.attachObserver())
+        );
+      },
 
-      root.classList.add('motioning');
+      // --- helpers ---
+      names(){ return this.steps.map(s => s.name); },
+      index(){ return this.names().indexOf(this.current); },
+      indexOf(n){ return this.names().indexOf(n); },
+      is(n){ return this.current === n; },
+      isCompleted(n){ return this.indexOf(n) < this.index(); },
+      get progress(){
+        const i = this.index(), total = this.steps.length - 1;
+        return (i <= 0) ? 0 : Math.round((i / total) * 100);
+      },
 
-      requestAnimationFrame(() => {
-        this.current = name;
-        this.persist();
-        history.replaceState(null, '', `#${name}`);
+      // --- navegación ---
+      go(name){
+        if (!this.names().includes(name) || name === this.current) return;
+        const root  = this.$root;
 
-        // reatacha el observer al nuevo panel
-        this.$nextTick(() => this.attachObserver());
+        root.classList.add('motioning');
 
-        setTimeout(() => root.classList.remove('motioning'), 220);
-      });
-    },
-    next(){ const i = this.index(); if (i < this.steps.length - 1) this.go(this.steps[i+1].name); },
-    prev(){ const i = this.index(); if (i > 0) this.go(this.steps[i-1].name); },
+        requestAnimationFrame(() => {
+          this.current = name;
+          this.persist();
+          history.replaceState(null, '', `#${name}`);
 
-    // --- persistencia ---
-    persist(){ if (!this.persistKey) return; try { localStorage.setItem(this.persistKey, this.current); } catch {} },
+          this.$nextTick(() => this.attachObserver());
 
-    // ya no necesitas measure()/resize(), el observer se encarga
-    validate(){ return true; },
-    submit(){ @this.call('guardarInscripcion'); },
-  }));
-});
+          setTimeout(() => root.classList.remove('motioning'), 220);
+        });
+      },
+      next(){
+        const i = this.index();
+        if (i < this.steps.length - 1) this.go(this.steps[i+1].name);
+      },
+      prev(){
+        const i = this.index();
+        if (i > 0) this.go(this.steps[i-1].name);
+      },
 
+      // --- persistencia ---
+      persist(){
+        if (!this.persistKey) return;
+        try { localStorage.setItem(this.persistKey, this.current); } catch {}
+      },
+
+      validate(){ return true; },
+      submit(){ @this.call('guardarInscripcion'); },
+    }));
+  };
+
+  // Si Alpine ya está disponible (caso navegación Livewire)
+  if (window.Alpine) {
+    registerWizard();
+  } else {
+    // Caso primer carga de la app
+    document.addEventListener('alpine:init', registerWizard);
+  }
+})();
 </script>
