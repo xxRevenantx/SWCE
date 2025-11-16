@@ -38,19 +38,22 @@
     }
   </style>
 
-  <!-- LOADER SOLO SOBRE EL WIZARD -->
+   <!-- LOADER SOLO SOBRE EL WIZARD -->
   <div
     x-show="loading"
     x-transition.opacity
-    class="absolute inset-0 z-[70] flex items-center justify-center bg-neutral-950/80 backdrop-blur-sm"
+    class="absolute inset-0 z-[70] flex items-center justify-center
+           bg-white/10 dark:bg-neutral-950/30
+           backdrop-blur-md backdrop-saturate-150"
   >
     <div class="flex flex-col items-center gap-3">
       <div class="h-12 w-12 rounded-full border-4 border-sky-500 border-t-transparent animate-spin"></div>
-      <p class="text-sm font-medium text-neutral-100">
+      <p class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
         Cargando inscripción de estudiantes...
       </p>
     </div>
   </div>
+
 
   <!-- Encabezado -->
   <header class="sticky top-0 z-20 mb-4 w-full">
