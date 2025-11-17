@@ -221,18 +221,21 @@
     class="relative bg-white rounded-2xl p-6 shadow border border-neutral-200 dark:bg-neutral-800 dark:border-neutral-700 mt-2"
 >
     {{-- Loader sobre la card --}}
-    <div
-        x-show="loading"
-        x-transition.opacity
-        class="absolute inset-0 z-20 flex items-center justify-center bg-neutral-950/70 backdrop-blur-sm"
-    >
-        <div class="flex flex-col items-center gap-3">
-            <div class="h-10 w-10 rounded-full border-4 border-sky-500 border-t-transparent animate-spin"></div>
-            <p class="text-sm font-medium text-neutral-100">
-                Cargando gráfica de alumnos...
-            </p>
-        </div>
+
+     <div
+    x-show="loading"
+    x-transition.opacity
+    class="absolute inset-0 z-[70] flex items-center justify-center
+           bg-white/10 dark:bg-neutral-950/30
+           backdrop-blur-md backdrop-saturate-150"
+  >
+    <div class="flex flex-col items-center gap-3">
+      <div class="h-12 w-12 rounded-full border-4 border-sky-500 border-t-transparent animate-spin"></div>
+      <p class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
+       Cargando gráfica de alumnos...
+      </p>
     </div>
+  </div>
 
     <h2 class="text-xl sm:text-2xl font-bold mb-4 text-neutral-800 dark:text-white">
         Gráfica de Alumnos por Licenciatura

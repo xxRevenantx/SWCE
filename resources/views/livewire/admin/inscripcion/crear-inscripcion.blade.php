@@ -232,6 +232,10 @@
 
             {{-- País --}}
             <flux:field>
+
+
+
+
               <flux:label badge="Opcional">País de nacimiento</flux:label>
               <flux:select wire:model.live="pais_nacimiento"
                            placeholder="Selecciona un país..."
@@ -244,6 +248,8 @@
                 @endforeach
               </flux:select>
               <flux:error name="pais_nacimiento" />
+
+
             </flux:field>
 
             {{-- Estado (depende de país) --}}
