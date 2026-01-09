@@ -16,10 +16,10 @@ class DatabaseSeeder extends Seeder
         // User::factory(10)->create();
 
 
-         $this->call([
+        $this->call([
             RoleSeeder::class,
             DiaSeeder::class,
-            CountriesTableSeeder::class,
+                // CountriesTableSeeder::class,
             UserSeeder::class,
             MesSeeder::class,
 
