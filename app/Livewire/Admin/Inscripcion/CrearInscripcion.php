@@ -59,18 +59,18 @@ class CrearInscripcion extends Component
     public function mount(): void
     {
         $this->countries = Country::orderBy('name')
-            ->get(['id','name'])
+            ->get(['id', 'name'])
             ->toArray();
 
-         $this->usuarios = User::role('Estudiante')
+        $this->usuarios = User::role('Estudiante')
             // ->whereNotIn('id', Inscripcion::pluck('user_id'))
             ->where('status', "true")
             ->orderBy('id', 'desc')
             ->get();
 
-            $this->licenciaturas = \App\Models\Licenciatura::orderBy('id')->get();
+        $this->licenciaturas = \App\Models\Licenciatura::orderBy('id')->get();
 
-            // dd($this->usuarios);
+        // dd($this->usuarios);
     }
 
     public function updatedPaisNacimiento(?int $countryId): void
@@ -87,7 +87,7 @@ class CrearInscripcion extends Component
 
         $this->states = State::where('country_id', $countryId)
             ->orderBy('name')
-            ->get(['id','name'])
+            ->get(['id', 'name'])
             ->toArray();
 
         $this->dispatch('catalogos-actualizados');
@@ -105,7 +105,7 @@ class CrearInscripcion extends Component
 
         $this->cities = City::where('state_id', $stateId)
             ->orderBy('name')
-            ->get(['id','name'])
+            ->get(['id', 'name'])
             ->toArray();
 
         $this->dispatch('catalogos-actualizados');
@@ -150,10 +150,21 @@ class CrearInscripcion extends Component
             ]);
 
             $this->reset([
-                'user_id','CURP','matricula','folio',
-                'nombre', 'apellido_paterno','apellido_materno','fecha_nacimiento',
-                'pais_nacimiento','estado_nacimiento','lugar_nacimiento', 'sexo',
-                'countries','states','cities',
+                'user_id',
+                'CURP',
+                'matricula',
+                'folio',
+                'nombre',
+                'apellido_paterno',
+                'apellido_materno',
+                'fecha_nacimiento',
+                'pais_nacimiento',
+                'estado_nacimiento',
+                'lugar_nacimiento',
+                'sexo',
+                'countries',
+                'states',
+                'cities',
             ]);
 
             $this->dispatch('inscripcion-creada');
@@ -219,6 +230,10 @@ class CrearInscripcion extends Component
 
     public function render()
     {
+        $generaciones = \App\Models\Generacion::orderBy('id')->get();
+        $licenciaturas      = \App\Models\Licenciatura::orderBy('id')->get();
+        $cuatrimestres = \App\Models\Cuatrimestre::orderBy('id')->get();
+
         return view('livewire.admin.inscripcion.crear-inscripcion', [
             'countries' => $this->countries,
             'states'    => $this->states,

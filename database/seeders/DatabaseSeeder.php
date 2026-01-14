@@ -19,7 +19,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             RoleSeeder::class,
             DiaSeeder::class,
-                // CountriesTableSeeder::class,
+            CountriesTableSeeder::class,
             MesSeeder::class,
 
             // Add other seeders here
@@ -42,7 +42,5 @@ class DatabaseSeeder extends Seeder
         if (!$user->hasRole('Admin')) {
             $user->assignRole('Admin');
         }
-
-
     }
 }

@@ -19,11 +19,16 @@ Route::middleware(['auth'])->group(function () {
 
     Route::view('panel-administrador', 'admin.dashboard')->middleware('can:admin.dashboard')->name('admin.dashboard'); // admin.dashboard (URL /admin/dashboard)
     // ...más rutas del admin
-        // Rutas del Admin
+    // Rutas del Admin
     Route::resource('usuarios', UserController::class)->middleware('can:admin.usuarios')->names('usuarios');
     Route::resource('licenciaturas', LicenciaturaController::class)->middleware('can:admin.licenciaturas')->names('licenciaturas');
     Route::resource('cuatrimestres', CuatrimestreController::class)->middleware('can:admin.cuatrimestres')->names('cuatrimestres');
-    Route::resource('generaciones', GeneracionController::class)->middleware('can:admin.generaciones')->names('generaciones');
+
+    // GENERACIONES
+    Route::get('generaciones', [GeneracionController::class, 'generaciones'])->middleware('can:admin.generaciones')->name('generaciones');
+    Route::get('asignacion_generaciones', [GeneracionController::class, 'asignacion'])->middleware('can:admin.asignacion_generaciones')->name('asignacion_generaciones');
+
+
     Route::resource('profesores', ProfesorController::class)->middleware('can:admin.profesores')->names('profesores');
     //MATERIA
     Route::resource('materias', MateriaController::class)->middleware('can:admin.materias')->names('materias');
@@ -34,5 +39,4 @@ Route::middleware(['auth'])->group(function () {
 
     //Inscripción
     Route::resource('inscripciones', InscripcionController::class)->middleware('can:admin.inscripciones')->names('inscripciones');
-
 });

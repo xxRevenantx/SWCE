@@ -8,8 +8,16 @@ use App\Http\Requests\UpdateGeneracionRequest;
 
 class GeneracionController extends Controller
 {
-    public function index()
+
+    // GENERACIONES
+    public function generaciones()
     {
         return view('admin.generacion.index');
+    }
+
+    // ASIGNACION DE GENERACIONES
+    public function asignacion()
+    {
+        return view('admin.asignar_generacion.index');
     }
 }
