@@ -12,8 +12,9 @@ Route::get('/', function () {
     return redirect()->route('login');
 })->name('home');
 
-Route::get('register', function(){
-    return redirect()->route('login');
+Route::get('register', function () {
+    // return redirect()->route('login');
+    return view('auth.register');
 })->name('register');
 
 
@@ -36,7 +37,7 @@ Route::middleware(['auth'])->group(function () {
         ->middleware(
             when(
                 Features::canManageTwoFactorAuthentication()
-                    && Features::optionEnabled(Features::twoFactorAuthentication(), 'confirmPassword'),
+                && Features::optionEnabled(Features::twoFactorAuthentication(), 'confirmPassword'),
                 ['password.confirm'],
                 [],
             ),
@@ -44,8 +45,8 @@ Route::middleware(['auth'])->group(function () {
         ->name('two-factor.show');
 });
 
-require __DIR__.'/auth.php';
-require __DIR__.'/admin.php';
-require __DIR__.'/estudiante.php';
-require __DIR__.'/profesor.php';
+require __DIR__ . '/auth.php';
+require __DIR__ . '/admin.php';
+require __DIR__ . '/estudiante.php';
+require __DIR__ . '/profesor.php';
 
