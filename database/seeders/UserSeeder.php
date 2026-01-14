@@ -13,15 +13,22 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-       User::factory()->create([
-            'username' => 'SWCE',
-            'email' => 'swce@gmail.com',
-            'password' => bcrypt('12345678'),
-        ])->assignRole('Admin');
+        $email = env('DEFAULT_ADMIN_EMAIL', 'swce@gmail.com');
+        $password = env('DEFAULT_ADMIN_PASSWORD', '12345678');
 
-        // User::factory(1)->create()->each(function ($user) {
-        //     $user->assignRole('Estudiante');
-        // });
+        $user = User::updateOrCreate(
+            ['email' => $email],
+            [
+                'username' => 'SWCE',
+                'password' => bcrypt($password),
+                'email_verified_at' => now(), // opcional si usas verificación
+            ]
+        );
 
+        // Evita error si el rol no existe por orden de seeders
+        if (!$user->hasRole('Admin')) {
+            $user->assignRole('Admin');
+        }
     }
+
 }
