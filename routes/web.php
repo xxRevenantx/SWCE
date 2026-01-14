@@ -13,8 +13,8 @@ Route::get('/', function () {
 })->name('home');
 
 Route::get('register', function () {
-    // return redirect()->route('login');
-    return view('register');
+    return redirect()->route('login');
+    // return view('register');
 })->name('register');
 
 
