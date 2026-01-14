@@ -36,17 +36,11 @@ class DatabaseSeeder extends Seeder
             RoleSeeder::class,
             DiaSeeder::class,
                 // CountriesTableSeeder::class,
-                // UserSeeder::class,
             MesSeeder::class,
 
             // Add other seeders here
         ]);
 
-        // User::factory()->create([
-        //     'name' => 'Centro Universitario Moctezuma AC',
-        //     'email' => 'centrouniversitariomoctezuma@gmail.com',
-        //     'password' => bcrypt('12345678')
-        // ])->assignRole('Admin');
-        // $this->call(UserSeeder::class);
+
     }
 }
