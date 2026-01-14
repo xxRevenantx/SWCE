@@ -25,23 +25,23 @@ class DatabaseSeeder extends Seeder
             // Add other seeders here
         ]);
 
+        // 2️⃣ LUEGO crear admin
         $email = env('DEFAULT_ADMIN_EMAIL', 'swce@gmail.com');
-        $password = env('DEFAULT_ADMIN_PASSWORD', '12345678');
+        $password = env('DEFAULT_ADMIN_PASSWORD', 'swce#2026');
 
-        $user = User::updateOrCreate(
+        $user = \App\Models\User::updateOrCreate(
             ['email' => $email],
             [
                 'username' => 'SWCE',
                 'password' => bcrypt($password),
-                'email_verified_at' => now(), // opcional si usas verificación
+                'email_verified_at' => now(),
             ]
         );
 
-        // Evita error si el rol no existe por orden de seeders
+        // 3️⃣ FINALMENTE asignar rol
         if (!$user->hasRole('Admin')) {
             $user->assignRole('Admin');
         }
-
 
 
     }
