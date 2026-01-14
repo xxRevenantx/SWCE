@@ -15,12 +15,28 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
+        $email = env('DEFAULT_ADMIN_EMAIL', 'swce@gmail.com');
+        $password = env('DEFAULT_ADMIN_PASSWORD', '12345678');
+
+        $user = User::updateOrCreate(
+            ['email' => $email],
+            [
+                'username' => 'SWCE',
+                'password' => bcrypt($password),
+                'email_verified_at' => now(), // opcional si usas verificación
+            ]
+        );
+
+        // Evita error si el rol no existe por orden de seeders
+        if (!$user->hasRole('Admin')) {
+            $user->assignRole('Admin');
+        }
 
         $this->call([
             RoleSeeder::class,
             DiaSeeder::class,
                 // CountriesTableSeeder::class,
-            UserSeeder::class,
+                // UserSeeder::class,
             MesSeeder::class,
 
             // Add other seeders here
