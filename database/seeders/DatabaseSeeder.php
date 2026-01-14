@@ -15,6 +15,16 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
+
+        $this->call([
+            RoleSeeder::class,
+            DiaSeeder::class,
+                // CountriesTableSeeder::class,
+            MesSeeder::class,
+
+            // Add other seeders here
+        ]);
+
         $email = env('DEFAULT_ADMIN_EMAIL', 'swce@gmail.com');
         $password = env('DEFAULT_ADMIN_PASSWORD', '12345678');
 
@@ -32,14 +42,6 @@ class DatabaseSeeder extends Seeder
             $user->assignRole('Admin');
         }
 
-        $this->call([
-            RoleSeeder::class,
-            DiaSeeder::class,
-                // CountriesTableSeeder::class,
-            MesSeeder::class,
-
-            // Add other seeders here
-        ]);
 
 
     }
