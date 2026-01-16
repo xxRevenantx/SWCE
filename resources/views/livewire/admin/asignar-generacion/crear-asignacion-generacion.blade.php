@@ -96,34 +96,26 @@
                         <!-- Actions -->
                         <div
                             class="mt-6 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2">
-                            <button type="button" @click="open = false"
-                                class="inline-flex justify-center rounded-xl px-4 py-2.5 border border-neutral-200 dark:border-neutral-700
-                                       bg-white dark:bg-neutral-800 text-neutral-700 dark:text-neutral-100
-                                       hover:bg-neutral-50 dark:hover:bg-neutral-700
-                                       focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-300 dark:focus:ring-offset-neutral-900">
+                            <flux:button variant="primary" type="button" class="cancelar-btn" @click="open=false">
                                 Cancelar
-                            </button>
+                            </flux:button>
 
-                            <flux:button variant="primary" type="submit" class="w-full sm:w-auto cursor-pointer">
+                            <flux:button variant="primary" type="submit"
+                                class="w-full sm:w-auto cursor-pointer guardar-btn">
                                 {{ __('Guardar') }}
                             </flux:button>
                         </div>
                     </div>
 
                     <!-- Loader overlay -->
-                    <div wire:loading.delay wire:target="asignarGeneracion"
-                        class="pointer-events-none absolute inset-0 grid place-items-center bg-white/60 dark:bg-neutral-900/60">
-                        <div
-                            class="flex items-center gap-3 rounded-xl bg-white/90 dark:bg-neutral-900/90 px-4 py-3 ring-1 ring-gray-200 dark:ring-neutral-700 shadow">
-                            <svg class="h-5 w-5 animate-spin text-blue-600 dark:text-blue-400" viewBox="0 0 24 24"
-                                fill="none">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
-                                    stroke-width="4" />
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-                            </svg>
-                            <span class="text-sm font-medium text-gray-700 dark:text-gray-200">Guardando
-                                asignación…</span>
-                        </div>
+                    <div class="absolute inset-0 rounded-2xl bg-white/70 dark:bg-neutral-900/60 backdrop-blur-[2px] flex items-center justify-center z-10"
+                        wire:loading wire:target="asignarGeneracion">
+                        <span
+                            class="inline-flex items-center gap-3 px-4 py-2 rounded-xl ring-1 ring-neutral-200 dark:ring-neutral-700 bg-white dark:bg-neutral-800 shadow">
+                            <span
+                                class="w-6 h-6 rounded-full border-2 border-neutral-300 dark:border-neutral-600 border-t-transparent animate-spin"></span>
+                            <span class="text-sm font-medium text-neutral-800 dark:text-neutral-100">Procesando…</span>
+                        </span>
                     </div>
                 </div>
             </form>
