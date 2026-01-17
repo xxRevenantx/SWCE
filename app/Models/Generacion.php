@@ -18,4 +18,11 @@ class Generacion extends Model
     ];
 
 
+    // RELACION CON ASIGNAR GENERACIONES
+    public function asignarGeneraciones()
+    {
+        return $this->hasMany(AsignarGeneracion::class);
+    }
+
+
 }

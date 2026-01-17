@@ -17,4 +17,10 @@ class Licenciatura extends Model
         'nombre_corto',
         'logo'
     ];
+
+    // RELACION CON ASIGNAR GENERACIONES
+    public function asignarGeneraciones()
+    {
+        return $this->hasMany(AsignarGeneracion::class);
+    }
 }

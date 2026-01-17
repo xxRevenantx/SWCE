@@ -34,7 +34,6 @@ class CrearAsignacionGeneracion extends Component
             'licenciatura_id.required' => 'La licenciatura es obligatoria.',
             'licenciatura_id.exists' => 'La licenciatura seleccionada no es válida.',
             'generacion_id.required' => 'La generación es obligatoria.',
-            'generacion_id.required' => 'La generación es obligatoria.',
             'generacion_id.exists' => 'La generación seleccionada no es válida.',
         ]);
 
