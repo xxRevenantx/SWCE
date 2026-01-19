@@ -19,8 +19,8 @@ class CrearAsignacionGeneracion extends Component
 
     public function mount()
     {
-        $this->licenciaturas = Licenciatura::all();
-        $this->generaciones = Generacion::all();
+        $this->licenciaturas = Licenciatura::orderBy('id', 'desc')->get();
+        $this->generaciones = Generacion::where('status', 'true')->get();
     }
 
 
