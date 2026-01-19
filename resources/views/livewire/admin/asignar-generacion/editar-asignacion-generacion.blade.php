@@ -33,7 +33,7 @@
                 <p class="text-sm text-neutral-600 dark:text-neutral-400">
                     <span class="inline-flex items-center gap-2">
 
-                        <flux:badge color="indigo">{{ $asignacionId }}</flux:badge>
+                        <flux:badge color="indigo">{{ $nombreGeneracion }}</flux:badge>
                     </span>
                 </p>
             </div>

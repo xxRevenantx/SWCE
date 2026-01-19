@@ -16,6 +16,7 @@ class EditarAsignacionGeneracion extends Component
     public $open = false;
 
 
+    public $nombreGeneracion;
 
 
 
@@ -27,6 +28,9 @@ class EditarAsignacionGeneracion extends Component
         $this->licenciatura_id = $asignacion->licenciatura_id;
         $this->generacion_id = $asignacion->generacion_id;
         $this->open = true;
+
+
+        $this->nombreGeneracion = Generacion::find($this->generacion_id)->generacion;
 
 
 
@@ -78,7 +82,6 @@ class EditarAsignacionGeneracion extends Component
 
             // 👉 Avisamos al front que debe cerrar el modal
             $this->dispatch('cerrar-modal-editar');
-
         }
     }
     public function cerrarModal()
