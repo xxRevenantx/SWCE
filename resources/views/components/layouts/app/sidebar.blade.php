@@ -250,6 +250,195 @@
 
     {{ $slot }}
 
+    @once
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+        <script>
+            document.addEventListener('alpine:init', () => {
+
+                Alpine.data('graficaAlumnos', (payload = null) => ({
+                    loading: true,
+                    chart: null,
+                    payload,
+
+                    init() {
+                        this.safeInit();
+                    },
+
+                    safeInit() {
+                        this.loading = true;
+
+                        this.$nextTick(() => {
+                            requestAnimationFrame(() => {
+                                if (!window.Chart || !this.$refs.canvas) {
+                                    setTimeout(() => this.safeInit(), 120);
+                                    return;
+                                }
+                                this.crearGrafica();
+                            });
+                        });
+                    },
+
+                    destruir() {
+                        try {
+                            if (this.chart) {
+                                this.chart.destroy();
+                                this.chart = null;
+                            }
+                            if (window.Chart && this.$refs.canvas) {
+                                const existing = Chart.getChart(this.$refs.canvas);
+                                if (existing) existing.destroy();
+                            }
+                        } catch (e) {}
+                    },
+
+                    crearGrafica() {
+                        const canvas = this.$refs.canvas;
+                        if (!canvas) {
+                            this.loading = false;
+                            return;
+                        }
+
+                        const ctx = canvas.getContext('2d');
+                        if (!ctx) {
+                            this.loading = false;
+                            return;
+                        }
+
+                        this.destruir();
+
+                        // ✅ DATOS FICTICIOS (DEFAULT)
+                        const fake = {
+                            labels: [
+                                'Nutrición',
+                                'Administración Empresarial',
+                                'Criminología',
+                                'Ciencias de la Educación',
+                                'Ciencias Políticas y Administración Pública',
+                                'Cultura Física y Deportes'
+                            ],
+                            dataHombres: [45, 32, 28, 38, 52, 25],
+                            dataMujeres: [35, 28, 42, 45, 48, 38],
+                            dataHombresBajas: [5, 3, 4, 6, 7, 2],
+                            dataMujeresBajas: [3, 2, 5, 4, 6, 3],
+                        };
+
+                        const labels = (this.payload?.labels?.length ? this.payload.labels : fake.labels);
+
+                        // ✅ Normaliza: mismo largo que labels y todo a Number
+                        const norm = (arr) => Array.from({
+                            length: labels.length
+                        }, (_, i) => {
+                            const v = arr?.[i];
+                            const n = Number(v);
+                            return Number.isFinite(n) ? n : 0;
+                        });
+
+                        const dataHombres = norm(this.payload?.dataHombres?.length ? this.payload
+                            .dataHombres : fake.dataHombres);
+                        const dataMujeres = norm(this.payload?.dataMujeres?.length ? this.payload
+                            .dataMujeres : fake.dataMujeres);
+                        const dataHombresBajas = norm(this.payload?.dataHombresBajas?.length ? this.payload
+                            .dataHombresBajas : fake.dataHombresBajas);
+                        const dataMujeresBajas = norm(this.payload?.dataMujeresBajas?.length ? this.payload
+                            .dataMujeresBajas : fake.dataMujeresBajas);
+
+                        this.chart = new Chart(ctx, {
+                            type: 'bar',
+                            data: {
+                                labels,
+                                datasets: [{
+                                        label: 'Activos Hombres',
+                                        data: dataHombres,
+                                        backgroundColor: '#3B82F6',
+                                        borderColor: '#2563EB',
+                                        borderWidth: 1
+                                    },
+                                    {
+                                        label: 'Activos Mujeres',
+                                        data: dataMujeres,
+                                        backgroundColor: '#60A5FA',
+                                        borderColor: '#3B82F6',
+                                        borderWidth: 1
+                                    },
+                                    {
+                                        label: 'Bajas Hombres',
+                                        data: dataHombresBajas,
+                                        backgroundColor: '#F87171',
+                                        borderColor: '#EF4444',
+                                        borderWidth: 1
+                                    },
+                                    {
+                                        label: 'Bajas Mujeres',
+                                        data: dataMujeresBajas,
+                                        backgroundColor: '#FCA5A5',
+                                        borderColor: '#FB7185',
+                                        borderWidth: 1
+                                    },
+                                ]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                animation: false, // ✅ ayuda en SPA/navigate
+                                interaction: {
+                                    mode: 'index',
+                                    intersect: false
+                                },
+                                plugins: {
+                                    legend: {
+                                        position: 'bottom',
+                                        labels: {
+                                            boxWidth: 12,
+                                            usePointStyle: true
+                                        }
+                                    },
+                                    tooltip: {
+                                        callbacks: {
+                                            label: (c) => `${c.dataset.label}: ${c.parsed.y ?? 0}`
+                                        }
+                                    }
+                                },
+                                scales: {
+                                    x: {
+                                        stacked: true
+                                    },
+                                    y: {
+                                        stacked: true,
+                                        beginAtZero: true
+                                    }
+                                }
+                            }
+                        });
+
+                        // ✅ Forzar repaint (clave cuando entra por wire:navigate)
+                        setTimeout(() => {
+                            try {
+                                this.chart.resize();
+                                this.chart.update();
+                            } catch (e) {}
+                        }, 80);
+
+                        this.loading = false;
+                    }
+                }));
+
+                // ✅ IMPORTANTÍSIMO: al navegar con wire:navigate
+                document.addEventListener('livewire:navigated', () => {
+                    document.querySelectorAll('[data-chart="alumnos-lic"]').forEach((el) => {
+                        if (el._x_dataStack && el._x_dataStack[0]) {
+                            try {
+                                el._x_dataStack[0].safeInit();
+                            } catch (e) {}
+                        }
+                    });
+                });
+            });
+        </script>
+
+    @endonce
+
+
     @fluxScripts
 </body>
 
