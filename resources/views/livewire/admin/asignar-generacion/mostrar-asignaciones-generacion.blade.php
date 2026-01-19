@@ -9,7 +9,7 @@
             cancelButtonColor: '#EF4444',
             cancelButtonText: 'Cancelar',
             confirmButtonText: 'Sí, eliminar'
-        }).then((r) => r.isConfirmed && @this.call('eliminarGeneracion', id))
+        }).then((r) => r.isConfirmed && @this.call('eliminarAsignacion', id))
     },
 }" class="space-y-5">
     <!-- Encabezado -->
@@ -69,6 +69,7 @@
                             <tr>
 
                                 <th class="px-4 py-3 text-center font-semibold">#</th>
+                                <th class="px-4 py-3 text-center font-semibold">Licenciatura</th>
                                 <th class="px-4 py-3 text-center font-semibold">Generacion</th>
                                 <th class="px-4 py-3 text-center font-semibold">Status</th>
                                 <th class="px-4 py-3 text-center font-semibold">Acciones</th>
@@ -76,47 +77,102 @@
                         </thead>
 
                         <tbody class="divide-y divide-gray-100 dark:divide-neutral-800">
-                            @forelse($asignaciones as $key => $asignacion)
-                                <tr class="transition-colors hover:bg-gray-50/70 dark:hover:bg-neutral-800/50 }}">
+                            @php
+                                // Agrupa SOLO los registros de la página actual
+                                $grupos = $asignaciones->getCollection()->groupBy('licenciatura_id');
 
-                                    <td class="px-4 py-3 text-center text-gray-800 dark:text-gray-200">
-                                        {{ $key + 1 }}</td>
-                                    <td class="px-4 py-3 text-center text-gray-900 dark:text-white">
-                                        {{ $asignacion->generacion }}</td>
-                                    <td class="px-4 py-3 text-center text-gray-900 dark:text-white">
-                                        @if ($asignacion->status === 'true')
-                                            <x-badge>Activo</x-badge>
-                                        @else
-                                            <x-badge color="red">Inactivo</x-badge>
-                                        @endif
+                                // contador consecutivo por página
+                                $i = ($asignaciones->currentPage() - 1) * $asignaciones->perPage();
+                            @endphp
 
-                                    </td>
+                            @forelse($grupos as $licId => $items)
+                                @php
+                                    $licNombre = optional($items->first()->licenciatura)->nombre ?? 'Sin licenciatura';
+                                @endphp
 
-                                    <td class="px-4 py-3">
-                                        <div class="flex items-center justify-center gap-2">
+                                {{-- Encabezado del grupo --}}
+                                {{-- Encabezado del grupo (Licenciatura / Nivel) --}}
+                                <tr class="bg-gradient-to-r from-indigo-600 via-sky-600 to-emerald-600">
+                                    <td colspan="5" class="px-4 py-3">
+                                        <div class="flex items-center justify-between">
+                                            <div class="flex items-center gap-3">
+                                                <span
+                                                    class="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-white/15 ring-1 ring-white/25">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white"
+                                                        viewBox="0 0 24 24" fill="currentColor">
+                                                        <path
+                                                            d="M12 2 2 7l10 5 10-5-10-5Zm0 7L2 4v13l10 5 10-5V4l-10 5Z" />
+                                                    </svg>
+                                                </span>
 
+                                                <div>
+                                                    <div class="font-semibold text-white drop-shadow">
+                                                        {{ $licNombre }}
+                                                    </div>
+                                                    <div class="text-xs text-white/80">
+                                                        Agrupado por licenciatura
+                                                    </div>
+                                                </div>
+                                            </div>
 
-                                            <flux:button variant="primary"
-                                                class="cursor-pointer bg-amber-500 hover:bg-amber-600 text-white"
-                                                @click="$dispatch('abrir-modal-editar');
-                                                                Livewire.dispatch('editarModal', { id: {{ $asignacion->id }} });
-                                                            ">
-                                                <flux:icon.square-pen class="w-3.5 h-3.5" />
-                                                <!-- ícono -->
-                                            </flux:button>
-
-                                            <flux:button variant="danger"
-                                                class="cursor-pointer bg-rose-600 hover:bg-rose-700 text-white p-1"
-                                                @click="destroyGeneracion({{ $asignacion->id }}, '{{ $asignacion->generacion }}')">
-                                                <flux:icon.trash-2 class="w-3.5 h-3.5" />
-                                            </flux:button>
-
+                                            <div
+                                                class="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold text-white ring-1 ring-white/25">
+                                                <span class="h-2 w-2 rounded-full bg-white/90"></span>
+                                                {{ $items->count() }} asignación(es)
+                                            </div>
                                         </div>
                                     </td>
                                 </tr>
+
+
+                                {{-- Filas del grupo --}}
+                                @foreach ($items as $asignacion)
+                                    @php $i++; @endphp
+
+                                    <tr class="transition-colors hover:bg-gray-50/70 dark:hover:bg-neutral-800/50">
+                                        <td class="px-4 py-3 text-center text-gray-800 dark:text-gray-200">
+                                            {{ $i }}
+                                        </td>
+
+                                        <td class="px-4 py-3 text-center text-gray-900 dark:text-white">
+                                            {{ $asignacion->licenciatura->nombre }}
+                                        </td>
+
+                                        <td class="px-4 py-3 text-center text-gray-900 dark:text-white">
+                                            {{ $asignacion->generacion->generacion }}
+                                        </td>
+
+                                        <td class="px-4 py-3 text-center text-gray-900 dark:text-white">
+
+                                            @if ($asignacion->generacion->status === 'true')
+                                                <x-badge>Activo</x-badge>
+                                            @else
+                                                <x-badge color="red">Inactivo</x-badge>
+                                            @endif
+                                        </td>
+
+                                        <td class="px-4 py-3">
+                                            <div class="flex items-center justify-center gap-2">
+                                                <flux:button variant="primary"
+                                                    class="cursor-pointer bg-amber-500 hover:bg-amber-600 text-white"
+                                                    @click="$dispatch('abrir-modal-editar');
+                                                            Livewire.dispatch('editarModal', { id: {{ $asignacion->id }} });
+                                                        ">
+                                                    <flux:icon.square-pen class="w-3.5 h-3.5" />
+                                                </flux:button>
+
+                                                <flux:button variant="danger"
+                                                    class="cursor-pointer bg-rose-600 hover:bg-rose-700 text-white p-1"
+                                                    @click="destroyGeneracion({{ $asignacion->id }}, '{{ $asignacion->generacion->generacion }}')">
+                                                    <flux:icon.trash-2 class="w-3.5 h-3.5" />
+                                                </flux:button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endforeach
                             @empty
                                 <tr>
-                                    <td colspan="6" class="px-6 py-10 text-center text-gray-500 dark:text-gray-400">
+                                    <td colspan="5" class="px-6 py-10 text-center text-gray-500 dark:text-gray-400">
                                         <div class="mx-auto w-full max-w-md">
                                             <div
                                                 class="rounded-2xl border border-dashed border-gray-300 dark:border-neutral-700 p-6">
@@ -129,6 +185,7 @@
                                 </tr>
                             @endforelse
                         </tbody>
+
                     </table>
                 </div>
             </div>

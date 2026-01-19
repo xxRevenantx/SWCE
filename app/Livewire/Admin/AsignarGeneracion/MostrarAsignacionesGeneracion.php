@@ -5,6 +5,7 @@ namespace App\Livewire\Admin\AsignarGeneracion;
 use App\Models\AsignarGeneracion;
 use App\Models\Generacion;
 use App\Models\Licenciatura;
+use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -39,7 +40,7 @@ class MostrarAsignacionesGeneracion extends Component
 
     public function getAsignacionesProperty()
     {
-        $query = AsignarGeneracion::with(['licenciatura', 'modalidad', 'generacion']);
+        $query = AsignarGeneracion::with(['licenciatura', 'generacion']);
 
         if ($this->filtrar_licenciatura) {
             $query->where('licenciatura_id', $this->filtrar_licenciatura);
@@ -51,10 +52,6 @@ class MostrarAsignacionesGeneracion extends Component
             $this->search = '';
         }
 
-        if ($this->filtrar_modalidad) {
-            $query->where('modalidad_id', $this->filtrar_modalidad);
-            $this->search = '';
-        }
 
         if ($this->filtrar_activa !== '') {
             $query->whereHas('generacion', function ($q) {
@@ -75,7 +72,6 @@ class MostrarAsignacionesGeneracion extends Component
         }
 
         return $query
-            ->orderBy($this->sortField, $this->sortDirection)
             ->paginate(10);
     }
 
@@ -164,7 +160,7 @@ class MostrarAsignacionesGeneracion extends Component
     }
 
 
-
+    #[On('refreshAsignacion')]
     public function render()
     {
         $licenciaturas = Licenciatura::all();
