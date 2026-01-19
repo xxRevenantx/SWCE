@@ -200,5 +200,5 @@
 
 
     <!-- Modal editar -->
-    {{-- <livewire:admin.generacion.editar-generacion /> --}}
+    <livewire:admin.asignar-generacion.editar-asignacion-generacion />
 </div>
