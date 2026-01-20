@@ -191,13 +191,45 @@
 
     <div x-data x-init="$nextTick(() => renderGraficaAlumnos())"
         class="bg-white rounded-2xl p-6 shadow border border-neutral-200 dark:bg-neutral-800 dark:border-neutral-700 mt-2">
-        <h2 class="text-xl sm:text-2xl font-bold mb-4 text-neutral-800 dark:text-white">
-            Comparativa por Licenciatura
-        </h2>
+
+        <!-- Header: Título + Botón Recargar -->
+        <div class="flex items-center justify-between gap-3 mb-4">
+            <h2 class="text-xl sm:text-2xl font-bold text-neutral-800 dark:text-white">
+                Comparativa por Licenciatura
+            </h2>
+
+            <!-- Botón recargar -->
+            <button type="button" onclick="window.location.reload()"
+                class="group relative inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold
+                   text-white shadow-lg shadow-slate-950/10
+                   bg-gradient-to-r from-indigo-600 via-blue-600 to-sky-500
+                   hover:brightness-110 active:scale-[0.98]
+                   focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-400
+                   dark:focus:ring-offset-neutral-900">
+                <!-- shine -->
+                <span class="pointer-events-none absolute inset-0 overflow-hidden rounded-xl">
+                    <span
+                        class="absolute -left-10 top-0 h-full w-10 rotate-12 bg-white/25 blur-sm
+                           transition-all duration-500 group-hover:left-[110%]"></span>
+                </span>
+
+                <!-- icon recargar -->
+                <svg xmlns="http://www.w3.org/2000/svg"
+                    class="h-4 w-4 opacity-95 group-hover:rotate-180 transition-transform duration-500"
+                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 12a9 9 0 1 1-2.64-6.36" />
+                    <path d="M21 3v6h-6" />
+                </svg>
+
+                <span>Recargar</span>
+            </button>
+        </div>
+
         <div class="relative h-[360px] sm:h-[420px] lg:h-[520px]">
             <canvas id="graficaAlumnos" class="!w-full !h-full"></canvas>
         </div>
     </div>
+
 
 
     @once
