@@ -189,27 +189,107 @@
 
     </div>
 
-    <div wire:ignore data-chart="alumnos-lic" x-data="graficaAlumnos()" x-init="init()"
-        class="relative bg-white rounded-2xl p-6 shadow border border-neutral-200 dark:bg-neutral-800 dark:border-neutral-700 mt-2">
-        <div x-show="loading" x-transition.opacity
-            class="absolute inset-0 z-[70] flex items-center justify-center
-               bg-white/10 dark:bg-neutral-950/30 backdrop-blur-md">
-            <div class="flex flex-col items-center gap-3">
-                <div class="h-12 w-12 rounded-full border-4 border-sky-500 border-t-transparent animate-spin"></div>
-                <p class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
-                    Cargando gráfica de alumnos...
-                </p>
-            </div>
-        </div>
-
-        <h2 class="text-xl sm:text-2xl font-bold text-neutral-800 dark:text-white mb-4">
-            Gráfica de Alumnos por Licenciatura
+    <div x-data x-init="$nextTick(() => renderGraficaAlumnos())"
+        class="bg-white rounded-2xl p-6 shadow border border-neutral-200 dark:bg-neutral-800 dark:border-neutral-700 mt-2">
+        <h2 class="text-xl sm:text-2xl font-bold mb-4 text-neutral-800 dark:text-white">
+            Comparativa por Licenciatura
         </h2>
-
         <div class="relative h-[360px] sm:h-[420px] lg:h-[520px]">
-            <canvas x-ref="canvas" class="!w-full !h-full"></canvas>
+            <canvas id="graficaAlumnos" class="!w-full !h-full"></canvas>
         </div>
     </div>
+
+
+    @once
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+        <script>
+            function renderGraficaAlumnos() {
+                const ctx = document.getElementById('graficaAlumnos');
+                if (!ctx) return;
+
+                if (window.graficaAlumnosInstance) {
+                    window.graficaAlumnosInstance.destroy();
+                }
+
+                const labels = @js($licenciaturas->pluck('nombre'));
+                const dataHombres = @js(collect($resumenPorLicenciatura ?? [])->pluck('hombres'));
+                const dataMujeres = @js(collect($resumenPorLicenciatura ?? [])->pluck('mujeres'));
+                const dataHombresBajas = @js(collect($resumenPorLicenciaturaBaja ?? [])->pluck('hombres'));
+                const dataMujeresBajas = @js(collect($resumenPorLicenciaturaBaja ?? [])->pluck('mujeres'));
+
+
+                window.graficaAlumnosInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels,
+                        datasets: [{
+                                label: 'Activos Hombres',
+                                data: dataHombres,
+                                backgroundColor: '#3B82F6'
+                            },
+                            {
+                                label: 'Activos Mujeres',
+                                data: dataMujeres,
+                                backgroundColor: '#60A5FA'
+                            },
+                            {
+                                label: 'Bajas Hombres',
+                                data: dataHombresBajas,
+                                backgroundColor: '#F87171'
+                            },
+                            {
+                                label: 'Bajas Mujeres',
+                                data: dataMujeresBajas,
+                                backgroundColor: '#FCA5A5'
+                            },
+
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: {
+                            mode: 'index',
+                            intersect: false
+                        },
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    boxWidth: 12,
+                                    usePointStyle: true
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y ?? 0}`
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                stacked: true,
+                                ticks: {
+                                    maxRotation: 0,
+                                    autoSkip: true
+                                }
+                            },
+                            y: {
+                                stacked: true,
+                                beginAtZero: true,
+                                ticks: {
+                                    precision: 0
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        </script>
+
+    @endonce
+
 
 
 
