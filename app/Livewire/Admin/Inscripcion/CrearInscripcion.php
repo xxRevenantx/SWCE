@@ -24,7 +24,7 @@ class CrearInscripcion extends Component
     public ?int $estado_nacimiento = null; // state_id
     public ?int $lugar_nacimiento  = null; // city_id
     public ?int    $user_id   = null;
-    public ?string $CURP      = null;
+    public ?string $curp      = null;
     public ?string $matricula = null;
     public ?string $folio     = null;
     public ?string $nombre     = null;
@@ -35,14 +35,10 @@ class CrearInscripcion extends Component
 
 
 
-    /**
-     * Paso del wizard -> campos que valida/contiene.
-     * Agrega aquí los campos de otros pasos si también los validas en este componente.
-     */
     protected array $stepMap = [
         'generales' => [
             'user_id',
-            'CURP',
+            'curp',
             'matricula',
             'folio',
             'nombre',
@@ -115,7 +111,7 @@ class CrearInscripcion extends Component
     {
         return [
             'user_id'            => 'required|exists:users,id',
-            'CURP'               => 'required|string|max:18',
+            'curp'               => 'required|string|max:18',
             'matricula'          => 'nullable|string|max:10',
             'folio'              => 'nullable|string|max:10',
             'nombre'             => 'required|string|max:255',
@@ -129,6 +125,25 @@ class CrearInscripcion extends Component
         ];
     }
 
+    // MENSAJES DE ERROR PERSONALIZADOS
+    protected function messages(): array
+    {
+        return [
+            'user_id.required'   => 'El campo Estudiante es obligatorio.',
+            'user_id.exists'     => 'El Estudiante seleccionado no es válido.',
+            'curp.required'      => 'El campo CURP es obligatorio.',
+            'curp.max'           => 'El campo CURP no debe exceder los 18 caracteres.',
+            'nombre.required'    => 'El campo Nombre es obligatorio.',
+            'nombre.max'         => 'El campo Nombre no debe exceder los 255 caracteres.',
+            'fecha_nacimiento.required' => 'El campo Fecha de Nacimiento es obligatorio.',
+            'fecha_nacimiento.date'     => 'El campo Fecha de Nacimiento no es una fecha válida.',
+            'sexo.required'      => 'El campo Sexo es obligatorio.',
+            'sexo.max'           => 'El campo Sexo no debe exceder 1 carácter.',
+        ];
+    }
+
+
+
     public function guardarInscripcion(): void
     {
         try {
@@ -136,7 +151,7 @@ class CrearInscripcion extends Component
 
             Inscripcion::create([
                 'user_id'          => $this->user_id,
-                'CURP'             => $this->CURP,
+                'curp'             => $this->curp,
                 'matricula'        => $this->matricula,
                 'folio'            => $this->folio,
                 'nombre'            => $this->nombre,
@@ -151,7 +166,7 @@ class CrearInscripcion extends Component
 
             $this->reset([
                 'user_id',
-                'CURP',
+                'curp',
                 'matricula',
                 'folio',
                 'nombre',

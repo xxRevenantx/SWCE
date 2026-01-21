@@ -13,7 +13,43 @@ class Inscripcion extends Model
     use HasFactory;
 
     protected $fillable = [
-        //
+        // generales
+        'user_id',
+        'CURP',
+        'matricula',
+        'folio',
+        'nombre',
+        'apellido_paterno',
+        'apellido_materno',
+        'fecha_nacimiento',
+        'sexo',
+        'pais_nacimiento',
+        'estado_nacimiento',
+        'lugar_nacimiento',
+
+        // contacto
+        'calle',
+        'num_exterior',
+        'num_interior',
+        'colonia',
+        'codigo_postal',
+        'municipio_residencia',
+        'estado_residencia_id',
+        'ciudad_residencia_id',
+        'celular',
+        'telefono_fijo',
+        'correo_electronico',
+        'tutor',
+
+        // escolares
+        'bachillerato_procedente',
+        'licenciatura_id',
+        'generacion_id',
+        'cuatrimestre_id',
+
+        // otros
+        'foto',
+        'status',
     ];
     // RELACIONES
 
@@ -39,6 +75,4 @@ class Inscripcion extends Model
     {
         return $this->belongsTo(State::class);
     }
-
-
 }
