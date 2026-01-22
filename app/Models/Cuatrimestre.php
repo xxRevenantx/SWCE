@@ -22,4 +22,9 @@ class Cuatrimestre extends Model
         return $this->belongsTo(Mes::class);
     }
 
+    public function inscripciones()
+    {
+        return $this->hasMany(Inscripcion::class);
+    }
+
 }

@@ -13,66 +13,33 @@ class Inscripcion extends Model
     use HasFactory;
 
     protected $fillable = [
-        // generales
-        'user_id',
-        'CURP',
-        'matricula',
-        'folio',
-        'nombre',
-        'apellido_paterno',
-        'apellido_materno',
-        'fecha_nacimiento',
-        'sexo',
-        'pais_nacimiento',
-        'estado_nacimiento',
-        'lugar_nacimiento',
-
-        // contacto
-        'calle',
-        'num_exterior',
-        'num_interior',
-        'colonia',
-        'codigo_postal',
-        'municipio_residencia',
-        'estado_residencia_id',
-        'ciudad_residencia_id',
-        'celular',
-        'telefono_fijo',
-        'correo_electronico',
-        'tutor',
-
-        // escolares
-        'bachillerato_procedente',
+        'alumno_id',
         'licenciatura_id',
         'generacion_id',
         'cuatrimestre_id',
-
-        // otros
-        'foto',
         'status',
+        'fecha_inscripcion',
     ];
+
     // RELACIONES
-
-    public function user()
+    public function alumno()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(Alumno::class);
+    }
+    public function licenciatura()
+    {
+        return $this->belongsTo(Licenciatura::class);
+    }
+    public function generacion()
+    {
+        return $this->belongsTo(Generacion::class);
     }
 
-    //COUNTRIES
-    public function country()
+    public function cuatrimestre()
     {
-        return $this->belongsTo(Country::class);
+        return $this->belongsTo(Cuatrimestre::class);
     }
 
-    // CITIES
-    public function city()
-    {
-        return $this->belongsTo(City::class);
-    }
 
-    // STATES
-    public function state()
-    {
-        return $this->belongsTo(State::class);
-    }
+
 }

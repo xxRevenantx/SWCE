@@ -8,14 +8,24 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Country extends Model
 {
-     use HasFactory;
+    use HasFactory;
 
     protected $table = 'countries';
 
     protected $fillable = [
-        'name', 'iso2', 'iso3', 'numeric_code', 'phonecode',
-        'capital', 'currency', 'currency_name', 'currency_symbol',
-        'tld', 'native', 'region', 'subregion',
+        'name',
+        'iso2',
+        'iso3',
+        'numeric_code',
+        'phonecode',
+        'capital',
+        'currency',
+        'currency_name',
+        'currency_symbol',
+        'tld',
+        'native',
+        'region',
+        'subregion',
     ];
 
     // Relación con estados y ciudades (por ID)
@@ -27,5 +37,11 @@ class Country extends Model
     public function city()
     {
         return $this->hasMany(City::class, 'country_id');
+    }
+
+    // Relación con DatosContacto
+    public function datosContacto()
+    {
+        return $this->hasMany(DatosContacto::class, 'pais_id');
     }
 }

@@ -23,4 +23,10 @@ class Licenciatura extends Model
     {
         return $this->hasMany(AsignarGeneracion::class);
     }
+
+    // RELACION CON INSCRIPCIONES
+    public function inscripciones()
+    {
+        return $this->hasMany(Inscripcion::class);
+    }
 }

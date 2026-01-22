@@ -7,12 +7,14 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class City extends Model
 {
-     use HasFactory;
+    use HasFactory;
 
     protected $table = 'cities';
 
     protected $fillable = [
-        'name', 'state_id', 'country_id',
+        'name',
+        'state_id',
+        'country_id',
         // latitude, longitude, is_active, etc.
     ];
 
@@ -25,4 +27,12 @@ class City extends Model
     {
         return $this->belongsTo(Country::class, 'country_id');
     }
+
+    // Relacion con DatosContacto
+    public function datosContactos()
+    {
+        return $this->hasMany(DatosContacto::class, 'ciudad_id');
+    }
+
+
 }
