@@ -28,8 +28,6 @@ return new class extends Migration {
                 ['alumno_id', 'licenciatura_id', 'generacion_id', 'cuatrimestre_id'],
                 'inscripciones_unique_alumno_lic_gener_cuat'
             );
-
-
         });
     }
 
