@@ -22,6 +22,10 @@ return new class extends Migration {
             $table->enum('sexo', ['M', 'F']);
             $table->timestamps();
 
+
+            $table->unique('curp');
+            $table->unique('user_id');
+
         });
     }
 

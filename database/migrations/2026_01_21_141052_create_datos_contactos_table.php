@@ -27,11 +27,17 @@ return new class extends Migration {
             $table->unsignedBigInteger('estado_id')->nullable();
             $table->unsignedBigInteger('pais_id')->nullable();
 
-            $table->foreign('ciudad_id')->references('id')->on('cities')->onDelete('cascade');
-            $table->foreign('estado_id')->references('id')->on('states')->onDelete('cascade');
-            $table->foreign('pais_id')->references('id')->on('countries')->onDelete('cascade');
+            $table->foreign('ciudad_id')->references('id')->on('cities')->nullOnDelete();
+            $table->foreign('estado_id')->references('id')->on('states')->nullOnDelete();
+            $table->foreign('pais_id')->references('id')->on('countries')->nullOnDelete();
+
 
             $table->timestamps();
+
+
+            $table->unique('alumno_id');
+
+
         });
     }
 

@@ -22,10 +22,14 @@ return new class extends Migration {
             $table->foreign('cuatrimestre_id')->references('id')->on('cuatrimestres')->onDelete('cascade');
 
 
-
-
-
             $table->timestamps();
+
+            $table->unique(
+                ['alumno_id', 'licenciatura_id', 'generacion_id', 'cuatrimestre_id'],
+                'inscripciones_unique_alumno_lic_gener_cuat'
+            );
+
+
         });
     }
 
