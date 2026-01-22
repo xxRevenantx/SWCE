@@ -160,7 +160,7 @@ class CrearInscripcion extends Component
             'user_id' => 'required|exists:users,id',
             'curp' => 'required|string|size:18|unique:alumnos,curp',
             'nombre' => 'required|string|max:255',
-            'apellido_paterno' => 'nullable|string|max:255',
+            'apellido_paterno' => 'required|string|max:255',
             'apellido_materno' => 'nullable|string|max:255',
             'fecha_nacimiento' => 'required|date',
             'sexo' => 'required|in:M,F',
@@ -170,15 +170,15 @@ class CrearInscripcion extends Component
             'folio' => 'nullable|string|max:255|unique:datos_escolares,folio',
 
             // datos_contactos (en tu migración son obligatorios)
-            'calle' => 'required|string|max:255',
-            'colonia' => 'required|string|max:255',
-            'municipio' => 'required|string|max:255',
-            'codigo_postal' => 'required|string|max:10',
-            'celular' => 'required|string|max:20',
+            'calle' => 'nullable|string|max:255',
+            'colonia' => 'nullable|string|max:255',
+            'municipio' => 'nullable|string|max:255',
+            'codigo_postal' => 'nullable|string|max:10',
+            'celular' => 'nullable|string|max:20',
             'telefono' => 'nullable|string|max:20',
             'numero_exterior' => 'nullable|string|max:10',
             'numero_interior' => 'nullable|string|max:10',
-            'bachillerato_procedente' => 'required|string|max:255',
+            'bachillerato_procedente' => 'nullable|string|max:255',
 
             'pais_id' => 'nullable|exists:countries,id',
             'estado_id' => 'nullable|exists:states,id',
@@ -321,7 +321,6 @@ class CrearInscripcion extends Component
             $this->cities = [];
 
             $this->dispatch('inscripcion-creada');
-
         } catch (ValidationException $e) {
             $errorKeys = array_keys($e->validator->errors()->toArray());
             $step = $this->firstErroredStep($errorKeys);

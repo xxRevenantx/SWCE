@@ -13,16 +13,15 @@ return new class extends Migration {
         Schema::create('datos_contactos', function (Blueprint $table) {
             $table->id();
             $table->foreignId('alumno_id')->constrained()->onDelete('cascade');
-            $table->string('calle', 255);
+            $table->string('calle', 255)->nullable();
             $table->string('numero_exterior', 10)->nullable();
             $table->string('numero_interior', 10)->nullable();
-            $table->string('colonia', 255);
-            $table->string('municipio', 255);
-            $table->string('codigo_postal', 10);
-            $table->string('celular', 20);
+            $table->string('colonia', 255)->nullable();
+            $table->string('municipio', 255)->nullable();
+            $table->string('codigo_postal', 10)->nullable();
+            $table->string('celular', 20)->nullable();
             $table->string('telefono', 20)->nullable();
-            $table->string('bachillerato_procedente', 255);
-
+            $table->string('bachillerato_procedente', 255)->nullable();
             $table->unsignedBigInteger('ciudad_id')->nullable();
             $table->unsignedBigInteger('estado_id')->nullable();
             $table->unsignedBigInteger('pais_id')->nullable();
@@ -36,8 +35,6 @@ return new class extends Migration {
 
 
             $table->unique('alumno_id');
-
-
         });
     }
 

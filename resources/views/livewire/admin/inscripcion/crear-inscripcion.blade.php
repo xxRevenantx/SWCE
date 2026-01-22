@@ -136,13 +136,13 @@
                     </flux:field>
 
                     <flux:field>
-                        <flux:label>Apellido paterno</flux:label>
+                        <flux:label badge="Requerido">Apellido paterno</flux:label>
                         <flux:input wire:model="apellido_paterno" placeholder="Opcional" />
                         <flux:error name="apellido_paterno" />
                     </flux:field>
 
                     <flux:field>
-                        <flux:label>Apellido materno</flux:label>
+                        <flux:label badge="Opcional">Apellido materno</flux:label>
                         <flux:input wire:model="apellido_materno" placeholder="Opcional" />
                         <flux:error name="apellido_materno" />
                     </flux:field>
@@ -183,49 +183,49 @@
 
                 <div class="p-4 sm:p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <flux:field>
-                        <flux:label badge="Requerido">Calle</flux:label>
+                        <flux:label badge="Opcional">Calle</flux:label>
                         <flux:input wire:model="calle" placeholder="Calle" />
                         <flux:error name="calle" />
                     </flux:field>
 
                     <flux:field>
-                        <flux:label>Núm. exterior</flux:label>
+                        <flux:label badge="Opcional">Núm. exterior</flux:label>
                         <flux:input wire:model="numero_exterior" placeholder="Opcional" />
                         <flux:error name="numero_exterior" />
                     </flux:field>
 
                     <flux:field>
-                        <flux:label>Núm. interior</flux:label>
+                        <flux:label badge="Opcional">Núm. interior</flux:label>
                         <flux:input wire:model="numero_interior" placeholder="Opcional" />
                         <flux:error name="numero_interior" />
                     </flux:field>
 
                     <flux:field>
-                        <flux:label badge="Requerido">Colonia</flux:label>
+                        <flux:label badge="Opcional">Colonia</flux:label>
                         <flux:input wire:model="colonia" placeholder="Colonia" />
                         <flux:error name="colonia" />
                     </flux:field>
 
                     <flux:field>
-                        <flux:label badge="Requerido">Municipio</flux:label>
+                        <flux:label badge="Opcional">Municipio</flux:label>
                         <flux:input wire:model="municipio" placeholder="Municipio" />
                         <flux:error name="municipio" />
                     </flux:field>
 
                     <flux:field>
-                        <flux:label badge="Requerido">Código postal</flux:label>
+                        <flux:label badge="Opcional">Código postal</flux:label>
                         <flux:input wire:model="codigo_postal" placeholder="CP" />
                         <flux:error name="codigo_postal" />
                     </flux:field>
 
                     <flux:field>
-                        <flux:label badge="Requerido">Celular</flux:label>
+                        <flux:label badge="Opcional">Celular</flux:label>
                         <flux:input wire:model="celular" placeholder="Celular" />
                         <flux:error name="celular" />
                     </flux:field>
 
                     <flux:field>
-                        <flux:label>Teléfono</flux:label>
+                        <flux:label badge="Opcional">Teléfono</flux:label>
                         <flux:input wire:model="telefono" placeholder="Opcional" />
                         <flux:error name="telefono" />
                     </flux:field>
@@ -300,13 +300,13 @@
                     </flux:field>
 
                     <flux:field>
-                        <flux:label>Folio</flux:label>
+                        <flux:label badge="Opcional">Folio</flux:label>
                         <flux:input wire:model="folio" placeholder="Opcional" />
                         <flux:error name="folio" />
                     </flux:field>
 
                     <flux:field class="lg:col-span-2">
-                        <flux:label>Foto</flux:label>
+                        <flux:label badge="Opcional">Foto</flux:label>
                         <input type="file" accept="image/png,image/jpeg"
                             class="block w-full text-sm
                             file:mr-4 file:rounded-lg file:border-0 file:bg-neutral-100 file:px-3 file:py-2 hover:file:bg-neutral-200
