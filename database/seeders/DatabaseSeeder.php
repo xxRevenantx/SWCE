@@ -19,7 +19,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             RoleSeeder::class,
             DiaSeeder::class,
-                // CountriesTableSeeder::class,
+            CountriesTableSeeder::class,
             LicenciaturaSeeder::class,
             MesSeeder::class,
             CuatrimestreSeeder::class,

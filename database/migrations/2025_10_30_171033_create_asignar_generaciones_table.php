@@ -16,6 +16,11 @@ return new class extends Migration {
             $table->unsignedBigInteger('generacion_id');
             $table->integer('orden');
             $table->timestamps();
+
+
+            $table->foreign('licenciatura_id')->references('id')->on('licenciaturas')->onDelete('cascade');
+            $table->foreign('generacion_id')->references('id')->on('generaciones')->onDelete('cascade');
+
         });
     }
 

@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -13,17 +12,16 @@ return new class extends Migration
     {
         Schema::create('alumnos', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->string('curp', 18);
-            $table->string('matricula', 10)->nullable();
-            $table->string('folio', 10)->nullable();
-
             $table->string('nombre', 255);
             $table->string('apellido_paterno', 255)->nullable();
             $table->string('apellido_materno', 255)->nullable();
 
             $table->date('fecha_nacimiento');
-            $table->enum('sexo', ['M', 'F', 'O']);
+            $table->enum('sexo', ['M', 'F']);
             $table->timestamps();
+
         });
     }
 
