@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "85887bf2c836755727f1372f7e58eb36",
+    "content-hash": "d094c32cb91334f6d14d482156702585",
     "packages": [
         {
             "name": "altwaireb/laravel-countries",
@@ -1235,6 +1235,85 @@
                 }
             ],
             "time": "2025-08-22T14:27:06+00:00"
+        },
+        {
+            "name": "laragear/turnstile",
+            "version": "v1.4.4",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Laragear/Turnstile.git",
+                "reference": "bca92a1a15e335afe6d460262c7eacf8f66ec5ff"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Laragear/Turnstile/zipball/bca92a1a15e335afe6d460262c7eacf8f66ec5ff",
+                "reference": "bca92a1a15e335afe6d460262c7eacf8f66ec5ff",
+                "shasum": ""
+            },
+            "require": {
+                "ext-json": "*",
+                "illuminate/container": "11.*|12.*",
+                "illuminate/events": "11.*|12.*",
+                "illuminate/http": "11.*|12.*",
+                "illuminate/routing": "11.*|12.*",
+                "illuminate/session": "11.*|12.*",
+                "illuminate/support": "11.*|12.*",
+                "php": "^8.2"
+            },
+            "require-dev": {
+                "orchestra/testbench": "9.*|10.*"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "aliases": {
+                        "Turnstile": "Laragear\\Turnstile\\Facades\\Turnstile"
+                    },
+                    "providers": [
+                        "Laragear\\Turnstile\\TurnstileServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Laragear\\Turnstile\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Italo Israel Baeza Cabrera",
+                    "email": "darkghosthunter@gmail.com",
+                    "homepage": "https://github.com/sponsors/DarkGhostHunter"
+                }
+            ],
+            "description": "Use Cloudflare's no-CAPTCHA alternative in your Laravel application.",
+            "keywords": [
+                "captcha",
+                "cloudflare",
+                "http2",
+                "http3",
+                "laragear",
+                "turnstile"
+            ],
+            "support": {
+                "issues": "https://github.com/Laragear/Turnstile/issues",
+                "source": "https://github.com/Laragear/Turnstile"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/sponsors/DarkGhostHunter",
+                    "type": "Github Sponsorship"
+                },
+                {
+                    "url": "https://paypal.me/darkghosthunter",
+                    "type": "Paypal"
+                }
+            ],
+            "time": "2025-11-06T22:51:11+00:00"
         },
         {
             "name": "laravel/fortify",

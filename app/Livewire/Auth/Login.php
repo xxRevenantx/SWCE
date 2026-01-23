@@ -25,44 +25,58 @@ class Login extends Component
 
     public bool $remember = false;
 
-    /**
-     * Handle an incoming authentication request.
-     */
+    // Token de Turnstile
+    public ?string $cf_turnstile_response = null;
+
     public function login(): void
     {
-        $this->validate();
+        try {
+            $this->validate([
+                'email' => 'required|string|email',
+                'password' => 'required|string',
+                'cf_turnstile_response' => ['required', 'turnstile'], // ✅ LARAGEAR
+            ], [
+                'cf_turnstile_response.turnstile' => 'Por favor, completa el captcha.',
 
-        $this->ensureIsNotRateLimited();
-
-        $user = $this->validateCredentials();
-
-        if (Features::canManageTwoFactorAuthentication() && $user->hasEnabledTwoFactorAuthentication()) {
-            Session::put([
-                'login.id' => $user->getKey(),
-                'login.remember' => $this->remember,
             ]);
 
-            $this->redirect(route('two-factor.login'), navigate: true);
+            $this->ensureIsNotRateLimited();
 
-            return;
+            $user = $this->validateCredentials();
+
+            if (Features::canManageTwoFactorAuthentication() && $user->hasEnabledTwoFactorAuthentication()) {
+                Session::put([
+                    'login.id' => $user->getKey(),
+                    'login.remember' => $this->remember,
+                ]);
+
+                $this->redirect(route('two-factor.login'), navigate: true);
+                return;
+            }
+
+            Auth::login($user, $this->remember);
+
+            RateLimiter::clear($this->throttleKey());
+            Session::regenerate();
+
+            $this->redirectIntended(default: route('dashboard', absolute: false), navigate: true);
+
+        } catch (ValidationException $e) {
+            // resetear captcha
+            $this->reset('cf_turnstile_response');
+            $this->dispatch('turnstile-reset');
+            throw $e;
         }
-
-        Auth::login($user, $this->remember);
-
-        RateLimiter::clear($this->throttleKey());
-        Session::regenerate();
-
-        $this->redirectIntended(default: route('dashboard', absolute: false), navigate: true);
     }
 
-    /**
-     * Validate the user's credentials.
-     */
     protected function validateCredentials(): User
     {
-        $user = Auth::getProvider()->retrieveByCredentials(['email' => $this->email, 'password' => $this->password]);
+        $user = Auth::getProvider()->retrieveByCredentials([
+            'email' => $this->email,
+            'password' => $this->password,
+        ]);
 
-        if (! $user || ! Auth::getProvider()->validateCredentials($user, ['password' => $this->password])) {
+        if (!$user || !Auth::getProvider()->validateCredentials($user, ['password' => $this->password])) {
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([
@@ -73,12 +87,9 @@ class Login extends Component
         return $user;
     }
 
-    /**
-     * Ensure the authentication request is not rate limited.
-     */
     protected function ensureIsNotRateLimited(): void
     {
-        if (! RateLimiter::tooManyAttempts($this->throttleKey(), 5)) {
+        if (!RateLimiter::tooManyAttempts($this->throttleKey(), 5)) {
             return;
         }
 
@@ -94,11 +105,8 @@ class Login extends Component
         ]);
     }
 
-    /**
-     * Get the authentication rate limiting throttle key.
-     */
     protected function throttleKey(): string
     {
-        return Str::transliterate(Str::lower($this->email).'|'.request()->ip());
+        return Str::transliterate(Str::lower($this->email) . '|' . request()->ip());
     }
 }
