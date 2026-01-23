@@ -36,7 +36,8 @@ class Login extends Component
                 'password' => 'required|string',
                 'cf_turnstile_response' => ['required', 'turnstile'], // ✅ LARAGEAR
             ], [
-                'cf_turnstile_response.turnstile' => 'Por favor, completa el captcha.',
+                'cf_turnstile_response.required' => 'Por favor, verifica que no eres un robot.',
+                'cf_turnstile_response.turnstile' => 'La verificación de seguridad falló. Intenta de nuevo.',
 
             ]);
 
