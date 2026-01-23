@@ -50,8 +50,6 @@
             dark:bg-gradient-to-r dark:from-[#111318] dark:to-[#111318]">
             <div class="px-4 py-4">
                 <h1 class="text-lg font-bold text-neutral-900 dark:text-white">INSCRIPCIÓN DE ESTUDIANTES</h1>
-                <p class="text-sm text-neutral-700 dark:text-neutral-300">Registro completo: Alumno + Contacto +
-                    Escolares + Inscripción</p>
             </div>
 
             {{-- PROGRESS --}}
@@ -107,7 +105,7 @@
                 <div
                     class="w-full rounded-t-2xl border-b border-neutral-200 dark:border-neutral-800
                     bg-gradient-to-r from-sky-500 via-blue-600 to-indigo-600 p-4 text-white">
-                    <h2 class="font-semibold">Datos del alumno (tabla alumnos)</h2>
+                    <h2 class="font-semibold">Datos Generales</h2>
                 </div>
 
                 <div class="p-4 sm:p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -166,7 +164,7 @@
 
                 <div class="flex items-center justify-between gap-3 px-4 sm:px-6 pt-3 pb-5">
                     <flux:button type="button" :disabled="true">Anterior</flux:button>
-                    <flux:button type="button" @click="next()">Siguiente</flux:button>
+                    <flux:button class="guardar-btn" type="button" @click="next()">Siguiente</flux:button>
                 </div>
             </div>
         </section>
@@ -178,7 +176,7 @@
                 <div
                     class="w-full rounded-t-2xl border-b border-neutral-200 dark:border-neutral-800
                     bg-gradient-to-r from-sky-500 via-blue-600 to-indigo-600 p-4 text-white">
-                    <h2 class="font-semibold">Datos de contacto (tabla datos_contactos)</h2>
+                    <h2 class="font-semibold">Datos de contacto</h2>
                 </div>
 
                 <div class="p-4 sm:p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -277,7 +275,7 @@
 
                 <div class="flex items-center justify-between gap-3 px-4 sm:px-6 pt-3 pb-5">
                     <flux:button type="button" @click="prev()">Anterior</flux:button>
-                    <flux:button type="button" @click="next()">Siguiente</flux:button>
+                    <flux:button class="guardar-btn" type="button" @click="next()">Siguiente</flux:button>
                 </div>
             </div>
         </section>
@@ -289,7 +287,7 @@
                 <div
                     class="w-full rounded-t-2xl border-b border-neutral-200 dark:border-neutral-800
                     bg-gradient-to-r from-sky-500 via-blue-600 to-indigo-600 p-4 text-white">
-                    <h2 class="font-semibold">Datos escolares + Inscripción (datos_escolares + inscripciones)</h2>
+                    <h2 class="font-semibold">Datos escolares</h2>
                 </div>
 
                 <div class="p-4 sm:p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -376,7 +374,7 @@
 
                 <div class="flex items-center justify-between gap-3 px-4 sm:px-6 pt-4 pb-5">
                     <flux:button type="button" @click="prev()">Anterior</flux:button>
-                    <flux:button type="button" @click="submit()" wire:loading.attr="disabled"
+                    <flux:button class="guardar-btn" type="button" @click="submit()" wire:loading.attr="disabled"
                         wire:target="guardarInscripcion,foto">
                         <span wire:loading.remove wire:target="guardarInscripcion">Guardar inscripción</span>
                         <span wire:loading wire:target="guardarInscripcion">Guardando…</span>
