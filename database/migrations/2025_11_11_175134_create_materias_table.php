@@ -13,7 +13,17 @@ return new class extends Migration
     {
         Schema::create('materias', function (Blueprint $table) {
             $table->id();
+            $table->string('nombre');
+            $table->string('clave');
+            $table->string('slug')->unique();
+            $table->boolean('calificable')->default(true);
+            $table->unsignedBigInteger('licenciatura_id');
+            $table->unsignedBigInteger('cuatrimestre_id');
             $table->timestamps();
+
+
+            $table->foreign('licenciatura_id')->references('id')->on('licenciaturas')->onDelete('cascade');
+            $table->foreign('cuatrimestre_id')->references('id')->on('cuatrimestres')->onDelete('cascade');
         });
     }
 
