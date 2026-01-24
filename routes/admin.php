@@ -31,7 +31,10 @@ Route::middleware(['auth'])->group(function () {
 
     Route::resource('profesores', ProfesorController::class)->middleware('can:admin.profesores')->names('profesores');
     //MATERIA
-    Route::resource('materias', MateriaController::class)->middleware('can:admin.materias')->names('materias');
+    Route::get('materias', [MateriaController::class, 'materia'])->middleware('can:admin.materias')->name('materias');
+
+    Route::get('asignacion_materias', [MateriaController::class, 'asignacion'])->middleware('can:admin.asignacion_materias')->name('asignacion_materias');
+
 
     //HORARIO
     Route::resource('horarios', HorarioController::class)->middleware('can:admin.horarios')->names('horarios');

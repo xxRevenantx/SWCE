@@ -13,9 +13,14 @@ class MateriaController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function materia()
     {
         return view('admin.materia.index');
+    }
+
+    public function asignacion()
+    {
+        return view('admin.asignar_materia.index');
     }
 
 

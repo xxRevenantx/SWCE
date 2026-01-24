@@ -29,4 +29,10 @@ class Licenciatura extends Model
     {
         return $this->hasMany(Inscripcion::class);
     }
+
+    // RELACION CON MATERIAS
+    public function materias()
+    {
+        return $this->hasMany(Materia::class);
+    }
 }

@@ -113,10 +113,22 @@
                         {{ __('Profesores') }}
                     </flux:navlist.item>
 
-                    <flux:navlist.item class="py-4" icon="book" :href="route('materias.index')"
-                        :current="request()->routeIs('materias.index')" wire:navigate>
-                        {{ __('Materias') }}
-                    </flux:navlist.item>
+                    <flux:navlist class="w-64">
+
+                        <flux:navlist.group icon="user-plus" heading="Materias" expandable>
+                            <flux:navlist.item class="py-4" icon="book" :href="route('materias')"
+                                :current="request()->routeIs('materias')" wire:navigate>
+                                {{ __('Materias') }}
+                            </flux:navlist.item>
+
+                            <flux:navlist.item class="py-4" icon="users-round" :href="route('asignacion_materias')"
+                                :current="request()->routeIs('asignacion_materias')" wire:navigate>
+                                {{ __('Asignaciones') }}
+                            </flux:navlist.item>
+                        </flux:navlist.group>
+                    </flux:navlist>
+
+
 
                     <flux:navlist.item class="py-4" icon="calendar-days" :href="route('horarios.index')"
                         :current="request()->routeIs('horarios.index')" wire:navigate>
@@ -240,7 +252,8 @@
 
                 <form method="POST" action="{{ route('logout') }}" class="w-full">
                     @csrf
-                    <flux:menu.item as="button" type="submit" icon="arrow-right-start-on-rectangle" class="w-full">
+                    <flux:menu.item as="button" type="submit" icon="arrow-right-start-on-rectangle"
+                        class="w-full">
                         {{ __('Log Out') }}
                     </flux:menu.item>
                 </form>

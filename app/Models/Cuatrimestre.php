@@ -17,14 +17,23 @@ class Cuatrimestre extends Model
         'mes_id',
     ];
 
+    // RELACION CON MES
+
     public function mes()
     {
         return $this->belongsTo(Mes::class);
     }
 
+    // RELACION CON INSCRIPCIONES
     public function inscripciones()
     {
         return $this->hasMany(Inscripcion::class);
+    }
+
+    // RELACION CON MATERIAS
+    public function materias()
+    {
+        return $this->hasMany(Materia::class);
     }
 
 }
