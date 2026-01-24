@@ -14,6 +14,7 @@ return new class extends Migration {
             $table->id();
             $table->string('nombre');
             $table->string('clave');
+            $table->integer('creditos');
             $table->string('slug')->unique();
             $table->enum('calificable', ['si', 'no'])->default('si');
             $table->unsignedBigInteger('licenciatura_id');

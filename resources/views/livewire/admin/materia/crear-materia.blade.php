@@ -97,8 +97,8 @@
                                 <flux:select badge="Requerido" label="Calificable" wire:model="calificable">
                                     <flux:select.option value="">{{ __('--Selecciona una opción--') }}
                                     </flux:select.option>
-                                    <flux:select.option value="true">Sí</flux:select.option>
-                                    <flux:select.option value="false">No</flux:select.option>
+                                    <flux:select.option value="si">Sí</flux:select.option>
+                                    <flux:select.option value="no">No</flux:select.option>
                                 </flux:select>
                             </div>
                         </flux:field>
@@ -117,8 +117,9 @@
                                 Cancelar
                             </button>
 
-                            <flux:button variant="primary" type="submit" class="w-full sm:w-auto cursor-pointer"
-                                wire:loading.attr="disabled" wire:target="guardarMateria">
+                            <flux:button variant="primary" type="submit"
+                                class="w-full sm:w-auto cursor-pointer guardar-btn" wire:loading.attr="disabled"
+                                wire:target="guardarMateria">
                                 {{ __('Guardar') }}
                             </flux:button>
                         </div>

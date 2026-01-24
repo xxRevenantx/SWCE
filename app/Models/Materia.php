@@ -14,6 +14,7 @@ class Materia extends Model
         'nombre',
         'slug',
         'clave',
+        'creditos',
         'calificable',
         'licenciatura_id',
         'cuatrimestre_id',
@@ -28,6 +29,4 @@ class Materia extends Model
     {
         return $this->belongsTo(Cuatrimestre::class);
     }
-
-
 }
