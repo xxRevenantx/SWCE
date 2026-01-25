@@ -118,7 +118,7 @@
                         </button>
                     </div>
 
-                    <div x-show="open" x-collapse class="mt-4">
+                    <div x-cloak="" x-show="open" x-collapse class="mt-4">
                         <div class="space-y-3 mt-4">
                             @foreach ($resumenPorLicenciatura as $resumen)
                                 @php
@@ -221,7 +221,7 @@
                         </button>
                     </div>
 
-                    <div x-show="open" x-collapse class="mt-4">
+                    <div x-cloak x-show="open" x-collapse class="mt-4">
                         <div class="space-y-3 mt-4">
                             @foreach ($resumenPorLicenciaturaBaja as $resumen)
                                 @php
