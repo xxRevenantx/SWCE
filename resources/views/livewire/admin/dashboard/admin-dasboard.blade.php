@@ -22,7 +22,7 @@
                 <div class="flex-1">
                     <p class=" text-white/90">Profesores Activos</p>
                     <p class="text-3xl font-extrabold text-white leading-tight drop-shadow-sm">
-                        10
+                        {{ $profesoresActivos->count() }}
                     </p>
                 </div>
             </div>
@@ -87,8 +87,14 @@
 
                     <div class="flex items-center justify-between align-center">
                         <div class="mt-3 flex items-baseline gap-3">
-                            <span class="text-5xl font-extrabold leading-none tracking-tight">4</span>
-                            <span class="text-sm text-slate-400">34H | 39M</span>
+                            <span class="text-5xl font-extrabold leading-none tracking-tight">
+                                {{ $totalActivos ?? 0 }}
+                            </span>
+
+                            <span class="text-sm text-slate-400">
+                                {{ $totalHombresActivos ?? 0 }}H | {{ $totalMujeresActivos ?? 0 }}M
+                            </span>
+
                         </div>
 
                         <button @click="toggle"
@@ -110,6 +116,37 @@
                                 </span>
                             </template>
                         </button>
+                    </div>
+
+                    <div x-show="open" x-collapse class="mt-4">
+                        <div class="space-y-3 mt-4">
+                            @foreach ($resumenPorLicenciatura as $resumen)
+                                @php
+                                    $t = max(1, (int) $resumen['hombres'] + (int) $resumen['mujeres']);
+                                    $pctH = round(($resumen['hombres'] / $t) * 100);
+                                    $pctM = 100 - $pctH;
+                                @endphp
+                                <div class="rounded-xl ring-1 ring-neutral-200 dark:ring-neutral-700 p-3 sm:p-4">
+                                    <div class="flex items-center justify-between gap-3">
+                                        <div class="min-w-0">
+                                            <p class="font-semibold truncate text-neutral-900 dark:text-neutral-100">
+                                                {{ $resumen['licenciatura'] }}</p>
+                                            <div class="mt-1 flex flex-wrap gap-2 text-xs">
+                                                <flux:badge color="zinc">{{ $resumen['hombres'] }} H</flux:badge>
+                                                <flux:badge color="zinc">{{ $resumen['mujeres'] }} M</flux:badge>
+                                            </div>
+                                        </div>
+                                        <flux:badge color="green">Total: {{ $resumen['total'] }}</flux:badge>
+                                    </div>
+                                    <div
+                                        class="mt-3 h-2 w-full rounded-full bg-neutral-200 dark:bg-neutral-700 overflow-hidden flex">
+                                        <div class="h-full bg-emerald-500" style="width: {{ $pctH }}%"></div>
+                                        <div class="h-full bg-neutral-200" style="width: {{ $pctM }}%"></div>
+                                    </div>
+                                </div>
+                                <flux:separator variant="subtle" />
+                            @endforeach
+                        </div>
                     </div>
                 </div>
             </div>
@@ -153,8 +190,14 @@
 
                     <div class="flex items-center justify-between align-center">
                         <div class="mt-3 flex items-baseline gap-3">
-                            <span class="text-5xl font-extrabold leading-none tracking-tight">4</span>
-                            <span class="text-sm text-slate-400">34H | 39M</span>
+                            <span class="text-5xl font-extrabold leading-none tracking-tight">
+                                {{ $totalBaja ?? 0 }}
+                            </span>
+
+                            <span class="text-sm text-slate-400">
+                                {{ $totalHombresBaja ?? 0 }}H | {{ $totalMujeresBaja ?? 0 }}M
+                            </span>
+
                         </div>
 
                         <button @click="toggle"
@@ -176,6 +219,37 @@
                                 </span>
                             </template>
                         </button>
+                    </div>
+
+                    <div x-show="open" x-collapse class="mt-4">
+                        <div class="space-y-3 mt-4">
+                            @foreach ($resumenPorLicenciaturaBaja as $resumen)
+                                @php
+                                    $t = max(1, (int) $resumen['hombres'] + (int) $resumen['mujeres']);
+                                    $pctH = round(($resumen['hombres'] / $t) * 100);
+                                    $pctM = 100 - $pctH;
+                                @endphp
+                                <div class="rounded-xl ring-1 ring-neutral-200 dark:ring-neutral-700 p-3 sm:p-4">
+                                    <div class="flex items-center justify-between gap-3">
+                                        <div class="min-w-0">
+                                            <p class="font-semibold truncate text-neutral-900 dark:text-neutral-100">
+                                                {{ $resumen['licenciatura'] }}</p>
+                                            <div class="mt-1 flex flex-wrap gap-2 text-xs">
+                                                <flux:badge color="zinc">{{ $resumen['hombres'] }} H</flux:badge>
+                                                <flux:badge color="zinc">{{ $resumen['mujeres'] }} M</flux:badge>
+                                            </div>
+                                        </div>
+                                        <flux:badge color="red">Total: {{ $resumen['total'] }}</flux:badge>
+                                    </div>
+                                    <div
+                                        class="mt-3 h-2 w-full rounded-full bg-neutral-200 dark:bg-neutral-700 overflow-hidden flex">
+                                        <div class="h-full bg-red-500" style="width: {{ $pctH }}%"></div>
+                                        <div class="h-full bg-neutral-200" style="width: {{ $pctM }}%"></div>
+                                    </div>
+                                </div>
+                                <flux:separator variant="subtle" />
+                            @endforeach
+                        </div>
                     </div>
                 </div>
             </div>

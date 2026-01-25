@@ -65,6 +65,14 @@ class CrearMateria extends Component
         ]);
 
 
+        // EL SLUG NO SE DEBE REPETIR EN LA MISMA LICENCIATURA
+        $existingMateria = Materia::where('slug', $this->slug)
+            ->where('licenciatura_id', $this->licenciatura_id)
+            ->first();
+        if ($existingMateria) {
+            $this->addError('slug', 'El slug de la materia ya existe en la licenciatura seleccionada.');
+            return;
+        }
         // CREAR MATERIA
         Materia::create([
             'nombre' => trim((string) $this->nombre),

@@ -4,146 +4,130 @@ namespace App\Livewire\Admin\Dashboard;
 
 use App\Models\Generacion;
 use App\Models\Inscripcion;
+use App\Models\Profesor;
 use Livewire\Component;
 
 class AdminDashboard extends Component
 {
-
-
     public $licenciaturas;
     public $generacionesActivas;
 
-      public $resumenPorLicenciatura = [];
+    public $resumenPorLicenciatura = [];
+    public $profesoresActivos;
+
+    public $totalActivos;
+    public $totalHombresActivos;
+    public $totalMujeresActivos;
+
+    public $resumenPorLicenciaturaBaja = [];
+    public $totalBaja;
+    public $totalHombresBaja;
+    public $totalMujeresBaja;
 
     public function mount()
     {
+        $this->licenciaturas = \App\Models\Licenciatura::orderBy('id', 'desc')->get();
 
-        $this->licenciaturas = \App\Models\Licenciatura::all() ?? '';
-
+        // Generaciones activas: en BD es generaciones.status (enum 'true'/'false')
         $this->generacionesActivas = Generacion::where('status', 'true')->get();
 
-        // $this->profesoresActivos = Profesor::whereHas('user', function ($query) {
-        //     $query->where('status', 'true');
-        // })->get();
+        // Profesores activos (se mantiene tu lógica)
+        $this->profesoresActivos = Profesor::whereHas('user', function ($query) {
+            $query->where('status', 'true');
+        })->get();
 
-        // $this->resumenPorLicenciatura = $this->licenciaturas->map(function ($licenciatura) {
+        /**
+         * Query base: SOLO inscripciones cuya generación esté activa (generaciones.status = 'true')
+         */
+        $base = Inscripcion::query()
+            ->whereHas('generacion', function ($q) {
+                $q->where('status', 'true');
+            });
 
-        //     $hombres = Inscripcion::where('licenciatura_id', $licenciatura->id)
-        //         ->where('foraneo', "false")
-        //         ->where('status', "true")
-        //         ->where('sexo', 'H')
-        //         ->get()
-        //         ->filter(function ($inscripcion) {
-        //             return $inscripcion->generacion && $inscripcion->generacion->activa == "true";
-        //         })
-        //         ->count();
+        /**
+         * RESUMEN POR LICENCIATURA (ACTIVOS)
+         * inscripciones.status = 1
+         * alumno.sexo = 'M' (masculino) / 'F' (femenino)
+         */
+        $this->resumenPorLicenciatura = $this->licenciaturas->map(function ($licenciatura) use ($base) {
 
-        //     $mujeres = Inscripcion::where('licenciatura_id', $licenciatura->id)
-        //         ->where('foraneo', "false")
-        //         ->where('status', "true")
-        //         ->where('sexo', 'M')
-        //         ->get()
-        //         ->filter(function ($inscripcion) {
-        //             return $inscripcion->generacion && $inscripcion->generacion->activa == "true";
-        //         })
-        //         ->count();
+            $hombres = (clone $base)
+                ->where('licenciatura_id', $licenciatura->id)
+                ->where('status', 1)
+                ->whereHas('alumno', fn($q) => $q->where('sexo', 'M'))
+                ->count();
 
-        //     return [
-        //         'licenciatura' => $licenciatura->nombre,
-        //         'hombres' => $hombres,
-        //         'mujeres' => $mujeres,
-        //         'total' => $hombres + $mujeres
-        //     ];
-        // });
+            $mujeres = (clone $base)
+                ->where('licenciatura_id', $licenciatura->id)
+                ->where('status', 1)
+                ->whereHas('alumno', fn($q) => $q->where('sexo', 'F'))
+                ->count();
 
-        // $this->totalLocalesActivos = Inscripcion::where('foraneo', "false")
-        //     ->where('status', "true")
-        //     ->get()
-        //     ->filter(function ($inscripcion) {
-        //     return $inscripcion->generacion && $inscripcion->generacion->activa == "true";
-        //     })
-        //     ->count();
+            return [
+                'licenciatura' => $licenciatura->nombre,
+                'hombres' => $hombres,
+                'mujeres' => $mujeres,
+                'total' => $hombres + $mujeres,
+            ];
+        });
 
-        // $this->totalHombresLocalesActivos = Inscripcion::where('foraneo', "false")
-        //     ->where('status', "true")
-        //     ->where('sexo', 'H')
-        //     ->get()
-        //     ->filter(function ($inscripcion) {
-        //     return $inscripcion->generacion && $inscripcion->generacion->activa == "true";
-        //     })
-        //     ->count();
+        // TOTALES ACTIVOS
+        $this->totalActivos = (clone $base)
+            ->where('status', 1)
+            ->count();
 
-        // $this->totalMujeresLocalesActivos = Inscripcion::where('foraneo', "false")
-        //     ->where('status', "true")
-        //     ->where('sexo', 'M')
-        //     ->get()
-        //     ->filter(function ($inscripcion) {
-        //     return $inscripcion->generacion && $inscripcion->generacion->activa == "true";
-        //     })
-        //     ->count();
+        $this->totalHombresActivos = (clone $base)
+            ->where('status', 1)
+            ->whereHas('alumno', fn($q) => $q->where('sexo', 'M'))
+            ->count();
 
+        $this->totalMujeresActivos = (clone $base)
+            ->where('status', 1)
+            ->whereHas('alumno', fn($q) => $q->where('sexo', 'F'))
+            ->count();
 
-        // $this->resumenPorLicenciaturaBaja = $this->licenciaturas->map(function ($licenciatura) {
+        /**
+         * RESUMEN POR LICENCIATURA (BAJA)
+         * inscripciones.status = 0
+         */
+        $this->resumenPorLicenciaturaBaja = $this->licenciaturas->map(function ($licenciatura) use ($base) {
 
-        //     $hombres = Inscripcion::where('licenciatura_id', $licenciatura->id)
-        //         ->where('foraneo', "false")
-        //         ->where('status', "false")
-        //         ->where('sexo', 'H')
-        //         ->get()
-        //         ->filter(function ($inscripcion) {
-        //             return $inscripcion->generacion && $inscripcion->generacion->activa == "true";
-        //         })
-        //         ->count();
+            $hombres = (clone $base)
+                ->where('licenciatura_id', $licenciatura->id)
+                ->where('status', 0)
+                ->whereHas('alumno', fn($q) => $q->where('sexo', 'M'))
+                ->count();
 
-        //     $mujeres = Inscripcion::where('licenciatura_id', $licenciatura->id)
-        //         ->where('foraneo', "false")
-        //         ->where('status', "false")
-        //         ->where('sexo', 'M')
-        //         ->get()
-        //         ->filter(function ($inscripcion) {
-        //             return $inscripcion->generacion && $inscripcion->generacion->activa == "true";
-        //         })
-        //         ->count();
+            $mujeres = (clone $base)
+                ->where('licenciatura_id', $licenciatura->id)
+                ->where('status', 0)
+                ->whereHas('alumno', fn($q) => $q->where('sexo', 'F'))
+                ->count();
 
-        //         return [
-        //             'licenciatura' => $licenciatura->nombre,
-        //             'hombres' => $hombres,
-        //             'mujeres' => $mujeres,
-        //             'total' => $hombres + $mujeres
-        //         ];
-        //     });
+            return [
+                'licenciatura' => $licenciatura->nombre,
+                'hombres' => $hombres,
+                'mujeres' => $mujeres,
+                'total' => $hombres + $mujeres,
+            ];
+        });
 
+        // TOTALES BAJA
+        $this->totalBaja = (clone $base)
+            ->where('status', 0)
+            ->count();
 
-        // $this->totalLocalesBaja = Inscripcion::where('foraneo', "false")
-        //     ->where('status', "false")
-        //     ->get()
-        //     ->filter(function ($inscripcion) {
-        //             return $inscripcion->generacion && $inscripcion->generacion->activa == "true";
-        //         })
-        //     ->count();
+        $this->totalHombresBaja = (clone $base)
+            ->where('status', 0)
+            ->whereHas('alumno', fn($q) => $q->where('sexo', 'M'))
+            ->count();
 
-        // $this->totalHombresLocalesBaja = Inscripcion::where('foraneo', "false")
-        //     ->where('status', "false")
-        //     ->where('sexo', 'H')
-        //     ->get()
-        //     ->filter(function ($inscripcion) {
-        //             return $inscripcion->generacion && $inscripcion->generacion->activa == "true";
-        //         })
-        //     ->count();
-
-        // $this->totalMujeresLocalesBaja = Inscripcion::where('foraneo', "false")
-        // ->where('status', "false")
-        // ->where('sexo', 'M')
-        // ->get()
-        // ->filter(function ($inscripcion) {
-        //         return $inscripcion->generacion && $inscripcion->generacion->activa == "true";
-        //     })
-        // ->count();
-
-
-
-
+        $this->totalMujeresBaja = (clone $base)
+            ->where('status', 0)
+            ->whereHas('alumno', fn($q) => $q->where('sexo', 'F'))
+            ->count();
     }
+
     public function render()
     {
         return view('livewire.admin.dashboard.admin-dasboard');

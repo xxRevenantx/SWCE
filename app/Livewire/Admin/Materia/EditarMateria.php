@@ -18,16 +18,19 @@ class EditarMateria extends Component
     public $cuatrimestre_id;
     public $licenciatura_id;
 
-
+    // ✅ Para "Información actual" (badges)
+    public $licenciatura_nombre = null;
+    public $cuatrimestre_nombre = null;
 
     public $materiaId;
     public $open = false;
 
-
     #[On('editarModal')]
     public function editarModal($id)
     {
-        $materia = Materia::findOrFail($id);
+        // ✅ Traemos relaciones para obtener nombres
+        $materia = Materia::with(['licenciatura', 'cuatrimestre'])->findOrFail($id);
+
         $this->materiaId = $materia->id;
         $this->nombre = $materia->nombre;
         $this->slug = $materia->slug;
@@ -36,6 +39,11 @@ class EditarMateria extends Component
         $this->calificable = $materia->calificable;
         $this->cuatrimestre_id = $materia->cuatrimestre_id;
         $this->licenciatura_id = $materia->licenciatura_id;
+
+        // ✅ Nombres para badges
+        $this->licenciatura_nombre = $materia->licenciatura?->nombre;
+        $this->cuatrimestre_nombre = $materia->cuatrimestre?->nombre_cuatrimestre;
+
         $this->open = true;
 
         $this->dispatch('editar-cargado');
@@ -60,11 +68,10 @@ class EditarMateria extends Component
             'creditos.required' => 'Los creditos son requeridos',
             'cuatrimestre_id.required' => 'El cuatrimestre es requerido',
             'licenciatura_id.required' => 'La licenciatura es requerida',
-
-
         ]);
 
         $materia = Materia::find($this->materiaId);
+
         if ($materia) {
             $materia->update([
                 'nombre' => trim($this->nombre),
@@ -76,29 +83,57 @@ class EditarMateria extends Component
                 'licenciatura_id' => $this->licenciatura_id,
             ]);
 
+            // ✅ refrescamos nombres del header por si cambiaron selects
+            $this->licenciatura_nombre = Licenciatura::find($this->licenciatura_id)?->nombre;
+            $this->cuatrimestre_nombre = Cuatrimestre::find($this->cuatrimestre_id)?->nombre_cuatrimestre;
+
             $this->dispatch('swal', [
                 'title' => 'Materia actualizada correctamente!',
                 'icon' => 'success',
                 'position' => 'top-end',
             ]);
 
-            $this->reset(['open', 'materiaId', 'nombre', 'slug', 'clave', 'creditos', 'calificable', 'cuatrimestre_id', 'licenciatura_id']);
-            $this->dispatch('refreshMaterias');
+            $this->reset([
+                'open',
+                'materiaId',
+                'nombre',
+                'slug',
+                'clave',
+                'creditos',
+                'calificable',
+                'cuatrimestre_id',
+                'licenciatura_id',
+                'licenciatura_nombre',
+                'cuatrimestre_nombre'
+            ]);
 
-            // 👉 Avisamos al front que debe cerrar el modal
+            $this->dispatch('refreshMaterias');
             $this->dispatch('cerrar-modal-editar');
         }
     }
+
     public function cerrarModal()
     {
-        $this->reset(['open', 'materiaId', 'nombre', 'slug', 'clave', 'creditos', 'calificable', 'cuatrimestre_id', 'licenciatura_id']);
+        $this->reset([
+            'open',
+            'materiaId',
+            'nombre',
+            'slug',
+            'clave',
+            'creditos',
+            'calificable',
+            'cuatrimestre_id',
+            'licenciatura_id',
+            'licenciatura_nombre',
+            'cuatrimestre_nombre'
+        ]);
     }
-
 
     public function render()
     {
         $licenciaturas = Licenciatura::orderBy('id', 'desc')->get();
         $cuatrimestres = Cuatrimestre::orderBy('id', 'desc')->get();
+
         return view('livewire.admin.materia.editar-materia', compact('licenciaturas', 'cuatrimestres'));
     }
 }

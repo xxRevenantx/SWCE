@@ -30,12 +30,21 @@
                 <h2 id="titulo-modal-materia" class="text-xl sm:text-2xl font-bold text-neutral-900 dark:text-white">
                     Editar Materia
                 </h2>
-                <p class="text-sm text-neutral-600 dark:text-neutral-400">
-                    <span class="inline-flex items-center gap-2">
+                <div class="flex flex-wrap items-center gap-2">
+                    <flux:badge color="indigo" size="sm">📘 {{ $nombre ?: '—' }}</flux:badge>
+                    <flux:badge color="violet" size="sm">🔑 {{ $clave ?: '—' }}</flux:badge>
 
-                        <flux:badge color="indigo"></flux:badge>
-                    </span>
-                </p>
+                    <flux:badge color="blue" size="sm">🎓 {{ $licenciatura_nombre ?: '—' }}</flux:badge>
+                    <flux:badge color="purple" size="sm">🗓️ {{ $cuatrimestre_nombre ?: '—' }}</flux:badge>
+
+                    <flux:badge color="{{ ($calificable ?? '') === 'si' ? 'emerald' : 'zinc' }}" size="sm">
+                        ✅ Calificable: {{ ($calificable ?? '') === 'si' ? 'Sí' : 'No' }}
+                    </flux:badge>
+
+                    <flux:badge color="amber" size="sm">⭐ {{ is_numeric($creditos) ? $creditos : '—' }} créditos
+                    </flux:badge>
+                </div>
+
             </div>
 
             <button @click="show = false; $wire.cerrarModal()" type="button"
