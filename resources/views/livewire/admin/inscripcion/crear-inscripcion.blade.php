@@ -430,7 +430,7 @@
 
                 {{-- ✅ STATUS (debajo, como en la imagen) --}}
                 <div class="px-4 sm:px-6 pb-5">
-                    <flux:field variant="inline">
+                    <flux:field>
                         <flux:label>Status</flux:label>
                         <flux:switch wire:model.live="status" />
                         <flux:error name="status" />
