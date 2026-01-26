@@ -286,52 +286,108 @@
                 class="rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 shadow-sm w-full">
                 <div
                     class="w-full rounded-t-2xl border-b border-neutral-200 dark:border-neutral-800
-                    bg-gradient-to-r from-sky-500 via-blue-600 to-indigo-600 p-4 text-white">
+                   bg-gradient-to-r from-sky-500 via-blue-600 to-indigo-600 p-4 text-white">
                     <h2 class="font-semibold">Datos escolares</h2>
                 </div>
 
+                {{-- ✅ FILA 1 (igual que la imagen): Matrícula | Folio | Foto (span 2) --}}
                 <div class="p-4 sm:p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <flux:field>
-                        <flux:label badge="Requerido">Matrícula</flux:label>
+                        <flux:label badge="Opcional">Matrícula</flux:label>
                         <flux:input wire:model="matricula" placeholder="Matrícula" />
                         <flux:error name="matricula" />
                     </flux:field>
 
                     <flux:field>
-                        <flux:label badge="Opcional">Folio</flux:label>
-                        <flux:input wire:model="folio" placeholder="Opcional" />
+                        <flux:label badge="Requerido">Folio</flux:label>
+                        <flux:input wire:model="folio" placeholder="Folio" />
                         <flux:error name="folio" />
                     </flux:field>
 
                     <flux:field class="lg:col-span-2">
-                        <flux:label badge="Opcional">Foto</flux:label>
-                        <input type="file" accept="image/png,image/jpeg"
-                            class="block w-full text-sm
-                            file:mr-4 file:rounded-lg file:border-0 file:bg-neutral-100 file:px-3 file:py-2 hover:file:bg-neutral-200
-                            dark:file:bg-neutral-800 dark:hover:file:bg-neutral-700"
-                            wire:model="foto" />
-                        <p class="mt-2 text-xs text-neutral-500">JPG/PNG hasta 2MB</p>
+                        <flux:label badge="Opcional">Foto del estudiante</flux:label>
+
+                        <div x-data
+                            class="relative rounded-2xl border-2 border-dashed border-neutral-200 dark:border-neutral-800
+               bg-neutral-50/70 dark:bg-neutral-900/40 p-4 sm:p-5
+               hover:bg-neutral-50 dark:hover:bg-neutral-900/60
+               transition-colors cursor-pointer"
+                            role="button" tabindex="0" @click="$refs.foto.click()"
+                            @keydown.enter.prevent="$refs.foto.click()" @keydown.space.prevent="$refs.foto.click()"
+                            aria-label="Seleccionar foto del estudiante">
+                            <div class="flex items-start gap-4">
+                                {{-- Icono --}}
+                                <div
+                                    class="mt-0.5 inline-flex h-10 w-10 items-center justify-center rounded-xl
+                        bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800">
+                                    <svg xmlns="http://www.w3.org/2000/svg"
+                                        class="h-5 w-5 text-neutral-600 dark:text-neutral-300" viewBox="0 0 24 24"
+                                        fill="currentColor">
+                                        <path
+                                            d="M4 7a2 2 0 0 1 2-2h3l1-1h4l1 1h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7zm8 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8z" />
+                                    </svg>
+                                </div>
+
+                                {{-- Textos --}}
+                                <div class="min-w-0 flex-1">
+                                    <p class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
+                                        Seleccionar archivo
+                                    </p>
+                                    <p class="mt-1 text-xs text-neutral-500">
+                                        Subir imagen JPG o PNG (máx. 2MB)
+                                    </p>
+
+                                    {{-- Nombre del archivo (cuando ya se eligió uno) --}}
+                                    @if ($foto)
+                                        <p class="mt-2 text-xs text-neutral-600 dark:text-neutral-300 truncate">
+                                            Archivo: {{ $foto->getClientOriginalName() }}
+                                        </p>
+                                    @endif
+                                </div>
+
+                                {{-- Botón visual --}}
+                                <div class="shrink-0">
+                                    <span
+                                        class="inline-flex items-center rounded-xl px-3 py-2 text-xs font-semibold
+                           bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800
+                           text-neutral-700 dark:text-neutral-200">
+                                        Elegir
+                                    </span>
+                                </div>
+                            </div>
+
+                            {{-- Input real (oculto) --}}
+                            <input x-ref="foto" type="file" accept="image/png,image/jpeg" class="sr-only"
+                                wire:model="foto" />
+
+                            {{-- Loader cuando sube --}}
+                            <div wire:loading wire:target="foto"
+                                class="absolute inset-0 rounded-2xl bg-white/60 dark:bg-neutral-900/60
+                   backdrop-blur-sm flex items-center justify-center">
+                                <div class="flex items-center gap-2 text-sm text-neutral-700 dark:text-neutral-200">
+                                    <svg class="h-4 w-4 animate-spin" xmlns="http://www.w3.org/2000/svg"
+                                        fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10"
+                                            stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor"
+                                            d="M4 12a8 8 0 0 1 8-8v3a5 5 0 0 0-5 5H4z"></path>
+                                    </svg>
+                                    Subiendo…
+                                </div>
+                            </div>
+                        </div>
+
                         <flux:error name="foto" />
                     </flux:field>
+
                 </div>
 
-                <div class="px-4 sm:px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <flux:field>
-                        <flux:label badge="Requerido">Licenciatura</flux:label>
-                        <flux:select wire:model="licenciatura_id">
-                            <flux:select.option value="">-- Selecciona --</flux:select.option>
-                            @foreach ($licenciaturas as $lic)
-                                <flux:select.option value="{{ $lic->id }}">{{ $lic->nombre }}
-                                </flux:select.option>
-                            @endforeach
-                        </flux:select>
-                        <flux:error name="licenciatura_id" />
-                    </flux:field>
-
+                {{-- ✅ FILA 2 (igual que la imagen): Generación | Licenciatura | Fecha | Cuatrimestre --}}
+                <div class="px-4 sm:px-6 pb-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <flux:field>
                         <flux:label badge="Requerido">Generación</flux:label>
                         <flux:select wire:model="generacion_id">
-                            <flux:select.option value="">-- Selecciona --</flux:select.option>
+                            <flux:select.option value="">Selecciona una generación…</flux:select.option>
                             @foreach ($generaciones as $gen)
                                 <flux:select.option value="{{ $gen->id }}">{{ $gen->generacion }}
                                 </flux:select.option>
@@ -341,9 +397,27 @@
                     </flux:field>
 
                     <flux:field>
+                        <flux:label badge="Requerido">Licenciatura</flux:label>
+                        <flux:select wire:model="licenciatura_id">
+                            <flux:select.option value="">Selecciona la licenciatura…</flux:select.option>
+                            @foreach ($licenciaturas as $lic)
+                                <flux:select.option value="{{ $lic->id }}">{{ $lic->nombre }}
+                                </flux:select.option>
+                            @endforeach
+                        </flux:select>
+                        <flux:error name="licenciatura_id" />
+                    </flux:field>
+
+                    <flux:field>
+                        <flux:label badge="Requerido">Fecha inscripción</flux:label>
+                        <flux:input type="date" wire:model="fecha_inscripcion" />
+                        <flux:error name="fecha_inscripcion" />
+                    </flux:field>
+
+                    <flux:field>
                         <flux:label badge="Requerido">Cuatrimestre</flux:label>
                         <flux:select wire:model="cuatrimestre_id">
-                            <flux:select.option value="">-- Selecciona --</flux:select.option>
+                            <flux:select.option value="">Selecciona un cuatrimestre…</flux:select.option>
                             @foreach ($cuatrimestres as $cuat)
                                 <flux:select.option value="{{ $cuat->id }}">
                                     {{ $cuat->no_cuatrimestre ?? $cuat->id }}
@@ -352,26 +426,21 @@
                         </flux:select>
                         <flux:error name="cuatrimestre_id" />
                     </flux:field>
-
-                    <flux:field>
-                        <flux:label badge="Requerido">Fecha inscripción</flux:label>
-                        <flux:input type="date" wire:model="fecha_inscripcion" />
-                        <flux:error name="fecha_inscripcion" />
-                    </flux:field>
                 </div>
 
-                <div class="px-4 sm:px-6 grid grid-cols-1 md:grid-cols-1 lg:grid-cols-1 gap-4">
+                {{-- ✅ STATUS (debajo, como en la imagen) --}}
+                <div class="px-4 sm:px-6 pb-5">
                     <flux:field variant="inline">
                         <flux:label>Status</flux:label>
                         <flux:switch wire:model.live="status" />
                         <flux:error name="status" />
                     </flux:field>
-
                 </div>
 
-
-                <div class="flex items-center justify-between gap-3 px-4 sm:px-6 pt-4 pb-5">
+                <div
+                    class="flex items-center justify-between gap-3 px-4 sm:px-6 pt-4 pb-5 border-t border-neutral-200 dark:border-neutral-800">
                     <flux:button type="button" @click="prev()">Anterior</flux:button>
+
                     <flux:button class="guardar-btn" type="button" @click="submit()" wire:loading.attr="disabled"
                         wire:target="guardarInscripcion,foto">
                         <span wire:loading.remove wire:target="guardarInscripcion">Guardar inscripción</span>
@@ -380,6 +449,7 @@
                 </div>
             </div>
         </section>
+
     </div>
 
     {{-- ALERTAS --}}
