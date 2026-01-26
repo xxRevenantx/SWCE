@@ -133,39 +133,73 @@
                             </tr>
                         </thead>
 
-                        <tbody class="divide-y divide-gray-100 dark:divide-neutral-800">
-                            @forelse($materias as $key => $materia)
-                                <tr class="transition-colors hover:bg-gray-50/70 dark:hover:bg-neutral-800/50 }}">
+                        @php
+                            $licActual = null;
+                            $contadorGrupo = 0; // si quieres # reiniciado por licenciatura
+                        @endphp
 
-                                    <td class="px-4 py-3 text-center text-gray-800 dark:text-gray-200">
-                                        {{ $key + 1 }}</td>
-                                    <td class="px-4 py-3 text-center text-gray-900 dark:text-white">
-                                        {{ $materia->nombre }}</td>
-                                    <td class="px-4 py-3 text-center text-gray-900 dark:text-white">
-                                        {{ $materia->slug }}</td>
-                                    <td class="px-4 py-3 text-center text-gray-800 dark:text-gray-200">
-                                        {{ $materia->clave }}</td>
-                                    <td class="px-4 py-3 text-center text-gray-800 dark:text-gray-200">
-                                        {{ $materia->creditos }}</td>
-                                    <td class="px-4 py-3 text-center text-gray-800 dark:text-gray-200">
-                                        {{ $materia->cuatrimestre->nombre_cuatrimestre }}</td>
-                                    <td class="px-4 py-3 text-center text-gray-800 dark:text-gray-200">
-                                        @if ($materia->calificable == 'si')
-                                            <flux:badge color="green">Sí</flux:badge>
+                        <tbody class="divide-y divide-neutral-100 dark:divide-neutral-800">
+                            @forelse($materias as $materia)
+                                @php
+                                    $licId = $materia->licenciatura_id;
+                                    $licNombre = $materia->licenciatura?->nombre ?? 'SIN LICENCIATURA';
+                                @endphp
+
+                                {{-- ✅ Encabezado del grupo --}}
+                                @if ($licActual !== $licId)
+                                    @php
+                                        $licActual = $licId;
+                                        $contadorGrupo = 0;
+                                    @endphp
+
+                                    <tr class="bg-neutral-100 dark:bg-neutral-900/60">
+                                        <td colspan="8" class="px-4 py-2.5">
+                                            <div class="inline-flex items-center gap-2">
+                                                <span class="h-2 w-2 rounded-full bg-indigo-500"></span>
+                                                <span
+                                                    class="text-[11px] font-extrabold tracking-wide text-neutral-700 dark:text-neutral-200">
+                                                    {{ mb_strtoupper($licNombre) }}
+                                                </span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endif
+
+                                @php $contadorGrupo++; @endphp
+
+                                <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-900/40">
+                                    {{-- # (reinicia por licenciatura) --}}
+                                    <td class="px-4 py-3 text-sm">{{ $contadorGrupo }}</td>
+
+                                    <td class="px-4 py-3 text-sm">{{ $materia->nombre }}</td>
+                                    <td class="px-4 py-3 text-sm">{{ $materia->slug }}</td>
+                                    <td class="px-4 py-3 text-sm">{{ $materia->clave }}</td>
+                                    <td class="px-4 py-3 text-sm">{{ $materia->creditos }}</td>
+                                    <td class="px-4 py-3 text-sm">
+                                        {{ $materia->cuatrimestre?->no_cuatrimestre ? $materia->cuatrimestre->no_cuatrimestre . '° CUATRIMESTRE' : '—' }}
+                                    </td>
+
+                                    <td class="px-4 py-3 text-sm">
+                                        @if ($materia->calificable)
+                                            <span
+                                                class="inline-flex items-center rounded-lg bg-emerald-100 px-2 py-1 text-xs font-semibold text-emerald-700">
+                                                SÍ
+                                            </span>
                                         @else
-                                            <flux:badge color="red">No</flux:badge>
+                                            <span
+                                                class="inline-flex items-center rounded-lg bg-rose-100 px-2 py-1 text-xs font-semibold text-rose-700">
+                                                NO
+                                            </span>
                                         @endif
                                     </td>
 
                                     <td class="px-4 py-3">
-                                        <div class="flex items-center justify-center gap-2">
-
-
+                                        {{-- BOTONES DE ELIMINAR Y EDITAR --}}
+                                        <div class="flex items-center justify-center gap-1">
                                             <flux:button variant="primary"
                                                 class="cursor-pointer bg-amber-500 hover:bg-amber-600 text-white"
                                                 @click="$dispatch('abrir-modal-editar');
-                                                                Livewire.dispatch('editarModal', { id: {{ $materia->id }} });
-                                                            ">
+                                                         Livewire.dispatch('editarModal', { id: {{ $materia->id }} }); ">
                                                 <flux:icon.square-pen class="w-3.5 h-3.5" />
                                                 <!-- ícono -->
                                             </flux:button>
@@ -179,21 +213,16 @@
                                         </div>
                                     </td>
                                 </tr>
+
                             @empty
                                 <tr>
-                                    <td colspan="8" class="px-6 py-10 text-center text-gray-500 dark:text-gray-400">
-                                        <div class="mx-auto w-full max-w-md">
-                                            <div
-                                                class="rounded-2xl border border-dashed border-gray-300 dark:border-neutral-700 p-6">
-                                                <div class="mb-1 text-base font-semibold">No hay materias
-                                                    disponibles</div>
-                                                <p class="text-sm">Ajusta tu búsqueda o crea un nuevo registro.</p>
-                                            </div>
-                                        </div>
+                                    <td colspan="8" class="px-4 py-8 text-center text-sm text-neutral-500">
+                                        Sin materias que coincidan con los filtros o la búsqueda.
                                     </td>
                                 </tr>
                             @endforelse
                         </tbody>
+
                     </table>
                 </div>
             </div>

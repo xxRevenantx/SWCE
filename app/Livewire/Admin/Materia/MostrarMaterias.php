@@ -32,6 +32,10 @@ class MostrarMaterias extends Component
     {
         $search = trim($this->search);
 
+        $allowedSorts = ['id', 'nombre', 'slug', 'clave', 'creditos', 'cuatrimestre_id', 'calificable', 'licenciatura_id'];
+        $sortField = in_array($this->sortField, $allowedSorts, true) ? $this->sortField : 'id';
+        $sortDirection = $this->sortDirection === 'desc' ? 'desc' : 'asc';
+
         return Materia::query()
             ->with(['cuatrimestre', 'licenciatura'])
 
@@ -50,14 +54,13 @@ class MostrarMaterias extends Component
                 $q->where('calificable', $this->filtrar_calificable === '1');
             })
 
-            // ✅ Búsqueda (agrupada para no romper los filtros)
+            // ✅ Búsqueda (agrupada)
             ->when($search !== '', function ($q) use ($search) {
                 $q->where(function ($qq) use ($search) {
                     $qq->where('nombre', 'like', "%{$search}%")
                         ->orWhere('clave', 'like', "%{$search}%")
                         ->orWhere('slug', 'like', "%{$search}%");
 
-                    // Soporte simple para escribir "si/no" en el buscador
                     $s = mb_strtolower($search);
                     if (in_array($s, ['si', 'sí', 's'], true)) {
                         $qq->orWhere('calificable', true);
@@ -67,9 +70,17 @@ class MostrarMaterias extends Component
                 });
             })
 
-            ->orderBy($this->sortField, $this->sortDirection)
+            // ✅ Agrupado por licenciatura
+            ->orderBy('licenciatura_id', 'asc')
+            ->orderBy('cuatrimestre_id', 'asc')
+
+            // ✅ tu sort adicional
+            ->orderBy($sortField, $sortDirection)
+
             ->paginate(10);
     }
+
+
 
     /**
      * ✅ Resetear paginación al cambiar búsqueda o filtros
