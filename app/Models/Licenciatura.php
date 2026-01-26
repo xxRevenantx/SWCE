@@ -35,4 +35,10 @@ class Licenciatura extends Model
     {
         return $this->hasMany(Materia::class);
     }
+
+    // RELACION CON ASIGNACION DE MATERIAS
+    public function asignacionMaterias()
+    {
+        return $this->hasMany(AsignacionMateria::class);
+    }
 }

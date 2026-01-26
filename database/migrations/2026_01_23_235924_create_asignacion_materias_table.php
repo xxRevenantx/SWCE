@@ -15,7 +15,7 @@ return new class extends Migration {
             $table->unsignedBigInteger('materia_id');
             $table->unsignedBigInteger('cuatrimestre_id');
             $table->unsignedBigInteger('licenciatura_id');
-            $table->unsignedBigInteger('profesor_id');
+            $table->unsignedBigInteger('profesor_id')->nullable();
 
             $table->timestamps();
 

@@ -29,4 +29,9 @@ class Materia extends Model
     {
         return $this->belongsTo(Cuatrimestre::class);
     }
+
+    public function asignaciones()
+    {
+        return $this->hasMany(AsignacionMateria::class);
+    }
 }

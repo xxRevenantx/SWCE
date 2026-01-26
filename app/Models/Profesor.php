@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Profesor extends Model
 {
-       protected $table = 'profesores';
+    protected $table = 'profesores';
 
     protected $fillable = [
         'user_id',
@@ -30,10 +30,11 @@ class Profesor extends Model
     {
         return $this->belongsTo(User::class);
     }
-    // public function asignacionMaterias()
-    // {
-    //     return $this->hasMany(AsignacionMateria::class);
-    // }
+    // RELACIONES con AsignacionMateria
+    public function asignacionMaterias()
+    {
+        return $this->hasMany(AsignacionMateria::class);
+    }
 
     // // Horarios
     // public function horarios()

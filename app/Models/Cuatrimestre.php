@@ -36,4 +36,10 @@ class Cuatrimestre extends Model
         return $this->hasMany(Materia::class);
     }
 
+    // RELACION CON ASIGNACION_MATERIAS
+    public function asignacionMaterias()
+    {
+        return $this->hasMany(AsignacionMateria::class);
+    }
+
 }
