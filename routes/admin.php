@@ -41,5 +41,8 @@ Route::middleware(['auth'])->group(function () {
 
 
     //Inscripción
-    Route::resource('inscripciones', InscripcionController::class)->middleware('can:admin.inscripciones')->names('inscripciones');
+    Route::get('inscripciones', [InscripcionController::class, 'inscripcion'])->middleware('can:admin.inscripciones')->name('inscripciones');
+
+    // Matrícula
+    Route::get('matricula', [InscripcionController::class, 'matricula'])->middleware('can:admin.matricula')->name('matricula');
 });

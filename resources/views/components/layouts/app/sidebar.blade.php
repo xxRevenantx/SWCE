@@ -100,10 +100,11 @@
 
                         <flux:navlist.group heading="Inscripciones" expandable>
 
-                            <flux:navlist.item icon="user-plus" :href="route('inscripciones.index')"
-                                :current="request()->routeIs('inscripciones.index')" wire:navigate>Inscripción
+                            <flux:navlist.item icon="user-plus" :href="route('inscripciones')"
+                                :current="request()->routeIs('inscripciones')" wire:navigate>Inscripción
                             </flux:navlist.item>
-                            <flux:navlist.item icon="users" href="#">Matrícula</flux:navlist.item>
+                            <flux:navlist.item icon="users" :href="route('matricula')"
+                                :current="request()->routeIs('matricula')" wire:navigate>Matrícula</flux:navlist.item>
 
 
                         </flux:navlist.group>

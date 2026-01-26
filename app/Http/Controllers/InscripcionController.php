@@ -9,9 +9,13 @@ use App\Http\Requests\UpdateInscripcionRequest;
 class InscripcionController extends Controller
 {
 
-    public function index()
+    public function inscripcion()
     {
         return view('admin.inscripcion.index');
     }
 
+    public function matricula()
+    {
+        return view('admin.matricula.index');
+    }
 }
