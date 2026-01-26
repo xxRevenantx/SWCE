@@ -231,7 +231,7 @@
 
                 <div class="px-4 sm:px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <flux:field>
-                        <flux:label>País</flux:label>
+                        <flux:label badge="Opcional">País</flux:label>
                         <flux:select wire:model.live="pais_id" wire:key="pais-select">
                             <flux:select.option value="">-- Selecciona --</flux:select.option>
                             @foreach ($countries as $country)
@@ -243,7 +243,7 @@
                     </flux:field>
 
                     <flux:field>
-                        <flux:label>Estado</flux:label>
+                        <flux:label badge="Opcional">Estado</flux:label>
                         <flux:select wire:model.live="estado_id" wire:key="estado-select-{{ $pais_id ?? 'none' }}">
                             <flux:select.option value="">-- Selecciona --</flux:select.option>
                             @foreach ($states as $state)
@@ -255,7 +255,7 @@
                     </flux:field>
 
                     <flux:field>
-                        <flux:label>Ciudad</flux:label>
+                        <flux:label badge="Opcional">Ciudad</flux:label>
                         <flux:select wire:model.live="ciudad_id" wire:key="ciudad-select-{{ $estado_id ?? 'none' }}">
                             <flux:select.option value="">-- Selecciona --</flux:select.option>
                             @foreach ($cities as $city)
@@ -360,17 +360,15 @@
                     </flux:field>
                 </div>
 
-                <div class="px-4 sm:px-6 pt-2">
-                    <label class="flex items-center gap-3">
-                        <input type="checkbox" class="peer sr-only" wire:model="status">
-                        <span
-                            class="relative h-6 w-10 rounded-full bg-neutral-300 peer-checked:bg-blue-600 transition">
-                            <span
-                                class="absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow transition peer-checked:translate-x-4"></span>
-                        </span>
-                        <span class="text-sm text-neutral-700 dark:text-neutral-300">Status activo</span>
-                    </label>
+                <div class="px-4 sm:px-6 grid grid-cols-1 md:grid-cols-1 lg:grid-cols-1 gap-4">
+                    <flux:field variant="inline">
+                        <flux:label>Status</flux:label>
+                        <flux:switch wire:model.live="status" />
+                        <flux:error name="status" />
+                    </flux:field>
+
                 </div>
+
 
                 <div class="flex items-center justify-between gap-3 px-4 sm:px-6 pt-4 pb-5">
                     <flux:button type="button" @click="prev()">Anterior</flux:button>
