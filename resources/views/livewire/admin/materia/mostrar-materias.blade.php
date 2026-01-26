@@ -171,15 +171,15 @@
                                     {{-- # (reinicia por licenciatura) --}}
                                     <td class="px-4 py-3 text-sm">{{ $contadorGrupo }}</td>
 
-                                    <td class="px-4 py-3 text-sm">{{ $materia->nombre }}</td>
-                                    <td class="px-4 py-3 text-sm">{{ $materia->slug }}</td>
-                                    <td class="px-4 py-3 text-sm">{{ $materia->clave }}</td>
-                                    <td class="px-4 py-3 text-sm">{{ $materia->creditos }}</td>
-                                    <td class="px-4 py-3 text-sm">
+                                    <td class="px-4 py-3 text-sm text-center">{{ $materia->nombre }}</td>
+                                    <td class="px-4 py-3 text-sm text-center">{{ $materia->slug }}</td>
+                                    <td class="px-4 py-3 text-sm text-center">{{ $materia->clave }}</td>
+                                    <td class="px-4 py-3 text-sm text-center">{{ $materia->creditos }}</td>
+                                    <td class="px-4 py-3 text-sm text-center">
                                         {{ $materia->cuatrimestre?->no_cuatrimestre ? $materia->cuatrimestre->no_cuatrimestre . '° CUATRIMESTRE' : '—' }}
                                     </td>
 
-                                    <td class="px-4 py-3 text-sm">
+                                    <td class="px-4 py-3 text-sm text-center">
                                         @if ($materia->calificable)
                                             <span
                                                 class="inline-flex items-center rounded-lg bg-emerald-100 px-2 py-1 text-xs font-semibold text-emerald-700">
@@ -193,7 +193,7 @@
                                         @endif
                                     </td>
 
-                                    <td class="px-4 py-3">
+                                    <td class="px-4 py-3 text-center">
                                         {{-- BOTONES DE ELIMINAR Y EDITAR --}}
                                         <div class="flex items-center justify-center gap-1">
                                             <flux:button variant="primary"

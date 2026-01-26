@@ -98,11 +98,14 @@
 
                     <flux:navlist class="w-64">
 
-                        <flux:navlist.group icon="user-plus" heading="Inscripciones" expandable>
-                            <flux:navlist.item :href="route('inscripciones.index')"
+                        <flux:navlist.group heading="Inscripciones" expandable>
+
+                            <flux:navlist.item icon="user-plus" :href="route('inscripciones.index')"
                                 :current="request()->routeIs('inscripciones.index')" wire:navigate>Inscripción
                             </flux:navlist.item>
-                            <flux:navlist.item href="#">Matrícula</flux:navlist.item>
+                            <flux:navlist.item icon="users" href="#">Matrícula</flux:navlist.item>
+
+
                         </flux:navlist.group>
                     </flux:navlist>
 
@@ -121,7 +124,7 @@
                                 {{ __('Materias') }}
                             </flux:navlist.item>
 
-                            <flux:navlist.item class="py-4" icon="users-round" :href="route('asignacion_materias')"
+                            <flux:navlist.item class="py-4" icon="book-plus" :href="route('asignacion_materias')"
                                 :current="request()->routeIs('asignacion_materias')" wire:navigate>
                                 {{ __('Asignaciones') }}
                             </flux:navlist.item>
