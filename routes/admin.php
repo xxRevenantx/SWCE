@@ -45,4 +45,9 @@ Route::middleware(['auth'])->group(function () {
 
     // Matrícula
     Route::get('matricula', [InscripcionController::class, 'matricula'])->middleware('can:admin.matricula')->name('matricula');
+
+
+    // PDF
+    // Route:get('')
+
 });
