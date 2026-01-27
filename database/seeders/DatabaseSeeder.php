@@ -2,8 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -13,22 +11,28 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
-
+        // 1) Seeders base (catálogos / permisos / etc.)
         $this->call([
             RoleSeeder::class,
+            UserSeeder::class,
             DiaSeeder::class,
             CountriesTableSeeder::class,
             LicenciaturaSeeder::class,
             MesSeeder::class,
             CuatrimestreSeeder::class,
             GeneracionSeeder::class,
-
-            // Add other seeders here
         ]);
 
-        // 2️⃣ LUEGO crear admin
+        // 2) Crear ALUMNOS antes de inscripciones (porque inscripciones depende de alumnos)
+        //    Ajusta el count a lo que quieras.
+        \App\Models\Alumno::factory()->count(50)->create();
+
+        // 3) Ahora sí, inscripciones (ya existen alumnos/licenciaturas/generaciones/cuatrimestres)
+        $this->call([
+            InscripcionSeeder::class,
+        ]);
+
+        // 4) Admin por default al final (como lo traías)
         $email = env('DEFAULT_ADMIN_EMAIL', 'admin@swce.com');
         $password = env('DEFAULT_ADMIN_PASSWORD', 'swce#2026');
 
@@ -41,7 +45,6 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
-        // 3️⃣ FINALMENTE asignar rol
         if (!$user->hasRole('Admin')) {
             $user->assignRole('Admin');
         }

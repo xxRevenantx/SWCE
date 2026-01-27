@@ -1,4 +1,4 @@
-<div class="p-4 sm:p-6">
+<div>
     {{-- HEADER --}}
     <div
         class="rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 shadow-sm overflow-hidden">
