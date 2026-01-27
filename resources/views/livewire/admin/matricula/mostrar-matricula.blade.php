@@ -461,7 +461,7 @@
                                                             </span>
                                                         </div>
                                                         <div class="mt-3 flex flex-wrap gap-2">
-                                                            <a href="{{ route('admin.') }}"
+                                                            <a href="#"
                                                                 class="inline-flex h-9 items-center justify-center gap-2 rounded-xl px-3 text-xs font-bold text-white
                                                        bg-gradient-to-r from-sky-500 via-blue-600 to-indigo-600 hover:from-sky-600 hover:via-blue-700 hover:to-indigo-700
                                                        focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
