@@ -12,11 +12,7 @@ class PDFController extends Controller
     public function expedienteAlumno($id)
     {
 
-        $inscripcion = \App\Models\Inscripcion::with(['alumno'])->find($id);
-
-        $alumno = $inscripcion->alumno;
-
-        dd($alumno);
+        $alumno = \App\Models\Inscripcion::findOrFail($id);
 
 
         if (!$alumno) {
@@ -28,6 +24,6 @@ class PDFController extends Controller
         ];
 
         $pdf = Pdf::loadView('admin.pdf.expedienteAlumnoPDF', $data)->setPaper('letter', 'portrait');
-        return $pdf->stream("Expediente_{$alumno->nombre}.pdf");
+        return $pdf->stream("Expediente.pdf");
     }
 }

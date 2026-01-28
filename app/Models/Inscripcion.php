@@ -21,6 +21,9 @@ class Inscripcion extends Model
         'fecha_inscripcion',
     ];
 
+    protected $with = ['alumno.datosContacto', 'alumno.datosEscolares'];
+
+
     // RELACIONES
     public function alumno()
     {
@@ -39,7 +42,4 @@ class Inscripcion extends Model
     {
         return $this->belongsTo(Cuatrimestre::class);
     }
-
-
-
 }
