@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\HorarioController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\LicenciaturaController;
 use App\Http\Controllers\Admin\MateriaController;
+use App\Http\Controllers\Admin\PDFController;
 use App\Http\Controllers\Admin\ProfesorController;
 use App\Http\Controllers\CuatrimestreController;
 use App\Http\Controllers\GeneracionController;
@@ -48,6 +49,6 @@ Route::middleware(['auth'])->group(function () {
 
 
     // PDF
-    // Route:get('')
+    Route::get('matricula/expediente-alumno/{id}', [PDFController::class, 'expedienteAlumno'])->middleware('can:admin.pdf.expediente_alumno')->name('admin.pdf.expedienteAlumno');
 
 });
