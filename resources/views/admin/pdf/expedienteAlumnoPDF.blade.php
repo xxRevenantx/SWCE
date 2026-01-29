@@ -10,13 +10,14 @@
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
-    <title>EXPEDIENTE DEL ALUMNO | {{ $alumno->nombre }} {{ $alumno->apellido_paterno }} {{ $alumno->apellido_materno }}
+    <title>EXPEDIENTE DEL ALUMNO | {{ $alumno->alumno->nombre }} {{ $alumno->alumno->apellido_paterno }}
+        {{ $alumno->alumno->apellido_materno }}
     </title>
 </head>
 
 <style>
     @page {
-        margin: 20px 0px 10px 0px;
+        margin: 30px 0px 10px 0px;
     }
 
     .page-break {
@@ -85,14 +86,19 @@
 
     .watermark {
         position: fixed;
-        top: 100%;
+        top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-        width: 150%;
-        height: 150%;
+        width: 80%;
+        height: 80%;
         z-index: -1;
         opacity: 0.1;
         text-align: center;
+    }
+
+    .watermark img {
+        width: 100%;
+        height: auto;
     }
 
     h2 {
@@ -186,27 +192,21 @@
     @endphp
 
 
-    {{ $alumno }}
 
 
+    <div style="width: 12%; text-align: center; margin-top: 0px;  position: absolute; left: 50px; top: -20px; ">
+        @if ($alumno->licenciatura->logo)
+            <img style="width: 100%;" src="{{ public_path('storage/licenciaturas/' . $alumno->licenciatura->logo) }}"
+                alt="{{ $alumno->licenciatura->nombre }}">
+        @else
+            <img style="width: 100%;" src="{{ public_path('imagenes_publicas/logo-letra.png') }}" alt="Logo">
+        @endif
 
-    <div style="width: 12%; text-align: center; margin-top: 0px;  position: absolute; left: 50px; top: 20px; ">
-        <img style="width: 100%;" src="{{ public_path('storage/licenciaturas/' . $alumno->licenciatura->logo) }}"
-            alt="{{ $alumno->licenciatura->nombre }}">
     </div>
     <div style="width: 100%; text-align: center; margin-top: 0px;">
         <img style="width: 40%;" src="{{ public_path('imagenes_publicas/logo.png') }}" alt="">
     </div>
 
-    <div style="text-align: center; margin-top: 0px; font-size:25px;  position: absolute; right: 147px; top: 3px; ">
-        <p>{{ \Carbon\Carbon::now()->locale('es')->isoFormat('DD') }}</p>
-    </div>
-    <div style="text-align: center; margin-top: 0px; font-size:25px;  position: absolute; right: 105px; top: 3px; ">
-        <p>{{ \Carbon\Carbon::now()->locale('es')->isoFormat('MM') }}</p>
-    </div>
-    <div style="text-align: center; margin-top: 0px; font-size:25px;  position: absolute; right: 60px; top: 3px; ">
-        <p>{{ \Carbon\Carbon::now()->locale('es')->isoFormat('YY') }}</p>
-    </div>
 
     <div class="contenedor">
 
@@ -227,10 +227,10 @@
 
                 <td rowspan="3" class="foto">
                     @if (!empty($alumno->foto))
-                        <img src="{{ public_path('storage/estudiantes/' . $alumno->foto) }}" width="75"
-                            height="90" style="object-fit: cover;">
+                        <img src="{{ public_path('storage/estudiantes/' . $alumno->foto) }}" height="90"
+                            style="object-fit: cover;">
                     @else
-                        <img src="{{ public_path('imagenes_publicas/user.png') }}" width="75" height="90"
+                        <img src="{{ public_path('imagenes_publicas/user.png') }}" height="90"
                             style="object-fit: cover;">
                     @endif
                 </td>
@@ -246,21 +246,23 @@
             <tr>
                 <td class="subtitulo">FECHA DE NACIMIENTO</td>
                 <td class="center">
-                    @if (!empty($alumno->fecha_nacimiento))
-                        {{ \Carbon\Carbon::parse($alumno->fecha_nacimiento)->format('d/m/Y') }}
+                    @if (!empty($alumno->alumno->fecha_nacimiento))
+                        {{ \Carbon\Carbon::parse($alumno->alumno->fecha_nacimiento)->format('d/m/Y') }}
                     @else
                         {{ $dash }}
                     @endif
                 </td>
                 <td class="subtitulo center">CURP</td>
-                <td colspan="2" class="center">{{ $v($alumno->CURP ?? ($alumno->curp ?? null)) }}</td>
+                <td colspan="2" class="center">{{ $v($alumno->alumno->CURP ?? ($alumno->alumno->curp ?? null)) }}
+                </td>
             </tr>
 
             <tr>
                 <td class="subtitulo">LUGAR DE NACIMIENTO</td>
                 <td class="center" colspan="5">
-                    @if (!empty($alumno->ciudadNacimiento->nombre))
-                        {{ $alumno->ciudadNacimiento->nombre }}, {{ $alumno->estadoNacimiento->nombre }}
+                    @if (!empty($alumno->alumno->ciudadNacimiento->nombre))
+                        {{ $alumno->alumno->ciudadNacimiento->nombre }},
+                        {{ $alumno->alumno->estadoNacimiento->nombre }}
                     @else
                         {{ $dash }}
                     @endif
@@ -307,11 +309,6 @@
                 <td class="center" colspan="2">{{ $v($alumno->celular ?? null) }}</td>
             </tr>
 
-            <tr>
-                <td class="subtitulo">NOMBRE DEL PADRE O TUTOR</td>
-                <td style="text-transform: uppercase;" colspan="5" class="center">
-                    {{ $upper($alumno->tutor ?? null) }}</td>
-            </tr>
 
             <tr>
                 <td class="subtitulo">BACHILLERATO DE PROCEDENCIA</td>
@@ -323,26 +320,22 @@
         {{-- ====================== SECCIÓN 2: DATOS ESCOLARES ====================== --}}
         <h2>DATOS ESCOLARES</h2>
 
+
+
         <table class="two-col">
             <tr>
                 <td>
-                    <b>Modalidad:</b> <span
-                        style="text-transform: uppercase;">{{ $v($alumno->modalidad->nombre ?? null) }}</span><br>
                     <b>Licenciatura:</b> <span
                         style="text-transform: uppercase;">{{ $v($alumno->licenciatura->nombre ?? null) }}</span><br>
                     <b>Generación:</b> <span
                         style="text-transform: uppercase;">{{ $v($alumno->generacion->generacion ?? null) }}</span><br>
                 </td>
                 <td>
-                    <b>Sexo:</b> <span style="text-transform: uppercase;">{{ $v($alumno->sexo ?? null) }}</span><br>
+                    <b>Sexo:</b> <span
+                        style="text-transform: uppercase;">{{ $v($alumno->alumno->sexo ?? null) }}</span><br>
                     <b>Matrícula:</b> <span
-                        style="text-transform: uppercase;">{{ $v($alumno->matricula ?? null) }}</span><br>
-                    <b>Fecha de inscripción:</b>
-                    @if (!empty($alumno->fecha_inscripcion))
-                        {{ \Carbon\Carbon::parse($alumno->fecha_inscripcion)->format('d/m/Y') }}
-                    @else
-                        {{ $dash }}
-                    @endif
+                        style="text-transform: uppercase;">{{ $v($alumno->alumno->datosEscolares->matricula ?? null) }}</span><br>
+
                 </td>
             </tr>
         </table>
@@ -395,8 +388,8 @@
             <tr>
                 <td class="subtitulo" style="width: 30%;">FOLIO / ID</td>
                 <td class="center">
-                    @if ($inscripcion && !empty($inscripcion->id))
-                        {{ $inscripcion->id }}
+                    @if ($alumno->alumno->datosEscolares->folio)
+                        {{ $alumno->alumno->datosEscolares->folio }}
                     @else
                         {{ $dash }}
                     @endif
@@ -445,8 +438,10 @@
             </tr>
         </table>
 
-
-
+        <footer>
+            <p>Sistema Web de Control Escolar | {{ config('app.name') }} | Fecha de expedición:
+                {{ \Carbon\Carbon::now()->locale('es')->isoFormat('DD/MM/YYYY') }}</p>
+        </footer>
 
     </div>
 </body>

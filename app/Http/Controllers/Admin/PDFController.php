@@ -21,9 +21,10 @@ class PDFController extends Controller
 
         $data = [
             'alumno' => $alumno,
+            1
         ];
 
         $pdf = Pdf::loadView('admin.pdf.expedienteAlumnoPDF', $data)->setPaper('letter', 'portrait');
-        return $pdf->stream("Expediente.pdf");
+        return $pdf->stream("EXPEDIENTE_" . mb_strtoupper($alumno->alumno->nombre . "_" . $alumno->alumno->apellido_paterno . "_" . $alumno->alumno->apellido_materno) . ".pdf");
     }
 }

@@ -30,6 +30,8 @@ class DatabaseSeeder extends Seeder
         // 3) Ahora sí, inscripciones (ya existen alumnos/licenciaturas/generaciones/cuatrimestres)
         $this->call([
             InscripcionSeeder::class,
+            DatosEscolaresSeeder::class,
+            DatosContactoSeeder::class,
         ]);
 
         // 4) Admin por default al final (como lo traías)
