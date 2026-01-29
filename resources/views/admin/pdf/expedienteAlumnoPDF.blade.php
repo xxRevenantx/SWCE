@@ -42,6 +42,8 @@
         font-family: sans-serif;
         margin: auto;
         font-size: 13px;
+        text-transform: uppercase;
+        line-height: 30px;
     }
 
     table {
@@ -257,63 +259,11 @@
                 </td>
             </tr>
 
-            <tr>
-                <td class="subtitulo">LUGAR DE NACIMIENTO</td>
-                <td class="center" colspan="5">
-                    @if (!empty($alumno->alumno->ciudadNacimiento->nombre))
-                        {{ $alumno->alumno->ciudadNacimiento->nombre }},
-                        {{ $alumno->alumno->estadoNacimiento->nombre }}
-                    @else
-                        {{ $dash }}
-                    @endif
-                </td>
-            </tr>
-
-            <tr>
-                <td class="subtitulo">DOMICILIO</td>
-                <td colspan="5" class="center" style="text-transform: uppercase;">
-                    @if (!empty($alumno->calle))
-                        {{ $alumno->calle }}
-                        @if (!empty($alumno->numero_exterior))
-                            NO. EXT.{{ $alumno->numero_exterior }}
-                        @else
-                            S/N
-                        @endif
-                        @if (!empty($alumno->numero_interior))
-                            {{ $alumno->numero_interior }}
-                        @endif
-                    @else
-                        {{ $dash }}
-                    @endif
-                </td>
-            </tr>
-
-            <tr>
-                <td class="subtitulo">COLONIA</td>
-                <td colspan="2" class="center">{{ $v($alumno->colonia ?? null) }}</td>
-                <td class="subtitulo center">CP</td>
-                <td colspan="2" class="center">{{ $v($alumno->codigo_postal ?? null) }}</td>
-            </tr>
-
-            <tr>
-                <td class="subtitulo">MUNICIPIO</td>
-                <td colspan="2" class="center">{{ $v($alumno->municipio ?? null) }}</td>
-                <td class="subtitulo center">EMAIL</td>
-                <td colspan="2" class="email center">{{ $v($alumno->user->email ?? null) }}</td>
-            </tr>
-
-            <tr>
-                <td class="subtitulo">TELÉFONO</td>
-                <td class="center" colspan="2">{{ $v($alumno->telefono ?? null) }}</td>
-                <td class="subtitulo center">CELULAR</td>
-                <td class="center" colspan="2">{{ $v($alumno->celular ?? null) }}</td>
-            </tr>
-
 
             <tr>
                 <td class="subtitulo">BACHILLERATO DE PROCEDENCIA</td>
                 <td style="text-transform: uppercase;" colspan="5" class="center">
-                    {{ $upper($alumno->bachillerato_procedente ?? null) }}</td>
+                    {{ $upper($alumno->alumno->datosContacto->bachillerato_procedente ?? null) }}</td>
             </tr>
         </table>
 
@@ -343,41 +293,48 @@
         {{-- ====================== SECCIÓN 3: DATOS DE CONTACTO ====================== --}}
         <h2>DATOS DE CONTACTO</h2>
 
+
+
         <table>
             <tr>
-                <td class="subtitulo" style="width: 30%;">EMAIL</td>
-                <td class="center">{{ $v($alumno->user->email ?? null) }}</td>
-                <td class="subtitulo" style="width: 20%;">TELÉFONO</td>
-                <td class="center">{{ $v($alumno->telefono ?? null) }}</td>
+                <td class="subtitulo">EMAIL</td>
+                <td class="center">{{ $v($alumno->alumno->user->email ?? null) }}</td>
+                <td class="subtitulo">TELÉFONO</td>
+                <td class="center">{{ $v($alumno->alumno->datosContacto->telefono ?? null) }}</td>
             </tr>
             <tr>
                 <td class="subtitulo">CELULAR</td>
-                <td class="center">{{ $v($alumno->celular ?? null) }}</td>
-                <td class="subtitulo">DOMICILIO</td>
+                <td class="center">{{ $v($alumno->alumno->datosContacto->celular ?? null) }}</td>
+                <td class="subtitulo">CIUDAD</td>
                 <td class="center" style="text-transform: uppercase;">
-                    @if (!empty($alumno->calle))
-                        {{ $alumno->calle }}
-                        @if (!empty($alumno->numero_exterior))
-                            NO. EXT.{{ $alumno->numero_exterior }}
-                        @else
-                            S/N
-                        @endif
-                    @else
-                        {{ $dash }}
-                    @endif
+                    @if (!empty($alumno->alumno->datosContacto->ciudad->name))
+                        {{ $alumno->alumno->datosContacto->ciudad->name }}
+
                 </td>
             </tr>
             <tr>
                 <td class="subtitulo">COLONIA</td>
-                <td class="center">{{ $v($alumno->colonia ?? null) }}</td>
+                <td class="center">{{ $v($alumno->alumno->datosContacto->colonia ?? null) }}</td>
                 <td class="subtitulo">MUNICIPIO</td>
-                <td class="center">{{ $v($alumno->municipio ?? null) }}</td>
+                <td class="center">{{ $v($alumno->alumno->datosContacto->municipio ?? null) }}</td>
             </tr>
             <tr>
                 <td class="subtitulo">C.P.</td>
-                <td class="center">{{ $v($alumno->codigo_postal ?? null) }}</td>
-                <td class="subtitulo">TUTOR</td>
-                <td class="center" style="text-transform: uppercase;">{{ $upper($alumno->tutor ?? null) }}</td>
+                <td class="center">{{ $v($alumno->alumno->datosContacto->codigo_postal ?? null) }}</td>
+                <td class="subtitulo">ESTADO</td>
+                <td class="center">{{ $v($alumno->alumno->datosContacto->estado->name ?? null) }}</td>
+            </tr>
+            <tr>
+                <td class="subtitulo">DOMICILIO</td>
+                <td colspan="3" class="center">{{ $v($alumno->alumno->datosContacto->calle ?? null) }} @if (!empty($alumno->alumno->datosContacto->numero_exterior))
+                        NO. EXT.{{ $alumno->alumno->datosContacto->numero_exterior }}
+                    @else
+                        S/N
+                    @endif
+                @else
+                    {{ $dash }}
+                    @endif
+                </td>
             </tr>
         </table>
 
@@ -422,23 +379,9 @@
             </tr>
         </table>
 
-        {{-- ====================== SECCIÓN 5: DATOS DE LA LICENCIATURA (COMO REFERENCIA) ====================== --}}
-        <h2>DATOS DE LA LICENCIATURA</h2>
 
-        <table>
-            <tr>
-                <td class="subtitulo">LICENCIATURA ASIGNADA</td>
-                <td colspan="3" class="center" style="text-transform: uppercase;">
-                    {{ $alumno->licenciatura->nombre }}
-                </td>
-            </tr>
-            <tr>
-                <td class="subtitulo">GENERACIÓN</td>
-                <td class="center" style="text-transform: uppercase;">{{ $alumno->generacion->generacion }}</td>
-            </tr>
-        </table>
 
-        <footer>
+        <footer style="line-height: 20px">
             <p>Sistema Web de Control Escolar | {{ config('app.name') }} | Fecha de expedición:
                 {{ \Carbon\Carbon::now()->locale('es')->isoFormat('DD/MM/YYYY') }}</p>
         </footer>

@@ -1,4 +1,17 @@
-<div>
+<div x-data="{
+    destroyAlumno(id) {
+        Swal.fire({
+            title: '¿Estás seguro?',
+            text: `Esta acción no podrá revertirse.`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#2563EB',
+            cancelButtonColor: '#EF4444',
+            cancelButtonText: 'Cancelar',
+            confirmButtonText: 'Sí, eliminar'
+        }).then((r) => r.isConfirmed && @this.call('eliminarAlumno', id))
+    },
+}" class="space-y-5">
     {{-- HEADER --}}
     <div
         class="rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 shadow-sm overflow-hidden">
@@ -336,37 +349,21 @@
                                             </button>
 
                                             {{-- Editar --}}
-                                            <button type="button"
-                                                class="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-amber-400 hover:bg-amber-500 text-white
-                                                       focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-400"
-                                                title="Editar">
-                                                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none"
-                                                    aria-hidden="true">
-                                                    <path d="M12 20h9" stroke="currentColor" stroke-width="2"
-                                                        stroke-linecap="round" />
-                                                    <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4 11.5-11.5Z"
-                                                        stroke="currentColor" stroke-width="2"
-                                                        stroke-linejoin="round" />
-                                                </svg>
-                                            </button>
+                                            <flux:button variant="primary"
+                                                class="cursor-pointer bg-amber-500 hover:bg-amber-600 text-white"
+                                                @click="$dispatch('abrir-modal-editar');
+                                                         Livewire.dispatch('editarModal', { id: {{ $row->id }} }); ">
+                                                <flux:icon.square-pen class="w-3.5 h-3.5" />
+                                                <!-- ícono -->
+                                            </flux:button>
 
-                                            {{-- Eliminar --}}
-                                            <button type="button"
-                                                class="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-rose-500 hover:bg-rose-600 text-white
-                                                       focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-500"
-                                                title="Eliminar">
-                                                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none"
-                                                    aria-hidden="true">
-                                                    <path d="M3 6h18" stroke="currentColor" stroke-width="2"
-                                                        stroke-linecap="round" />
-                                                    <path d="M8 6V4h8v2" stroke="currentColor" stroke-width="2"
-                                                        stroke-linejoin="round" />
-                                                    <path d="M6 6l1 16h10l1-16" stroke="currentColor" stroke-width="2"
-                                                        stroke-linejoin="round" />
-                                                    <path d="M10 11v6M14 11v6" stroke="currentColor" stroke-width="2"
-                                                        stroke-linecap="round" />
-                                                </svg>
-                                            </button>
+                                            <flux:button variant="danger"
+                                                class="cursor-pointer bg-rose-600 hover:bg-rose-700 text-white p-1"
+                                                @click="destroyAlumno({{ $row->id }})">
+                                                <flux:icon.trash-2 class="w-3.5 h-3.5" />
+                                            </flux:button>
+
+
                                         </div>
                                     </td>
                                 </tr>
