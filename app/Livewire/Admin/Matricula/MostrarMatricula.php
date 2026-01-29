@@ -68,6 +68,25 @@ class MostrarMatricula extends Component
         $this->resetPage();
     }
 
+    // ELIMINAR ALUMNO
+    public function destroyAlumno(int $id): void
+    {
+        $inscripcion = Inscripcion::findOrFail($id);
+        $alumno = $inscripcion->alumno;
+
+        if ($alumno) {
+            // Aquí elimino el alumno y todo lo relacionado (gracias a las relaciones con onDelete cascade).
+            $alumno->delete();
+
+            $this->dispatch('toast', type: 'success', message: 'El alumno y sus datos relacionados han sido eliminados correctamente.');
+        } else {
+            $this->dispatch('toast', type: 'error', message: 'No se encontró el alumno asociado a esta inscripción.');
+        }
+
+        // Aquí reinicio la paginación para evitar problemas si la página actual queda vacía.
+        $this->resetPage();
+    }
+
     public function limpiarFiltros(): void
     {
         // Aquí limpio todo y dejo los filtros como string vacío para que no truene el tipado.
