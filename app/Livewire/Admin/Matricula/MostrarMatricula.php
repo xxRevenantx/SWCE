@@ -31,7 +31,9 @@ class MostrarMatricula extends Component
         'filtrar_licenciatura' => ['except' => ''],
         'filtrar_generacion' => ['except' => ''],
         'filtrar_cuatrimestre' => ['except' => ''],
+        'page' => ['except' => 1], // ✅ para mantener la página en la URL
     ];
+
 
 
     public function mount(): void
@@ -69,23 +71,40 @@ class MostrarMatricula extends Component
     }
 
     // ELIMINAR ALUMNO
-    public function destroyAlumno(int $id): void
+    public function eliminarAlumno(int $id): void
     {
+        $paginaActual = $this->getPage();
+
         $inscripcion = Inscripcion::findOrFail($id);
         $alumno = $inscripcion->alumno;
 
-        if ($alumno) {
-            // Aquí elimino el alumno y todo lo relacionado (gracias a las relaciones con onDelete cascade).
-            $alumno->delete();
-
-            $this->dispatch('toast', type: 'success', message: 'El alumno y sus datos relacionados han sido eliminados correctamente.');
-        } else {
-            $this->dispatch('toast', type: 'error', message: 'No se encontró el alumno asociado a esta inscripción.');
+        if (!$alumno) {
+            $this->dispatch('swal', [
+                'position' => 'top',
+                'title' => 'Error: Alumno no encontrado',
+                'icon' => 'error',
+            ]);
+            return;
         }
 
-        // Aquí reinicio la paginación para evitar problemas si la página actual queda vacía.
-        $this->resetPage();
+        $alumno->delete(); // ✅ soft delete
+
+        $this->dispatch('swal', [
+            'position' => 'top',
+            'title' => 'Alumno Eliminado',
+            'icon' => 'success',
+        ]);
+
+        // Mantener página (solo retroceder si quedó vacía)
+        $registrosEnPagina = $this->registros;
+
+        if ($registrosEnPagina->count() === 0 && $registrosEnPagina->total() > 0 && $paginaActual > 1) {
+            $this->setPage($paginaActual - 1);
+        } else {
+            $this->setPage($paginaActual);
+        }
     }
+
 
     public function limpiarFiltros(): void
     {
@@ -117,6 +136,10 @@ class MostrarMatricula extends Component
 
             // Aquí hago join con alumnos porque la búsqueda incluye nombre y CURP.
             ->join('alumnos', 'alumnos.id', '=', 'inscripciones.alumno_id')
+
+
+            ->whereNull('alumnos.deleted_at') // ✅ excluye alumnos “eliminados”
+
 
             // Aquí uso leftJoin con datos_escolares porque puede que aún no exista ese registro.
             ->leftJoin('datos_escolares', 'datos_escolares.alumno_id', '=', 'alumnos.id')

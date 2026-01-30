@@ -25,7 +25,7 @@ class DatabaseSeeder extends Seeder
 
         // 2) Crear ALUMNOS antes de inscripciones (porque inscripciones depende de alumnos)
         //    Ajusta el count a lo que quieras.
-        \App\Models\Alumno::factory()->count(50)->create();
+        \App\Models\Alumno::factory()->count(10)->create();
 
         // 3) Ahora sí, inscripciones (ya existen alumnos/licenciaturas/generaciones/cuatrimestres)
         $this->call([

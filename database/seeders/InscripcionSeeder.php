@@ -24,7 +24,7 @@ class InscripcionSeeder extends Seeder
         }
 
         // ✅ Cantidad de inscripciones a crear (ajusta a tu gusto)
-        $objetivo = 200;
+        $objetivo = 10;
 
         // ✅ Máximo posible de combinaciones únicas
         $maxPosible = $alumnos->count() * $licenciaturas->count() * $generaciones->count() * $cuatrimestres->count();

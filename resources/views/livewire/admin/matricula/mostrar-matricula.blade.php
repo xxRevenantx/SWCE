@@ -139,7 +139,7 @@
             <div class="relative overflow-hidden rounded-2xl border border-neutral-200 dark:border-neutral-800">
                 {{-- LOADER SOLO PARA LA TABLA --}}
                 <div wire:loading
-                    wire:target="search, filtrar_licenciatura, filtrar_generacion, filtrar_cuatrimestre, limpiarFiltros, exportarPdf, gotoPage, nextPage, previousPage"
+                    wire:target="search,  filtrar_licenciatura, filtrar_generacion, filtrar_cuatrimestre, limpiarFiltros, exportarPdf, gotoPage, nextPage, previousPage, eliminarAlumno"
                     class="absolute inset-0 z-20 grid place-items-center bg-white/60 dark:bg-neutral-900/60 backdrop-blur-sm">
                     <div
                         class="rounded-2xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 shadow-xl px-6 py-5 flex items-center gap-3">

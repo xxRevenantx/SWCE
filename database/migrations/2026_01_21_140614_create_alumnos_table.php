@@ -22,6 +22,8 @@ return new class extends Migration {
             $table->enum('sexo', ['M', 'F']);
             $table->timestamps();
 
+            $table->softDeletes(); // crea deleted_at
+
 
             $table->unique('curp');
             $table->unique('user_id');
