@@ -302,6 +302,7 @@
                                     </tr>
                                 @endif
 
+
                                 {{-- FILA PRINCIPAL --}}
                                 <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-800/40">
                                     <td class="px-4 py-3">{{ $registros->firstItem() + $i }}</td>
@@ -349,17 +350,19 @@
                                             </button>
 
                                             {{-- Editar --}}
-                                            <flux:button variant="primary"
-                                                class="cursor-pointer bg-amber-500 hover:bg-amber-600 text-white"
-                                                @click="$dispatch('abrir-modal-editar');
-                                                         Livewire.dispatch('editarModal', { id: {{ $row->id }} }); ">
+                                            <flux:button
+                                                href="{{ route('admin.matricula.editar.alumno', $row->alumno->id) }}"
+                                                variant="primary"
+                                                class="cursor-pointer bg-amber-500 hover:bg-amber-600 text-white">
                                                 <flux:icon.square-pen class="w-3.5 h-3.5" />
                                                 <!-- ícono -->
                                             </flux:button>
 
+                                            {{ $row->alumno->id }}
+
                                             <flux:button variant="danger"
                                                 class="cursor-pointer bg-rose-600 hover:bg-rose-700 text-white p-1"
-                                                @click="destroyAlumno({{ $row->id }})">
+                                                @click="destroyAlumno( {{ $row->alumno->id }})">
                                                 <flux:icon.trash-2 class="w-3.5 h-3.5" />
                                             </flux:button>
 

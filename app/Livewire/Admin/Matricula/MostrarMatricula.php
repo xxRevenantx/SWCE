@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin\Matricula;
 
+use App\Models\Alumno;
 use App\Models\Cuatrimestre;
 use App\Models\Generacion;
 use App\Models\Inscripcion;   // ✅ Aquí uso el modelo Inscripcion porque es el que conecta alumno + licenciatura + generación + cuatrimestre.
@@ -73,10 +74,13 @@ class MostrarMatricula extends Component
     // ELIMINAR ALUMNO
     public function eliminarAlumno(int $id): void
     {
+
+
+        // dd('Eliminar alumno con ID de inscripción: ' . $id);
+
         $paginaActual = $this->getPage();
 
-        $inscripcion = Inscripcion::findOrFail($id);
-        $alumno = $inscripcion->alumno;
+        $alumno = Alumno::findOrFail($id);
 
         if (!$alumno) {
             $this->dispatch('swal', [

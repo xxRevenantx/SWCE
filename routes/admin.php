@@ -47,6 +47,7 @@ Route::middleware(['auth'])->group(function () {
     // Matrícula
     Route::get('matricula', [InscripcionController::class, 'matricula'])->middleware('can:admin.matricula')->name('matricula');
 
+    Route::get('matricula/editar-alumno/{id}', [InscripcionController::class, 'editarAlumno'])->middleware('can:admin.matricula.editar_alumno')->name('admin.matricula.editar.alumno');
 
     // PDF
     Route::get('matricula/expediente-alumno/{id}', [PDFController::class, 'expedienteAlumno'])->middleware('can:admin.pdf.expediente_alumno')->name('admin.pdf.expedienteAlumno');

@@ -18,4 +18,9 @@ class InscripcionController extends Controller
     {
         return view('admin.matricula.index');
     }
+
+    public function editarAlumno($id)
+    {
+        return view('admin.matricula.editar-alumno', compact('id'));
+    }
 }
