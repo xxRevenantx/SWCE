@@ -4,5 +4,5 @@
         {{ $slot }}
     </flux:main>
 
-    <livewire:footer />
+
 </x-layouts.app.sidebar>
