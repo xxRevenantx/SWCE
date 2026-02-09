@@ -14,7 +14,6 @@ class DatabaseSeeder extends Seeder
         // 1) Seeders base (catálogos / permisos / etc.)
         $this->call([
             RoleSeeder::class,
-            UserSeeder::class,
             DiaSeeder::class,
             CountriesTableSeeder::class,
             LicenciaturaSeeder::class,
@@ -22,6 +21,16 @@ class DatabaseSeeder extends Seeder
             CuatrimestreSeeder::class,
             GeneracionSeeder::class,
         ]);
+
+        // Seeders con factories SOLO en local/testing
+        if (app()->environment(['local', 'testing'])) {
+            $this->call([
+                UserSeeder::class,
+                // InscripcionSeeder::class,
+                // DatosEscolaresSeeder::class,
+                // DatosContactosSeeder::class,
+            ]);
+        }
 
         // 2) Crear ALUMNOS antes de inscripciones (porque inscripciones depende de alumnos)
         //    Ajusta el count a lo que quieras.
