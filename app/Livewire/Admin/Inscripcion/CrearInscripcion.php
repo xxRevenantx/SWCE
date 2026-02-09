@@ -108,7 +108,7 @@ class CrearInscripcion extends Component
     {
         $this->countries = Country::orderBy('name')->get(['id', 'name'])->toArray();
 
-        // Usuarios estudiante activos y sin alumno asociado
+        // Aquí obtengo usuarios con rol Estudiante, activos y que todavía no tienen alumno asociado.
         $this->usuarios = User::role('Estudiante')
             ->where('status', 'true')
             ->whereDoesntHave('alumno')
@@ -120,6 +120,61 @@ class CrearInscripcion extends Component
         $this->cuatrimestres = Cuatrimestre::orderBy('id')->get();
 
         $this->fecha_inscripcion = now()->toDateString();
+    }
+
+    /** ============================
+     *  MATRÍCULA AUTOMÁTICA
+     *  Estructura: LIC + 3 letras licenciatura + 4 letras CURP + 2 números aleatorios
+     *  Ej: LICNUTCANP09
+     *  ============================ */
+
+    public function updatedCurp(?string $valor): void
+    {
+        // Aquí normalizo el CURP y luego intento regenerar la matrícula.
+        $this->curp = $valor ? mb_strtoupper(trim($valor)) : null;
+        $this->regenerarMatricula();
+    }
+
+    public function updatedLicenciaturaId(?int $valor): void
+    {
+        // Aquí solo reacciono al cambio y regenero la matrícula.
+        $this->licenciatura_id = $valor;
+        $this->regenerarMatricula();
+    }
+
+    protected function regenerarMatricula(): void
+    {
+        // Aquí valido que ya tenga los datos mínimos para construir la matrícula.
+        if (!$this->licenciatura_id || !$this->curp) {
+            return;
+        }
+
+        // Aquí tomo las primeras 4 letras del CURP.
+        $curp4 = mb_substr($this->curp, 0, 4);
+
+        // Aquí saco las 3 primeras letras de la licenciatura (por nombre).
+        $lic = Licenciatura::find($this->licenciatura_id);
+        $nombreLic = $lic?->nombre ?? '';
+
+        // Aquí convierto "Nutrición" a "NUT" (sin espacios y en mayúsculas).
+        $tresLic = mb_strtoupper(mb_substr(preg_replace('/\s+/', '', $nombreLic), 0, 3));
+
+        // Aquí genero 2 números aleatorios.
+        $dosNumeros = str_pad((string) random_int(0, 99), 2, '0', STR_PAD_LEFT);
+
+        // Aquí armo la matrícula final.
+        $matricula = 'LIC' . $tresLic . $curp4 . $dosNumeros;
+
+        // Aquí verifico que no exista ya en datos_escolares, y si existe, vuelvo a intentar.
+        $intentos = 0;
+        while (DatosEscolares::where('matricula', $matricula)->exists() && $intentos < 15) {
+            $dosNumeros = str_pad((string) random_int(0, 99), 2, '0', STR_PAD_LEFT);
+            $matricula = 'LIC' . $tresLic . $curp4 . $dosNumeros;
+            $intentos++;
+        }
+
+        // Aquí asigno la matrícula al input, para que se vea en tiempo real.
+        $this->matricula = $matricula;
     }
 
     /** Cascadas país -> estado -> ciudad (para datos_contactos) */
@@ -169,7 +224,7 @@ class CrearInscripcion extends Component
             'matricula' => 'required|string|max:255|unique:datos_escolares,matricula',
             'folio' => 'nullable|string|max:255|unique:datos_escolares,folio',
 
-            // datos_contactos (en tu migración son obligatorios)
+            // datos_contactos
             'calle' => 'nullable|string|max:255',
             'colonia' => 'nullable|string|max:255',
             'municipio' => 'nullable|string|max:255',
@@ -192,7 +247,7 @@ class CrearInscripcion extends Component
             'status' => 'boolean',
 
             // foto
-            'foto' => 'nullable|image|max:2048', // 2MB
+            'foto' => 'nullable|image|max:2048',
         ];
     }
 
@@ -214,10 +269,11 @@ class CrearInscripcion extends Component
     public function guardarInscripcion(): void
     {
         try {
+            // Aquí por si el usuario cambió algo y no se disparó el updated, vuelvo a generar.
+            $this->regenerarMatricula();
+
             $this->validate();
 
-            // Evitar duplicar inscripción para la misma combinación
-            // (si deseas permitir historial, aquí cambia la regla)
             $exists = Inscripcion::whereHas('alumno', function ($q) {
                 $q->where('user_id', $this->user_id);
             })
@@ -233,18 +289,16 @@ class CrearInscripcion extends Component
             }
 
             DB::transaction(function () {
-                // 1) Alumno
                 $alumno = Alumno::create([
                     'user_id' => $this->user_id,
-                    'curp' => mb_strtoupper(trim((string) $this->curp)),
-                    'nombre' => mb_strtoupper(trim((string) $this->nombre)),
-                    'apellido_paterno' => $this->apellido_paterno ? mb_strtoupper(trim($this->apellido_paterno)) : null,
-                    'apellido_materno' => $this->apellido_materno ? mb_strtoupper(trim($this->apellido_materno)) : null,
+                    'curp' => $this->ponerMayusculas($this->curp),
+                    'nombre' => $this->ponerMayusculas($this->nombre),
+                    'apellido_paterno' => $this->apellido_paterno ? $this->ponerMayusculas($this->apellido_paterno) : null,
+                    'apellido_materno' => $this->apellido_materno ? $this->ponerMayusculas($this->apellido_materno) : null,
                     'fecha_nacimiento' => $this->fecha_nacimiento,
                     'sexo' => $this->sexo,
                 ]);
 
-                // 2) Datos escolares
                 $pathFoto = null;
                 if ($this->foto) {
                     $pathFoto = $this->foto->store('alumnos/fotos', 'public');
@@ -252,29 +306,27 @@ class CrearInscripcion extends Component
 
                 DatosEscolares::create([
                     'alumno_id' => $alumno->id,
-                    'matricula' => trim((string) $this->matricula),
-                    'folio' => $this->folio ? trim((string) $this->folio) : null,
+                    'matricula' => $this->limpiarTexto($this->matricula),
+                    'folio' => $this->folio ? $this->limpiarTexto($this->folio) : null,
                     'foto' => $pathFoto,
                 ]);
 
-                // 3) Datos contacto
                 DatosContacto::create([
                     'alumno_id' => $alumno->id,
-                    'calle' => trim((string) $this->calle),
-                    'numero_exterior' => $this->numero_exterior ? trim((string) $this->numero_exterior) : null,
-                    'numero_interior' => $this->numero_interior ? trim((string) $this->numero_interior) : null,
-                    'colonia' => trim((string) $this->colonia),
-                    'municipio' => trim((string) $this->municipio),
-                    'codigo_postal' => trim((string) $this->codigo_postal),
-                    'celular' => trim((string) $this->celular),
-                    'telefono' => $this->telefono ? trim((string) $this->telefono) : null,
-                    'bachillerato_procedente' => trim((string) $this->bachillerato_procedente),
+                    'calle' => $this->limpiarTexto($this->calle),
+                    'numero_exterior' => $this->numero_exterior ? $this->limpiarTexto($this->numero_exterior) : null,
+                    'numero_interior' => $this->numero_interior ? $this->limpiarTexto($this->numero_interior) : null,
+                    'colonia' => $this->limpiarTexto($this->colonia),
+                    'municipio' => $this->limpiarTexto($this->municipio),
+                    'codigo_postal' => $this->limpiarTexto($this->codigo_postal),
+                    'celular' => $this->limpiarTexto($this->celular),
+                    'telefono' => $this->telefono ? $this->limpiarTexto($this->telefono) : null,
+                    'bachillerato_procedente' => $this->limpiarTexto($this->bachillerato_procedente),
                     'pais_id' => $this->pais_id,
                     'estado_id' => $this->estado_id,
                     'ciudad_id' => $this->ciudad_id,
                 ]);
 
-                // 4) Inscripción
                 Inscripcion::create([
                     'alumno_id' => $alumno->id,
                     'licenciatura_id' => $this->licenciatura_id,
@@ -285,7 +337,6 @@ class CrearInscripcion extends Component
                 ]);
             });
 
-            // Reset (no resetees catálogos)
             $this->reset([
                 'user_id',
                 'curp',
@@ -320,30 +371,38 @@ class CrearInscripcion extends Component
             $this->states = [];
             $this->cities = [];
 
-            $this->dispatch('inscripcion-creada');
+            $this->dispatch('swal', [
+                'title' => '¡Inscripción creada correctamente!',
+                'icon' => 'success',
+                'position' => 'top-end',
+            ]);
         } catch (ValidationException $e) {
             $errorKeys = array_keys($e->validator->errors()->toArray());
-            $step = $this->firstErroredStep($errorKeys);
+            $step = $this->obtenerPrimerStepConError($errorKeys);
 
             $this->dispatch('ir-a-step', step: $step);
-            $this->dispatch('errores-por-step', summary: $this->errorsSummaryByStep($e));
+            $this->dispatch('errores-por-step', summary: $this->obtenerResumenErroresPorStep($e));
 
             throw $e;
         }
     }
 
-    protected function firstErroredStep(array $errorKeys): string
+    protected function obtenerPrimerStepConError(array $errorKeys): string
     {
         foreach ($this->stepMap as $step => $fields) {
-            if (empty($fields))
+            if (empty($fields)) {
                 continue;
-            if (count(array_intersect($fields, $errorKeys)) > 0)
+            }
+
+            if (count(array_intersect($fields, $errorKeys)) > 0) {
                 return $step;
+            }
         }
+
         return 'generales';
     }
 
-    protected function errorsSummaryByStep(?ValidationException $e = null): array
+    protected function obtenerResumenErroresPorStep(?ValidationException $e = null): array
     {
         $messages = $e
             ? $e->validator->errors()->messages()
@@ -361,6 +420,16 @@ class CrearInscripcion extends Component
         }
 
         return $summary;
+    }
+
+    protected function limpiarTexto(?string $valor): string
+    {
+        return trim((string) $valor);
+    }
+
+    protected function ponerMayusculas(?string $valor): string
+    {
+        return mb_strtoupper($this->limpiarTexto($valor));
     }
 
     public function render()

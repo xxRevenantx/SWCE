@@ -42,10 +42,10 @@ Route::middleware(['auth'])->group(function () {
 
 
     //Inscripción
-    Route::get('inscripciones', [InscripcionController::class, 'inscripcion'])->middleware('can:admin.inscripciones')->name('inscripciones');
+    Route::get('inscripciones', [InscripcionController::class, 'inscripcion'])->middleware('can:admin.inscripciones')->name('admin.inscripciones');
 
     // Matrícula
-    Route::get('matricula', [InscripcionController::class, 'matricula'])->middleware('can:admin.matricula')->name('matricula');
+    Route::get('matricula', [InscripcionController::class, 'matricula'])->middleware('can:admin.matricula')->name('admin.matricula');
 
     Route::get('matricula/editar-alumno/{id}', [InscripcionController::class, 'editarAlumno'])->middleware('can:admin.matricula.editar_alumno')->name('admin.matricula.editar.alumno');
 

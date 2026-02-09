@@ -3,7 +3,7 @@
 namespace App\Livewire\Admin\Matricula;
 
 use Livewire\Component;
-
+use Livewire\WithFileUploads;
 
 use App\Models\Alumno;
 use App\Models\City;
@@ -16,29 +16,31 @@ use App\Models\State;
 use App\Models\User;
 use App\Models\Generacion;
 use App\Models\Cuatrimestre;
+
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
-use Livewire\WithFileUploads;
-
 
 class EditarMatricula extends Component
 {
-
-
-
     use WithFileUploads;
 
-    /** IDs */
+    /** =========================
+     *  IDs
+     *  ========================= */
     public int $inscripcion_id;
 
-    /** Modelos cargados (para ignore y para paths viejos) */
+    /** =========================
+     *  Modelos cargados (para ignore y para paths viejos)
+     *  ========================= */
     public ?Inscripcion $inscripcion = null;
     public ?Alumno $alumno = null;
     public ?DatosEscolares $datosEscolares = null;
     public ?DatosContacto $datosContacto = null;
 
-    /** Catálogos */
+    /** =========================
+     *  Catálogos
+     *  ========================= */
     public $usuarios;
     public $licenciaturas;
     public $generaciones;
@@ -48,7 +50,9 @@ class EditarMatricula extends Component
     public array $states = [];
     public array $cities = [];
 
-    /** === ALUMNO (tabla alumnos) === */
+    /** =========================
+     *  === ALUMNO (tabla alumnos) ===
+     *  ========================= */
     public ?int $user_id = null;
     public ?string $curp = null;
     public ?string $nombre = null;
@@ -57,13 +61,17 @@ class EditarMatricula extends Component
     public ?string $fecha_nacimiento = null;
     public ?string $sexo = null; // M/F
 
-    /** === DATOS ESCOLARES (tabla datos_escolares) === */
-    public ?string $matricula = null;
+    /** =========================
+     *  === DATOS ESCOLARES (tabla datos_escolares) ===
+     *  ========================= */
+    public ?string $matricula = null; // ✅ ahora se autogenera: LIC + SIGLAS + CANP + 2 dígitos
     public ?string $folio = null;
-    public $foto = null; // archivo Livewire (nuevo)
-    public ?string $foto_actual = null; // path actual (para preview)
+    public $foto = null;                 // archivo Livewire (nuevo)
+    public ?string $foto_actual = null;  // path actual (para preview)
 
-    /** === DATOS CONTACTO (tabla datos_contactos) === */
+    /** =========================
+     *  === DATOS CONTACTO (tabla datos_contactos) ===
+     *  ========================= */
     public ?string $calle = null;
     public ?string $numero_exterior = null;
     public ?string $numero_interior = null;
@@ -78,13 +86,18 @@ class EditarMatricula extends Component
     public ?int $estado_id = null;
     public ?int $ciudad_id = null;
 
-    /** === INSCRIPCION (tabla inscripciones) === */
+    /** =========================
+     *  === INSCRIPCION (tabla inscripciones) ===
+     *  ========================= */
     public ?int $licenciatura_id = null;
     public ?int $generacion_id = null;
     public ?int $cuatrimestre_id = null;
     public ?string $fecha_inscripcion = null;
     public bool $status = true;
 
+    /** =========================
+     *  Mapa de campos por step (para regresarte al step con errores)
+     *  ========================= */
     protected array $stepMap = [
         'generales' => [
             'user_id',
@@ -121,6 +134,113 @@ class EditarMatricula extends Component
         ],
     ];
 
+    /** ============================================================
+     *  ✅ AUTOGENERADOR DE MATRÍCULA
+     *  ============================================================
+     *  Formato requerido:
+     *      LIC + SIGLAS(3) + CANP + 2 dígitos
+     *  Ejemplo:
+     *      LICNUTCANP09
+     *
+     *  Reglas:
+     *   - Yo solo la genero si viene vacía (en edición no la cambio si ya existe).
+     *   - SIGLAS: las saco de nombre_corto (ideal), o slug, o nombre.
+     *   - Consecutivo: lo calculo por (licenciatura + generación).
+     *   - La matrícula debe ser única en datos_escolares.matricula.
+     * ============================================================ */
+    protected function generarMatriculaSiHaceFalta(bool $force = false): void
+    {
+        // Si ya hay matrícula y no quiero forzar, no hago nada
+        if (!$force && !empty($this->matricula)) {
+            return;
+        }
+
+        // Si no tengo lo mínimo, no genero nada
+        if (empty($this->licenciatura_id) || empty($this->generacion_id)) {
+            return;
+        }
+
+        $this->matricula = $this->buildMatriculaUnica();
+    }
+
+    /**
+     * Yo construyo una matrícula con el formato LIC + SIGLAS + CANP + 2 dígitos
+     * y me aseguro de que sea única.
+     */
+    protected function buildMatriculaUnica(): string
+    {
+        $siglas = $this->resolverSiglasLicenciatura(); // Ej: NUT
+        $seq = $this->resolverConsecutivoInicial();     // Ej: 9 -> "09"
+
+        while (true) {
+            $seqStr = str_pad((string) $seq, 2, '0', STR_PAD_LEFT);
+            $mat = "LIC{$siglas}CANP{$seqStr}";
+
+            $exists = DatosEscolares::query()
+                ->when($this->datosEscolares?->id, fn($q) => $q->where('id', '!=', $this->datosEscolares->id))
+                ->where('matricula', $mat)
+                ->exists();
+
+            if (!$exists) {
+                return $mat;
+            }
+
+            // Si ya existe, subo el consecutivo y vuelvo a intentar
+            $seq++;
+        }
+    }
+
+    /**
+     * Yo obtengo SIGLAS(3) de la licenciatura:
+     * - Primero intento nombre_corto
+     * - Luego slug
+     * - Luego nombre
+     */
+    protected function resolverSiglasLicenciatura(): string
+    {
+        $lic = $this->licenciaturas?->firstWhere('id', $this->licenciatura_id);
+
+        $raw = $lic?->nombre_corto
+            ?? $lic?->slug
+            ?? $lic?->nombre
+            ?? ('LIC' . $this->licenciatura_id);
+
+        // Yo limpio: dejo solo letras/números
+        $raw = strtoupper((string) $raw);
+        $raw = preg_replace('/[^A-Z0-9]+/i', '', $raw) ?: 'XXX';
+
+        // Yo tomo solo 3 caracteres para SIGLAS
+        $siglas = substr($raw, 0, 3);
+
+        // Si por algo quedara corto, lo relleno
+        return str_pad($siglas, 3, 'X', STR_PAD_RIGHT);
+    }
+
+    /**
+     * Yo calculo el consecutivo inicial contando registros existentes
+     * por (licenciatura + generación).
+     *
+     * Nota:
+     * - Esto funciona muy bien en la práctica.
+     * - Si en tu sistema hubiera alta concurrencia extrema,
+     *   lo ideal sería una tabla de folios con lock.
+     */
+    protected function resolverConsecutivoInicial(): int
+    {
+        $count = DatosEscolares::query()
+            ->when($this->datosEscolares?->id, fn($q) => $q->where('id', '!=', $this->datosEscolares->id))
+            ->whereHas('alumno.inscripciones', function ($q) {
+                $q->where('licenciatura_id', $this->licenciatura_id)
+                    ->where('generacion_id', $this->generacion_id);
+            })
+            ->count();
+
+        return $count + 1;
+    }
+
+    /** ============================================================
+     *  Mount
+     * ============================================================ */
     public function mount(int $id): void
     {
         $this->inscripcion_id = $id;
@@ -142,8 +262,7 @@ class EditarMatricula extends Component
         $this->datosEscolares = $this->alumno?->datosEscolares;
         $this->datosContacto = $this->alumno?->datosContacto;
 
-        // 3) Usuarios estudiante activos:
-        //    - permito el usuario actual aunque ya tenga alumno
+        // 3) Usuarios estudiante activos (permito el usuario actual aunque ya tenga alumno)
         $this->usuarios = User::role('Estudiante')
             ->where('status', 'true')
             ->where(function ($q) {
@@ -196,9 +315,14 @@ class EditarMatricula extends Component
         if ($this->estado_id) {
             $this->cities = City::where('state_id', $this->estado_id)->orderBy('name')->get(['id', 'name'])->toArray();
         }
+
+        // ✅ 9) Si la matrícula está vacía, yo la genero en automático
+        $this->generarMatriculaSiHaceFalta(false);
     }
 
-    /** Cascadas país -> estado -> ciudad (para datos_contactos) */
+    /** ============================================================
+     *  Cascadas país -> estado -> ciudad (para datos_contactos)
+     * ============================================================ */
     public function updatedPaisId(?int $countryId): void
     {
         $this->estado_id = null;
@@ -229,6 +353,22 @@ class EditarMatricula extends Component
         $this->dispatch('catalogos-actualizados');
     }
 
+    /** ============================================================
+     *  ✅ Si cambian licenciatura o generación, yo genero matrícula SOLO si está vacía
+     *  ============================================================ */
+    public function updatedLicenciaturaId(?int $value): void
+    {
+        $this->generarMatriculaSiHaceFalta(false);
+    }
+
+    public function updatedGeneracionId(?int $value): void
+    {
+        $this->generarMatriculaSiHaceFalta(false);
+    }
+
+    /** ============================================================
+     *  Reglas
+     * ============================================================ */
     protected function rules(): array
     {
         $alumnoId = $this->alumno?->id;
@@ -245,7 +385,8 @@ class EditarMatricula extends Component
             'sexo' => 'required|in:M,F',
 
             // datos_escolares
-            'matricula' => 'required|string|max:255|unique:datos_escolares,matricula,' . $escolaresId,
+            // ✅ yo permito null porque la genero antes de validar
+            'matricula' => 'nullable|string|max:255|unique:datos_escolares,matricula,' . $escolaresId,
             'folio' => 'nullable|string|max:255|unique:datos_escolares,folio,' . $escolaresId,
 
             // datos_contactos
@@ -275,6 +416,9 @@ class EditarMatricula extends Component
         ];
     }
 
+    /** ============================================================
+     *  Mensajes
+     * ============================================================ */
     protected function messages(): array
     {
         return [
@@ -282,7 +426,6 @@ class EditarMatricula extends Component
             'curp.required' => 'El campo CURP es obligatorio.',
             'curp.size' => 'El CURP debe tener 18 caracteres.',
             'curp.unique' => 'Este CURP ya está registrado.',
-            'matricula.required' => 'La matrícula es obligatoria.',
             'matricula.unique' => 'Esta matrícula ya está registrada.',
             'licenciatura_id.required' => 'Selecciona una licenciatura.',
             'generacion_id.required' => 'Selecciona una generación.',
@@ -290,12 +433,25 @@ class EditarMatricula extends Component
         ];
     }
 
+    /** ============================================================
+     *  Actualizar inscripción
+     * ============================================================ */
     public function actualizarInscripcion(): void
     {
         try {
+            // ✅ Antes de validar, yo genero la matrícula si está vacía
+            $this->generarMatriculaSiHaceFalta(false);
+
+            // ✅ Si aún así quedó vacía, yo muestro un error claro
+            if (empty($this->matricula)) {
+                throw ValidationException::withMessages([
+                    'matricula' => 'No pude generar la matrícula. Verifica licenciatura y generación.',
+                ]);
+            }
+
             $this->validate();
 
-            // Evitar duplicar inscripción para la misma combinación (excluyendo esta inscripción)
+            // Yo evito duplicar inscripción (excluyendo esta inscripción)
             $exists = Inscripcion::query()
                 ->where('id', '!=', $this->inscripcion_id)
                 ->where('alumno_id', $this->alumno?->id)
@@ -311,7 +467,9 @@ class EditarMatricula extends Component
             }
 
             DB::transaction(function () {
-                // 1) Alumno
+                /** =========================
+                 *  1) Alumno
+                 *  ========================= */
                 $this->alumno->update([
                     'user_id' => $this->user_id,
                     'curp' => mb_strtoupper(trim((string) $this->curp)),
@@ -322,14 +480,15 @@ class EditarMatricula extends Component
                     'sexo' => $this->sexo,
                 ]);
 
-                // 2) Datos escolares
+                /** =========================
+                 *  2) Datos escolares
+                 *  ========================= */
                 $pathFoto = $this->foto_actual;
 
-                // Si subo nueva foto, guardo y (opcional) elimino la anterior
+                // Si subo nueva foto, guardo y elimino la anterior
                 if ($this->foto) {
                     $nuevoPath = $this->foto->store('alumnos/fotos', 'public');
 
-                    // Si ya existía una foto, la borro (si quieres conservar historial, quita esto)
                     if ($this->foto_actual && Storage::disk('public')->exists($this->foto_actual)) {
                         Storage::disk('public')->delete($this->foto_actual);
                     }
@@ -337,7 +496,7 @@ class EditarMatricula extends Component
                     $pathFoto = $nuevoPath;
                 }
 
-                // Si tu relación es 1-1 y siempre existe, hago update; si no existe, creo
+                // Si existe, actualizo; si no existe, creo
                 if ($this->datosEscolares) {
                     $this->datosEscolares->update([
                         'matricula' => trim((string) $this->matricula),
@@ -353,10 +512,12 @@ class EditarMatricula extends Component
                     ]);
                 }
 
-                // Refresco foto_actual para la UI
+                // Yo refresco foto_actual para la UI
                 $this->foto_actual = $pathFoto;
 
-                // 3) Datos contacto
+                /** =========================
+                 *  3) Datos contacto
+                 *  ========================= */
                 if ($this->datosContacto) {
                     $this->datosContacto->update([
                         'calle' => trim((string) $this->calle),
@@ -390,7 +551,9 @@ class EditarMatricula extends Component
                     ]);
                 }
 
-                // 4) Inscripción
+                /** =========================
+                 *  4) Inscripción
+                 *  ========================= */
                 $this->inscripcion->update([
                     'licenciatura_id' => $this->licenciatura_id,
                     'generacion_id' => $this->generacion_id,
@@ -402,6 +565,7 @@ class EditarMatricula extends Component
 
             $this->dispatch('inscripcion-actualizada');
         } catch (ValidationException $e) {
+            // Yo detecto en qué step cayó el error y regreso ahí automáticamente
             $errorKeys = array_keys($e->validator->errors()->toArray());
             $step = $this->firstErroredStep($errorKeys);
 
@@ -412,14 +576,21 @@ class EditarMatricula extends Component
         }
     }
 
+    /** ============================================================
+     *  Helpers para steps (errores)
+     * ============================================================ */
     protected function firstErroredStep(array $errorKeys): string
     {
         foreach ($this->stepMap as $step => $fields) {
-            if (empty($fields))
+            if (empty($fields)) {
                 continue;
-            if (count(array_intersect($fields, $errorKeys)) > 0)
+            }
+
+            if (count(array_intersect($fields, $errorKeys)) > 0) {
                 return $step;
+            }
         }
+
         return 'generales';
     }
 
@@ -443,6 +614,9 @@ class EditarMatricula extends Component
         return $summary;
     }
 
+    /** ============================================================
+     *  Render
+     * ============================================================ */
     public function render()
     {
         return view('livewire.admin.matricula.editar-matricula', [
@@ -456,5 +630,3 @@ class EditarMatricula extends Component
         ]);
     }
 }
-
-

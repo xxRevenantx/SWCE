@@ -123,7 +123,7 @@
 
                     <flux:field>
                         <flux:label badge="Requerido">CURP</flux:label>
-                        <flux:input wire:model="curp" placeholder="18 caracteres" />
+                        <flux:input wire:model.live="curp" placeholder="18 caracteres" />
                         <flux:error name="curp" />
                     </flux:field>
 
@@ -294,7 +294,7 @@
                 <div class="p-4 sm:p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <flux:field>
                         <flux:label badge="Opcional">Matrícula</flux:label>
-                        <flux:input wire:model="matricula" placeholder="Matrícula" />
+                        <flux:input wire:model.live="matricula" placeholder="Matrícula" />
                         <flux:error name="matricula" />
                     </flux:field>
 
@@ -398,7 +398,7 @@
 
                     <flux:field>
                         <flux:label badge="Requerido">Licenciatura</flux:label>
-                        <flux:select wire:model="licenciatura_id">
+                        <flux:select wire:model.live="licenciatura_id">
                             <flux:select.option value="">Selecciona la licenciatura…</flux:select.option>
                             @foreach ($licenciaturas as $lic)
                                 <flux:select.option value="{{ $lic->id }}">{{ $lic->nombre }}
@@ -409,14 +409,8 @@
                     </flux:field>
 
                     <flux:field>
-                        <flux:label badge="Requerido">Fecha inscripción</flux:label>
-                        <flux:input type="date" wire:model="fecha_inscripcion" />
-                        <flux:error name="fecha_inscripcion" />
-                    </flux:field>
-
-                    <flux:field>
                         <flux:label badge="Requerido">Cuatrimestre</flux:label>
-                        <flux:select wire:model="cuatrimestre_id">
+                        <flux:select wire:model.live="cuatrimestre_id">
                             <flux:select.option value="">Selecciona un cuatrimestre…</flux:select.option>
                             @foreach ($cuatrimestres as $cuat)
                                 <flux:select.option value="{{ $cuat->id }}">
@@ -426,6 +420,14 @@
                         </flux:select>
                         <flux:error name="cuatrimestre_id" />
                     </flux:field>
+
+                    <flux:field>
+                        <flux:label badge="Requerido">Fecha inscripción</flux:label>
+                        <flux:input type="date" wire:model="fecha_inscripcion" />
+                        <flux:error name="fecha_inscripcion" />
+                    </flux:field>
+
+
                 </div>
 
                 {{-- ✅ STATUS (debajo, como en la imagen) --}}
