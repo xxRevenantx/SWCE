@@ -69,7 +69,7 @@
                         class="w-full rounded-xl border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-3 py-2 text-sm text-neutral-900 dark:text-neutral-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
                         <option value="">--Selecciona un cuatrimestre--</option>
                         @foreach ($cuatrimestres as $c)
-                            <option value="{{ $c->id }}">{{ $c->no_cuatrimestre }}° {{ $c->nombre_cuatrimestre }}
+                            <option value="{{ $c->id }}">{{ $c->no_cuatrimestre }}°
                             </option>
                         @endforeach
                     </select>

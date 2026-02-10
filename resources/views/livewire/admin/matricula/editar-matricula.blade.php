@@ -218,12 +218,8 @@
                         <flux:error name="sexo" />
                     </flux:field>
 
-                    {{-- Extra (si ya lo manejas aquí) --}}
-                    <flux:field>
-                        <flux:label badge="Requerido">Matrícula</flux:label>
-                        <flux:input wire:model.live="matricula" placeholder="Matrícula" />
-                        <flux:error name="matricula" />
-                    </flux:field>
+
+
                 </div>
 
                 <div class="flex items-center justify-between gap-3 px-4 sm:px-6 pt-3 pb-5">

@@ -63,6 +63,9 @@ class RoleSeeder extends Seeder
         // Permisos para 'pdf.expediente_alumno' y asignación al rol 'Admin'
         Permission::create(['name' => 'admin.pdf.expediente_alumno'])->syncRoles([$role1]);
 
+        // Permisos para 'pdf.credencial_profesor' y asignación al rol 'Admin'
+        Permission::create(['name' => 'admin.pdf.credencial_profesor'])->syncRoles([$role1]);
+
 
 
 
