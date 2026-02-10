@@ -123,7 +123,7 @@
 
 
                                             <flux:button variant="primary"
-                                                href="{{ route('admin.profesores.credencial', ['id' => $profesor->id]) }}"
+                                                href="{{ route('admin.profesores.credencial', $profesor->id) }}"
                                                 class="cursor-pointer bg-indigo-500 hover:bg-indigo-600 text-white">
                                                 <flux:icon.id-card class="w-3.5 h-3.5" />
                                                 <!-- ícono -->
