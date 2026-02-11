@@ -13,6 +13,7 @@ use App\Models\State;
 use App\Models\User;
 use App\Models\Generacion;
 use App\Models\Cuatrimestre;
+use App\Services\CurpService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Livewire\Component;
@@ -68,6 +69,10 @@ class CrearInscripcion extends Component
     public ?string $fecha_inscripcion = null;
     public bool $status = true;
 
+    /** === ESTADO CONSULTA CURP === */
+    public bool $curpConsultando = false;
+    public ?string $curpError = null;
+
     protected array $stepMap = [
         'generales' => [
             'user_id',
@@ -108,7 +113,7 @@ class CrearInscripcion extends Component
     {
         $this->countries = Country::orderBy('name')->get(['id', 'name'])->toArray();
 
-        // Aquí obtengo usuarios con rol Estudiante, activos y que todavía no tienen alumno asociado.
+        // obtengo usuarios con rol Estudiante, activos y que todavía no tienen alumno asociado.
         $this->usuarios = User::role('Estudiante')
             ->where('status', 'true')
             ->whereDoesntHave('alumno')
@@ -122,50 +127,44 @@ class CrearInscripcion extends Component
         $this->fecha_inscripcion = now()->toDateString();
     }
 
-    /** ============================
-     *  MATRÍCULA AUTOMÁTICA
-     *  Estructura: LIC + 3 letras licenciatura + 4 letras CURP + 2 números aleatorios
-     *  Ej: LICNUTCANP09
-     *  ============================ */
-
     public function updatedCurp(?string $valor): void
     {
-        // Aquí normalizo el CURP y luego intento regenerar la matrícula.
         $this->curp = $valor ? mb_strtoupper(trim($valor)) : null;
+        $this->curpError = null;
+
         $this->regenerarMatricula();
+
+        if (!$this->curp || mb_strlen($this->curp) !== 18) {
+            return;
+        }
+
+        $this->consultarCurp();
     }
+
 
     public function updatedLicenciaturaId(?int $valor): void
     {
-        // Aquí solo reacciono al cambio y regenero la matrícula.
         $this->licenciatura_id = $valor;
         $this->regenerarMatricula();
     }
 
     protected function regenerarMatricula(): void
     {
-        // Aquí valido que ya tenga los datos mínimos para construir la matrícula.
         if (!$this->licenciatura_id || !$this->curp) {
             return;
         }
 
-        // Aquí tomo las primeras 4 letras del CURP.
         $curp4 = mb_substr($this->curp, 0, 4);
 
-        // Aquí saco las 3 primeras letras de la licenciatura (por nombre).
         $lic = Licenciatura::find($this->licenciatura_id);
         $nombreLic = $lic?->nombre ?? '';
 
-        // Aquí convierto "Nutrición" a "NUT" (sin espacios y en mayúsculas).
         $tresLic = mb_strtoupper(mb_substr(preg_replace('/\s+/', '', $nombreLic), 0, 3));
 
-        // Aquí genero 2 números aleatorios.
         $dosNumeros = str_pad((string) random_int(0, 99), 2, '0', STR_PAD_LEFT);
 
-        // Aquí armo la matrícula final.
         $matricula = 'LIC' . $tresLic . $curp4 . $dosNumeros;
 
-        // Aquí verifico que no exista ya en datos_escolares, y si existe, vuelvo a intentar.
         $intentos = 0;
         while (DatosEscolares::where('matricula', $matricula)->exists() && $intentos < 15) {
             $dosNumeros = str_pad((string) random_int(0, 99), 2, '0', STR_PAD_LEFT);
@@ -173,9 +172,76 @@ class CrearInscripcion extends Component
             $intentos++;
         }
 
-        // Aquí asigno la matrícula al input, para que se vea en tiempo real.
         $this->matricula = $matricula;
     }
+
+    /** ============================
+     *  CONSULTA CURP (API)
+     *  ============================ */
+    protected function consultarCurp(): void
+    {
+        $this->curpConsultando = true;
+        $this->curpError = null;
+
+        $service = app(\App\Services\CurpService::class);
+
+        $data = $service->obtenerDatosPorCurp($this->curp);
+
+        $this->curpConsultando = false;
+
+
+        if (isset($data['error']) && $data['error'] === true) {
+            $this->curpError = $data['message'] ?? 'No se pudo consultar el CURP.';
+            return;
+        }
+
+
+
+        $sol = data_get($data, 'response.Solicitante')
+            ?? data_get($data, 'response.Soliciante')
+            ?? null;
+
+        if (!$sol || !is_array($sol)) {
+            $this->curpError = 'La API respondió, pero no trajo el bloque Solicitante.';
+            return;
+        }
+
+        // Tomo datos reales
+        $nombre   = $sol['Nombres'] ?? null;
+        $apPat    = $sol['ApellidoPaterno'] ?? null;
+        $apMat    = $sol['ApellidoMaterno'] ?? null;
+        $fechaNac = $sol['FechaNacimiento'] ?? null;
+
+        // Sexo: viene "ClaveSexo" = H/M
+        $claveSexo = $sol['ClaveSexo'] ?? null; // H o M
+        // También viene "Sexo" => Hombre/Mujer, pero me quedo con clave
+
+        // asigno sin romper si faltan llaves
+        if ($nombre) $this->nombre = $this->ponerMayusculas($nombre);
+        if ($apPat)  $this->apellido_paterno = $this->ponerMayusculas($apPat);
+        if ($apMat)  $this->apellido_materno = $this->ponerMayusculas($apMat);
+
+        // Fecha ya viene yyyy-mm-dd, pero igual la valido
+        if ($fechaNac) {
+            $this->fecha_nacimiento = trim((string) $fechaNac);
+        }
+
+
+        if ($claveSexo) {
+            $claveSexo = mb_strtoupper(trim((string) $claveSexo));
+
+            // H = Hombre => en tu sistema es "M"
+            // M = Mujer  => en tu sistema es "F"
+            if ($claveSexo === 'H') {
+                $this->sexo = 'M';
+            } elseif ($claveSexo === 'M') {
+                $this->sexo = 'F';
+            }
+        }
+
+        $this->regenerarMatricula();
+    }
+
 
     /** Cascadas país -> estado -> ciudad (para datos_contactos) */
     public function updatedPaisId(?int $countryId): void
@@ -269,7 +335,7 @@ class CrearInscripcion extends Component
     public function guardarInscripcion(): void
     {
         try {
-            // Aquí por si el usuario cambió algo y no se disparó el updated, vuelvo a generar.
+            // ✅ Por si no se disparó algún updated
             $this->regenerarMatricula();
 
             $this->validate();
@@ -365,6 +431,8 @@ class CrearInscripcion extends Component
                 'cuatrimestre_id',
                 'status',
                 'fecha_inscripcion',
+                'curpConsultando',
+                'curpError',
             ]);
 
             $this->fecha_inscripcion = now()->toDateString();
@@ -390,9 +458,7 @@ class CrearInscripcion extends Component
     protected function obtenerPrimerStepConError(array $errorKeys): string
     {
         foreach ($this->stepMap as $step => $fields) {
-            if (empty($fields)) {
-                continue;
-            }
+            if (empty($fields)) continue;
 
             if (count(array_intersect($fields, $errorKeys)) > 0) {
                 return $step;
