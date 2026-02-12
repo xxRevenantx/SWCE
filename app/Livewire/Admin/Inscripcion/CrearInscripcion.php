@@ -45,7 +45,7 @@ class CrearInscripcion extends Component
     /** === DATOS ESCOLARES (tabla datos_escolares) === */
     public ?string $matricula = null;
     public ?string $folio = null;
-    public $foto = null; // archivo Livewire
+    public $foto = null;
 
     /** === DATOS CONTACTO (tabla datos_contactos) === */
     public ?string $calle = null;
@@ -72,6 +72,9 @@ class CrearInscripcion extends Component
     /** === ESTADO CONSULTA CURP === */
     public bool $curpConsultando = false;
     public ?string $curpError = null;
+
+    /** ✅ BANDERA: modo pruebas CURP */
+    public bool $curpModoPruebas = false;
 
     protected array $stepMap = [
         'generales' => [
@@ -113,7 +116,7 @@ class CrearInscripcion extends Component
     {
         $this->countries = Country::orderBy('name')->get(['id', 'name'])->toArray();
 
-        // obtengo usuarios con rol Estudiante, activos y que todavía no tienen alumno asociado.
+        // ✅ Yo obtengo usuarios con rol Estudiante, activos y que todavía no tienen alumno asociado.
         $this->usuarios = User::role('Estudiante')
             ->where('status', 'true')
             ->whereDoesntHave('alumno')
@@ -125,6 +128,10 @@ class CrearInscripcion extends Component
         $this->cuatrimestres = Cuatrimestre::orderBy('id')->get();
 
         $this->fecha_inscripcion = now()->toDateString();
+
+        // detecto si el service está en modo pruebas
+        $service = app(CurpService::class);
+        $this->curpModoPruebas = $service->esModoPruebas();
     }
 
     public function updatedCurp(?string $valor): void
@@ -140,7 +147,6 @@ class CrearInscripcion extends Component
 
         $this->consultarCurp();
     }
-
 
     public function updatedLicenciaturaId(?int $valor): void
     {
@@ -183,20 +189,22 @@ class CrearInscripcion extends Component
         $this->curpConsultando = true;
         $this->curpError = null;
 
-        $service = app(\App\Services\CurpService::class);
+        /** @var CurpService $service */
+        $service = app(CurpService::class);
+
+        // ✅ Yo vuelvo a setear por si cambió a pruebas
+        $this->curpModoPruebas = $service->esModoPruebas();
 
         $data = $service->obtenerDatosPorCurp($this->curp);
 
         $this->curpConsultando = false;
-
 
         if (isset($data['error']) && $data['error'] === true) {
             $this->curpError = $data['message'] ?? 'No se pudo consultar el CURP.';
             return;
         }
 
-
-
+        // ✅ Tu estructura real: response.Solicitante
         $sol = data_get($data, 'response.Solicitante')
             ?? data_get($data, 'response.Soliciante')
             ?? null;
@@ -206,32 +214,30 @@ class CrearInscripcion extends Component
             return;
         }
 
-        // Tomo datos reales
-        $nombre   = $sol['Nombres'] ?? null;
-        $apPat    = $sol['ApellidoPaterno'] ?? null;
-        $apMat    = $sol['ApellidoMaterno'] ?? null;
+        $nombre = $sol['Nombres'] ?? null;
+        $apPat = $sol['ApellidoPaterno'] ?? null;
+        $apMat = $sol['ApellidoMaterno'] ?? null;
         $fechaNac = $sol['FechaNacimiento'] ?? null;
 
-        // Sexo: viene "ClaveSexo" = H/M
         $claveSexo = $sol['ClaveSexo'] ?? null; // H o M
-        // También viene "Sexo" => Hombre/Mujer, pero me quedo con clave
 
-        // asigno sin romper si faltan llaves
-        if ($nombre) $this->nombre = $this->ponerMayusculas($nombre);
-        if ($apPat)  $this->apellido_paterno = $this->ponerMayusculas($apPat);
-        if ($apMat)  $this->apellido_materno = $this->ponerMayusculas($apMat);
+        if ($nombre)
+            $this->nombre = $this->ponerMayusculas($nombre);
+        if ($apPat)
+            $this->apellido_paterno = $this->ponerMayusculas($apPat);
+        if ($apMat)
+            $this->apellido_materno = $this->ponerMayusculas($apMat);
 
-        // Fecha ya viene yyyy-mm-dd, pero igual la valido
         if ($fechaNac) {
             $this->fecha_nacimiento = trim((string) $fechaNac);
         }
 
-
+        // ✅ Conversión a tu sistema M/F (validación)
         if ($claveSexo) {
             $claveSexo = mb_strtoupper(trim((string) $claveSexo));
 
-            // H = Hombre => en tu sistema es "M"
-            // M = Mujer  => en tu sistema es "F"
+            // H = Hombre => tu sistema usa M
+            // M = Mujer  => tu sistema usa F
             if ($claveSexo === 'H') {
                 $this->sexo = 'M';
             } elseif ($claveSexo === 'M') {
@@ -241,7 +247,6 @@ class CrearInscripcion extends Component
 
         $this->regenerarMatricula();
     }
-
 
     /** Cascadas país -> estado -> ciudad (para datos_contactos) */
     public function updatedPaisId(?int $countryId): void
@@ -277,7 +282,6 @@ class CrearInscripcion extends Component
     protected function rules(): array
     {
         return [
-            // alumnos
             'user_id' => 'required|exists:users,id',
             'curp' => 'required|string|size:18|unique:alumnos,curp',
             'nombre' => 'required|string|max:255',
@@ -286,11 +290,9 @@ class CrearInscripcion extends Component
             'fecha_nacimiento' => 'required|date',
             'sexo' => 'required|in:M,F',
 
-            // datos_escolares
             'matricula' => 'required|string|max:255|unique:datos_escolares,matricula',
             'folio' => 'nullable|string|max:255|unique:datos_escolares,folio',
 
-            // datos_contactos
             'calle' => 'nullable|string|max:255',
             'colonia' => 'nullable|string|max:255',
             'municipio' => 'nullable|string|max:255',
@@ -305,14 +307,12 @@ class CrearInscripcion extends Component
             'estado_id' => 'nullable|exists:states,id',
             'ciudad_id' => 'nullable|exists:cities,id',
 
-            // inscripciones
             'licenciatura_id' => 'required|exists:licenciaturas,id',
             'generacion_id' => 'required|exists:generaciones,id',
             'cuatrimestre_id' => 'required|exists:cuatrimestres,id',
             'fecha_inscripcion' => 'required|date',
             'status' => 'boolean',
 
-            // foto
             'foto' => 'nullable|image|max:2048',
         ];
     }
@@ -335,9 +335,7 @@ class CrearInscripcion extends Component
     public function guardarInscripcion(): void
     {
         try {
-            // ✅ Por si no se disparó algún updated
             $this->regenerarMatricula();
-
             $this->validate();
 
             $exists = Inscripcion::whereHas('alumno', function ($q) {
@@ -433,6 +431,7 @@ class CrearInscripcion extends Component
                 'fecha_inscripcion',
                 'curpConsultando',
                 'curpError',
+                'curpModoPruebas',
             ]);
 
             $this->fecha_inscripcion = now()->toDateString();
@@ -458,7 +457,8 @@ class CrearInscripcion extends Component
     protected function obtenerPrimerStepConError(array $errorKeys): string
     {
         foreach ($this->stepMap as $step => $fields) {
-            if (empty($fields)) continue;
+            if (empty($fields))
+                continue;
 
             if (count(array_intersect($fields, $errorKeys)) > 0) {
                 return $step;

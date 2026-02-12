@@ -108,6 +108,28 @@
                     <h2 class="font-semibold">Datos Generales</h2>
                 </div>
 
+                {{-- AVISO MODO PRUEBAS CURP --}}
+                @if ($curpModoPruebas)
+                    <div
+                        class="mx-4 sm:mx-6 mt-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3
+                text-amber-900 shadow-sm dark:border-amber-900/40 dark:bg-amber-950/30 dark:text-amber-100">
+                        <div class="flex items-start gap-3">
+                            <div class="mt-0.5">
+                                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                    <path d="M12 2a10 10 0 100 20 10 10 0 000-20zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
+                                </svg>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-sm font-semibold">Modo pruebas activado</p>
+                                <p class="text-xs opacity-90">
+                                    Los datos de CURP se generan/consultan en pruebas y <b>no</b> se usa la API real.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+
+
                 <div class="p-4 sm:p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <flux:field>
                         <flux:label badge="Requerido">Usuario</flux:label>
@@ -290,13 +312,20 @@
                     <h2 class="font-semibold">Datos escolares</h2>
                 </div>
 
-                {{-- ✅ FILA 1 (igual que la imagen): Matrícula | Folio | Foto (span 2) --}}
+
                 <div class="p-4 sm:p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+
+
                     <flux:field>
-                        <flux:label badge="Opcional">Matrícula</flux:label>
+                        <flux:label badge="Requerido">Matrícula</flux:label>
+
                         <flux:input wire:model.live="matricula" placeholder="Matrícula" />
+
+
+
                         <flux:error name="matricula" />
                     </flux:field>
+
 
                     <flux:field>
                         <flux:label badge="Requerido">Folio</flux:label>
