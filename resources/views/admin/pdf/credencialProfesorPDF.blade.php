@@ -91,8 +91,8 @@
             {{ $profesor->apellido_materno }}<br>
             <b>CURP:</b> {{ $profesor->CURP ?? '-----------' }} <br>
             <b>CURP:</b> {{ $profesor->telefono ?? '-----------' }} <br>
-            <b>Ciclo escolar:</b> {{ $ciclo_escolar->ciclo_escolar }} <br>
-            <b>Vigencia:</b> Agosto {{ substr($ciclo_escolar->ciclo_escolar, -4) }}
+            {{-- <b>Ciclo escolar:</b> {{ $ciclo_escolar->ciclo_escolar }} <br>
+            <b>Vigencia:</b> Agosto {{ substr($ciclo_escolar->ciclo_escolar, -4) }} --}}
         </div>
 
 
