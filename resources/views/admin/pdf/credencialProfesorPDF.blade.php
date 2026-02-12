@@ -64,12 +64,12 @@
         .titulo {
             font-size: 10px;
             color: #fff;
-            margin-top: -162px;
+            margin-top: -165px;
             margin-left: 38px;
         }
 
         .info {
-            font-size: 11px;
+            font-size: 10px;
             margin-top: -150px;
             line-height: 15px;
             margin-left: 130px;
@@ -89,10 +89,10 @@
             <h1 class="titulo">CREDENCIAL DEL PROFESOR</h1>
             <b>Nombre:</b>{{ $profesor->nombre }} {{ $profesor->apellido_paterno }}
             {{ $profesor->apellido_materno }}<br>
-            <b>Título:</b> {{ $profesor->perfil ?? 'No especificado' }} <br>
-            <b>CURP:</b> {{ $profesor->curp }} <br>
-            {{-- <b>Ciclo escolar:</b> {{ $ciclo_escolar->ciclo_escolar }} <br>
-            <b>Vigencia:</b> Agosto {{ substr($ciclo_escolar->ciclo_escolar, -4) }} --}}
+            <b>CURP:</b> {{ $profesor->CURP ?? '-----------' }} <br>
+            <b>CURP:</b> {{ $profesor->telefono ?? '-----------' }} <br>
+            <b>Ciclo escolar:</b> {{ $ciclo_escolar->ciclo_escolar }} <br>
+            <b>Vigencia:</b> Agosto {{ substr($ciclo_escolar->ciclo_escolar, -4) }}
         </div>
 
 
