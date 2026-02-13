@@ -114,10 +114,12 @@
 
             {{-- BOTÓN LISTA PDF --}}
             <div>
-                <button type="button" wire:click="exportarPdf"
+                <x-button target="_blank"
+                    href="{{ route('admin.pdf.listaMatricula', ['filtrar_licenciatura' => $filtrar_licenciatura, 'filtrar_generacion' => $filtrar_generacion, 'filtrar_cuatrimestre' => $filtrar_cuatrimestre, 'search' => $search]) }}"
+                    type="button"
                     class="inline-flex items-center rounded-xl px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                     Lista PDF
-                </button>
+                </x-button>
             </div>
 
             {{-- RESUMEN GENERAL --}}

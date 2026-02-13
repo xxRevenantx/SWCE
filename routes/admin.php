@@ -19,7 +19,6 @@ Route::middleware(['auth'])->group(function () {
 
 
     Route::view('panel-administrador', 'admin.dashboard')->middleware('can:admin.dashboard')->name('admin.dashboard'); // admin.dashboard (URL /admin/dashboard)
-    // ...más rutas del admin
     // Rutas del Admin
     Route::resource('usuarios', UserController::class)->middleware('can:admin.usuarios')->names('usuarios');
     Route::resource('licenciaturas', LicenciaturaController::class)->middleware('can:admin.licenciaturas')->names('licenciaturas');
@@ -56,4 +55,7 @@ Route::middleware(['auth'])->group(function () {
 
     // Credencial de profesor
     Route::get('profesores/credencial/{id}', [PDFController::class, 'credencialProfesor'])->middleware('can:admin.pdf.credencial_profesor')->name('admin.profesores.credencial');
+
+    // Lista de matrícula
+    Route::get('matricula/lista/{filtrar_licenciatura?}/{filtrar_generacion?}/{filtrar_cuatrimestre?}/{search?}', [PDFController::class, 'listaMatricula'])->middleware('can:admin.pdf.lista_matricula')->name('admin.pdf.listaMatricula');
 });
