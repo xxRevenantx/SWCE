@@ -75,6 +75,10 @@
             margin-left: 130px;
             width: 200px;
         }
+
+        .info .contenido {
+            font-size: 9.5px;
+        }
     </style>
 
 </head>
@@ -85,14 +89,25 @@
 
         <img class="credencial" src="{{ public_path('imagenes_publicas/credencial-profesor.jpg') }}">
 
+        <div style="border:1px solid #767676; width: 2.4cm; height: 2.8cm; margin:-155px 0 0 10px">
+
+        </div>
+
         <div class="info">
             <h1 class="titulo">CREDENCIAL DEL PROFESOR</h1>
-            <b>Nombre:</b>{{ $profesor->nombre }} {{ $profesor->apellido_paterno }}
-            {{ $profesor->apellido_materno }}<br>
-            <b>CURP:</b> {{ $profesor->CURP ?? '-----------' }} <br>
-            <b>CURP:</b> {{ $profesor->telefono ?? '-----------' }} <br>
-            {{-- <b>Ciclo escolar:</b> {{ $ciclo_escolar->ciclo_escolar }} <br>
-            <b>Vigencia:</b> Agosto {{ substr($ciclo_escolar->ciclo_escolar, -4) }} --}}
+
+            <div class="contenido">
+                <b>Nombre:</b>{{ $profesor->nombre }} {{ $profesor->apellido_paterno }}
+                {{ $profesor->apellido_materno }}<br>
+                <b>CURP:</b> {{ $profesor->CURP ?? '-----------' }} <br>
+                <b>Teléfono:</b> {{ $profesor->telefono ?? '-----------' }} <br>
+                <b>Ciclo escolar:</b> 2025-2026 <br>
+                <b>Vigencia:</b> AGOSTO 2026
+            </div>
+
+
+
+
         </div>
 
 

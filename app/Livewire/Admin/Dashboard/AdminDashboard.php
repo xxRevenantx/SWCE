@@ -31,24 +31,20 @@ class AdminDashboard extends Component
         // Generaciones activas: en BD es generaciones.status (enum 'true'/'false')
         $this->generacionesActivas = Generacion::where('status', 'true')->get();
 
-        // Profesores activos (se mantiene tu lógica)
+        // Profesores activos
         $this->profesoresActivos = Profesor::whereHas('user', function ($query) {
             $query->where('status', 'true');
         })->get();
 
         /**
-         * Query base: SOLO inscripciones cuya generación esté activa (generaciones.status = 'true')
+         * SOLO inscripciones cuya generación esté activa (generaciones.status = 'true')
          */
         $base = Inscripcion::query()
             ->whereHas('generacion', function ($q) {
                 $q->where('status', 'true');
             });
 
-        /**
-         * RESUMEN POR LICENCIATURA (ACTIVOS)
-         * inscripciones.status = 1
-         * alumno.sexo = 'M' (masculino) / 'F' (femenino)
-         */
+
         $this->resumenPorLicenciatura = $this->licenciaturas->map(function ($licenciatura) use ($base) {
 
             $hombres = (clone $base)

@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -14,12 +13,12 @@ return new class extends Migration
         Schema::create('profesores', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id')->unique();
-            $table->string('CURP')->unique();
+            $table->string('CURP', 18)->unique();
             $table->string('foto')->nullable();
             $table->string('nombre');
             $table->string('apellido_paterno');
             $table->string('apellido_materno')->nullable();
-            $table->string('telefono')->nullable();
+            $table->string('telefono', 10)->nullable();
             $table->string('perfil')->nullable();
             $table->string('color')->nullable();
 
