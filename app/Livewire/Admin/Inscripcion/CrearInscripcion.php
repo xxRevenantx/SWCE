@@ -336,6 +336,8 @@ class CrearInscripcion extends Component
     {
         try {
             $this->regenerarMatricula();
+
+            // valido todo
             $this->validate();
 
             $exists = Inscripcion::whereHas('alumno', function ($q) {
@@ -401,6 +403,22 @@ class CrearInscripcion extends Component
                 ]);
             });
 
+            // ==========================================================
+            //  Limpio errores/validación para que ya NO se vean rojos
+            // ==========================================================
+            $this->resetErrorBag();
+            $this->resetValidation();
+
+            // Reseteo los badges del wizard (0 errores en todos)
+            $this->dispatch('errores-por-step', summary: [
+                'generales' => 0,
+                'contacto' => 0,
+                'escolares' => 0,
+            ]);
+
+            $this->dispatch('ir-a-step', step: 'generales');
+
+            //  limpio campos
             $this->reset([
                 'user_id',
                 'curp',
@@ -443,6 +461,7 @@ class CrearInscripcion extends Component
                 'icon' => 'success',
                 'position' => 'top-end',
             ]);
+
         } catch (ValidationException $e) {
             $errorKeys = array_keys($e->validator->errors()->toArray());
             $step = $this->obtenerPrimerStepConError($errorKeys);
@@ -453,6 +472,7 @@ class CrearInscripcion extends Component
             throw $e;
         }
     }
+
 
     protected function obtenerPrimerStepConError(array $errorKeys): string
     {
