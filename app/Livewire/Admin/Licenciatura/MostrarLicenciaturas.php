@@ -35,15 +35,15 @@ class MostrarLicenciaturas extends Component
             // Eliminar la imagen asociada si existe
             $imagePath = public_path('storage/licenciaturas/' . $licenciatura->imagen);
             if ($licenciatura->imagen && file_exists($imagePath)) {
-            unlink($imagePath);
+                unlink($imagePath);
             }
 
             $licenciatura->delete();
 
             $this->dispatch('swal', [
-            'title' => '¡Licenciatura eliminada correctamente!',
-            'icon' => 'success',
-            'position' => 'top-end',
+                'title' => '¡Licenciatura eliminada correctamente!',
+                'icon' => 'success',
+                'position' => 'top-end',
             ]);
         }
     }
@@ -57,7 +57,7 @@ class MostrarLicenciaturas extends Component
             ->orWhere('nombre_corto', 'like', '%' . $this->search . '%')
             ->orWhere('RVOE', 'like', '%' . $this->search . '%')
             ->orderBy('id', 'desc')
-            ->paginate(10);
+            ->paginate(5);
         return view('livewire.admin.licenciatura.mostrar-licenciaturas', compact('licenciaturas'));
     }
 }

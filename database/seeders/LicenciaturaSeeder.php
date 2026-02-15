@@ -14,20 +14,7 @@ class LicenciaturaSeeder extends Seeder
     {
 
         $licenciaturas = [
-            [
-                'nombre' => 'Arquitectura y Diseño de Interiores',
-                'slug' => 'arquitectura-y-diseno-de-interiores',
-                'RVOE' => null, // Sin RVOE
-                'nombre_corto' => 'Arquitectura',
-                'logo' => null,
-            ],
-            [
-                'nombre' => 'Contaduría Pública',
-                'slug' => 'contabilidad-publica',
-                'RVOE' => null, // Sin RVOE
-                'nombre_corto' => 'Contaduría Pública',
-                'logo' => null,
-            ],
+
             [
                 'nombre' => 'Cultura Física y Deportes',
                 'slug' => 'cultura-fisica-y-deportes',
