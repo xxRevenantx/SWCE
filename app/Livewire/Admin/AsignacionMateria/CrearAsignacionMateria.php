@@ -45,7 +45,7 @@ class CrearAsignacionMateria extends Component
             ->orderBy('no_cuatrimestre')
             ->get(['id', 'no_cuatrimestre', 'nombre_cuatrimestre']);
 
-        // ✅ IMPORTANTE: traer también "color"
+        // IMPORTANTE: traer también "color"
         $this->profesores = Profesor::query()
             ->orderBy('nombre')
             ->get(['id', 'nombre', 'apellido_paterno', 'apellido_materno', 'color']);
@@ -77,13 +77,13 @@ class CrearAsignacionMateria extends Component
         $this->search = '';
     }
 
-    /** ✅ Key seguro para Livewire/Alpine */
+
     private function makeKey(int $licId, int $cuatId, int $matId): string
     {
         return "{$licId}_{$cuatId}_{$matId}";
     }
 
-    /** Parse del key seguro */
+
     private function parseKey(string $key): ?array
     {
         $parts = explode('_', $key);
@@ -97,9 +97,7 @@ class CrearAsignacionMateria extends Component
         return [$licId, $cuatId, $matId];
     }
 
-    /**
-     * Guardar inline desde el select
-     */
+
     public function guardarProfesor(string $key, $value): void
     {
         $parsed = $this->parseKey($key);
@@ -136,11 +134,7 @@ class CrearAsignacionMateria extends Component
         $this->dispatch('toast', type: 'success', message: 'Asignación guardada.');
     }
 
-    /**
-     * Matriz agrupada:
-     * Licenciatura -> Cuatrimestre -> Materias
-     * + filtros por licenciatura y cuatrimestre
-     */
+
     public function getMatrizProperty(): array
     {
         $q = Materia::query()

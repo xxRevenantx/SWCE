@@ -77,7 +77,7 @@
         }
 
         .info .contenido {
-            font-size: 9.5px;
+            font-size: 9.3px;
         }
     </style>
 
