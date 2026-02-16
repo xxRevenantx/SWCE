@@ -42,4 +42,10 @@ class Cuatrimestre extends Model
         return $this->hasMany(AsignacionMateria::class);
     }
 
+    // RELACIÓN CON HORARIOS
+    public function horarios()
+    {
+        return $this->hasMany(Horario::class);
+    }
+
 }

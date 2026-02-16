@@ -39,5 +39,11 @@ class AsignacionMateria extends Model
         return $this->belongsTo(Profesor::class);
     }
 
+    // RELACIÓN CON HORARIOS
+    public function horarios()
+    {
+        return $this->hasMany(Horario::class);
+    }
+
 
 }

@@ -41,4 +41,10 @@ class Licenciatura extends Model
     {
         return $this->hasMany(AsignacionMateria::class);
     }
+
+    // RELACION CON HORARIOS
+    public function horarios()
+    {
+        return $this->hasMany(Horario::class);
+    }
 }

@@ -28,6 +28,8 @@ class AdminDashboard extends Component
     {
         $this->licenciaturas = \App\Models\Licenciatura::orderBy('id', 'desc')->get();
 
+
+
         // Generaciones activas: en BD es generaciones.status (enum 'true'/'false')
         $this->generacionesActivas = Generacion::where('status', 'true')->get();
 

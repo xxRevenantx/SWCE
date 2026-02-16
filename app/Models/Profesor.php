@@ -37,10 +37,10 @@ class Profesor extends Model
     }
 
     // // Horarios
-    // public function horarios()
-    // {
-    //     return $this->hasMany(Horario::class);
-    // }
+    public function horarios()
+    {
+        return $this->hasMany(Horario::class);
+    }
 
     // // Calificaciones
     // public function calificaciones()
