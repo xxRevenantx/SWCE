@@ -13,12 +13,12 @@ return new class extends Migration {
         Schema::create('materias', function (Blueprint $table) {
             $table->id();
             $table->string('nombre');
+            $table->string('slug')->unique();
             $table->string('clave');
             $table->integer('creditos');
-            $table->string('slug')->unique();
-            $table->enum('calificable', ['si', 'no'])->default('si');
-            $table->unsignedBigInteger('licenciatura_id');
             $table->unsignedBigInteger('cuatrimestre_id');
+            $table->unsignedBigInteger('licenciatura_id');
+            $table->enum('calificable', ['si', 'no'])->default('si');
             $table->timestamps();
 
 

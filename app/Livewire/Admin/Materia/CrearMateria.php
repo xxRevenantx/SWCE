@@ -35,7 +35,7 @@ class CrearMateria extends Component
     public function mount()
     {
         $this->cuatrimestres = Cuatrimestre::all();
-        $this->licenciaturas = Licenciatura::orderBy('id', 'desc')->get();
+        $this->licenciaturas = Licenciatura::orderBy('id', 'asc')->get();
     }
 
 
@@ -101,9 +101,6 @@ class CrearMateria extends Component
             'icon' => 'success',
             'position' => 'top-end',
         ]);
-
-
-
     }
 
     public function render()

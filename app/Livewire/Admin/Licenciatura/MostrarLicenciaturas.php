@@ -56,8 +56,8 @@ class MostrarLicenciaturas extends Component
         $licenciaturas = Licenciatura::where('nombre', 'like', '%' . $this->search . '%')
             ->orWhere('nombre_corto', 'like', '%' . $this->search . '%')
             ->orWhere('RVOE', 'like', '%' . $this->search . '%')
-            ->orderBy('id', 'desc')
-            ->paginate(5);
+            ->orderBy('id', 'asc')
+            ->paginate(10);
         return view('livewire.admin.licenciatura.mostrar-licenciaturas', compact('licenciaturas'));
     }
 }

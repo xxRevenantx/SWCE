@@ -39,7 +39,7 @@ class Horario extends Component
     {
         // Se cargan licenciaturas para el primer filtro
         $this->licenciaturas = Licenciatura::query()
-            ->orderBy('nombre')
+            ->orderBy('id')
             ->get();
 
         // Se definen las horas fijas de la tabla

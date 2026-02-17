@@ -13,8 +13,10 @@ use App\Models\State;
 use App\Models\User;
 use App\Models\Generacion;
 use App\Models\Cuatrimestre;
+use App\Models\AsignarGeneracion;
 use App\Services\CurpService;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\ValidationException;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -26,8 +28,13 @@ class CrearInscripcion extends Component
     /** Catálogos */
     public $usuarios;
     public $licenciaturas;
-    public $generaciones;
-    public $cuatrimestres;
+
+    // Estos se cargarán según filtros
+    public $generaciones = [];
+    public $cuatrimestres = [];
+
+    // Catálogo base de cuatrimestres (por si no se puede filtrar por pivote)
+    public $cuatrimestresCatalogo = [];
 
     public array $countries = [];
     public array $states = [];
@@ -73,7 +80,7 @@ class CrearInscripcion extends Component
     public bool $curpConsultando = false;
     public ?string $curpError = null;
 
-    /** ✅ BANDERA: modo pruebas CURP */
+    /** Bandera: modo pruebas CURP */
     public bool $curpModoPruebas = false;
 
     protected array $stepMap = [
@@ -114,22 +121,30 @@ class CrearInscripcion extends Component
 
     public function mount(): void
     {
+        // Países para el formulario
         $this->countries = Country::orderBy('name')->get(['id', 'name'])->toArray();
 
-        // ✅ Yo obtengo usuarios con rol Estudiante, activos y que todavía no tienen alumno asociado.
+        // Usuarios con rol Estudiante, activos y sin alumno
         $this->usuarios = User::role('Estudiante')
             ->where('status', 'true')
             ->whereDoesntHave('alumno')
             ->orderBy('id', 'desc')
             ->get();
 
+        // Licenciaturas para el primer filtro
         $this->licenciaturas = Licenciatura::orderBy('id')->get();
-        $this->generaciones = Generacion::orderBy('id')->get();
-        $this->cuatrimestres = Cuatrimestre::orderBy('id')->get();
 
+        // Catálogo completo de cuatrimestres (por si no hay filtro por tabla pivote)
+        $this->cuatrimestresCatalogo = Cuatrimestre::orderBy('no_cuatrimestre')->get();
+
+        // Al inicio no se muestran generaciones ni cuatrimestres hasta elegir licenciatura
+        $this->generaciones = collect();
+        $this->cuatrimestres = collect();
+
+        // Fecha por defecto
         $this->fecha_inscripcion = now()->toDateString();
 
-        // detecto si el service está en modo pruebas
+        // Detecta si el service está en modo pruebas
         $service = app(CurpService::class);
         $this->curpModoPruebas = $service->esModoPruebas();
     }
@@ -139,8 +154,10 @@ class CrearInscripcion extends Component
         $this->curp = $valor ? mb_strtoupper(trim($valor)) : null;
         $this->curpError = null;
 
+        // Si ya hay licenciatura, se intenta regenerar matrícula
         $this->regenerarMatricula();
 
+        // Si aún no llega a 18 caracteres, no se consulta
         if (!$this->curp || mb_strlen($this->curp) !== 18) {
             return;
         }
@@ -150,12 +167,79 @@ class CrearInscripcion extends Component
 
     public function updatedLicenciaturaId(?int $valor): void
     {
-        $this->licenciatura_id = $valor;
+        // Guarda el valor (si viene vacío, queda null)
+        $this->licenciatura_id = $valor ?: null;
+
+        // Al cambiar licenciatura, se limpian dependientes
+        $this->generacion_id = null;
+        $this->cuatrimestre_id = null;
+
+        // Se limpian listas dependientes
+        $this->generaciones = collect();
+        $this->cuatrimestres = collect();
+
+        // Si no hay licenciatura, ya no se carga nada
+        if (!$this->licenciatura_id) {
+            $this->regenerarMatricula();
+            return;
+        }
+
+        // Se cargan solo generaciones disponibles para esa licenciatura
+        $idsGeneracion = AsignarGeneracion::query()
+            ->where('licenciatura_id', $this->licenciatura_id)
+            ->pluck('generacion_id')
+            ->unique()
+            ->values();
+
+        $this->generaciones = Generacion::query()
+            ->whereIn('id', $idsGeneracion)
+            ->orderBy('generacion')
+            ->get();
+
+        // Cuatrimestres se cargan hasta elegir generación
+        $this->cuatrimestres = collect();
+
+        // Actualiza matrícula si ya existe CURP
         $this->regenerarMatricula();
+    }
+
+    public function updatedGeneracionId(?int $valor): void
+    {
+        // Guarda el valor (si viene vacío, queda null)
+        $this->generacion_id = $valor ?: null;
+
+        // Al cambiar generación, se limpia cuatrimestre
+        $this->cuatrimestre_id = null;
+
+        // Si faltan filtros, se limpia lista
+        if (!$this->licenciatura_id || !$this->generacion_id) {
+            $this->cuatrimestres = collect();
+            return;
+        }
+
+        // Si la tabla pivote tiene cuatrimestre_id, filtra
+        if (Schema::hasColumn('asignar_generaciones', 'cuatrimestre_id')) {
+            $idsCuat = AsignarGeneracion::query()
+                ->where('licenciatura_id', $this->licenciatura_id)
+                ->where('generacion_id', $this->generacion_id)
+                ->pluck('cuatrimestre_id')
+                ->filter()
+                ->unique()
+                ->values();
+
+            $this->cuatrimestres = Cuatrimestre::query()
+                ->whereIn('id', $idsCuat)
+                ->orderBy('no_cuatrimestre')
+                ->get();
+        } else {
+            // Si no existe cuatrimestre_id, se usa el catálogo completo
+            $this->cuatrimestres = $this->cuatrimestresCatalogo;
+        }
     }
 
     protected function regenerarMatricula(): void
     {
+        // Si falta licenciatura o CURP, no se genera
         if (!$this->licenciatura_id || !$this->curp) {
             return;
         }
@@ -181,9 +265,7 @@ class CrearInscripcion extends Component
         $this->matricula = $matricula;
     }
 
-    /** ============================
-     *  CONSULTA CURP (API)
-     *  ============================ */
+    /** Consulta CURP (API) */
     protected function consultarCurp(): void
     {
         $this->curpConsultando = true;
@@ -192,7 +274,7 @@ class CrearInscripcion extends Component
         /** @var CurpService $service */
         $service = app(CurpService::class);
 
-        // ✅ Yo vuelvo a setear por si cambió a pruebas
+        // Actualiza bandera de modo pruebas
         $this->curpModoPruebas = $service->esModoPruebas();
 
         $data = $service->obtenerDatosPorCurp($this->curp);
@@ -204,7 +286,7 @@ class CrearInscripcion extends Component
             return;
         }
 
-        // ✅ Tu estructura real: response.Solicitante
+        // Respuesta esperada
         $sol = data_get($data, 'response.Solicitante')
             ?? data_get($data, 'response.Soliciante')
             ?? null;
@@ -221,23 +303,18 @@ class CrearInscripcion extends Component
 
         $claveSexo = $sol['ClaveSexo'] ?? null; // H o M
 
-        if ($nombre)
-            $this->nombre = $this->ponerMayusculas($nombre);
-        if ($apPat)
-            $this->apellido_paterno = $this->ponerMayusculas($apPat);
-        if ($apMat)
-            $this->apellido_materno = $this->ponerMayusculas($apMat);
+        if ($nombre) $this->nombre = $this->ponerMayusculas($nombre);
+        if ($apPat) $this->apellido_paterno = $this->ponerMayusculas($apPat);
+        if ($apMat) $this->apellido_materno = $this->ponerMayusculas($apMat);
 
         if ($fechaNac) {
             $this->fecha_nacimiento = trim((string) $fechaNac);
         }
 
-        // ✅ Conversión a tu sistema M/F (validación)
+        // Conversión H/M a M/F del sistema
         if ($claveSexo) {
             $claveSexo = mb_strtoupper(trim((string) $claveSexo));
 
-            // H = Hombre => tu sistema usa M
-            // M = Mujer  => tu sistema usa F
             if ($claveSexo === 'H') {
                 $this->sexo = 'M';
             } elseif ($claveSexo === 'M') {
@@ -248,7 +325,7 @@ class CrearInscripcion extends Component
         $this->regenerarMatricula();
     }
 
-    /** Cascadas país -> estado -> ciudad (para datos_contactos) */
+    /** Cascadas país -> estado -> ciudad */
     public function updatedPaisId(?int $countryId): void
     {
         $this->estado_id = null;
@@ -337,7 +414,7 @@ class CrearInscripcion extends Component
         try {
             $this->regenerarMatricula();
 
-            // valido todo
+            // Valida todo
             $this->validate();
 
             $exists = Inscripcion::whereHas('alumno', function ($q) {
@@ -403,13 +480,11 @@ class CrearInscripcion extends Component
                 ]);
             });
 
-            // ==========================================================
-            //  Limpio errores/validación para que ya NO se vean rojos
-            // ==========================================================
+            // Limpia errores
             $this->resetErrorBag();
             $this->resetValidation();
 
-            // Reseteo los badges del wizard (0 errores en todos)
+            // Resetea contadores del wizard
             $this->dispatch('errores-por-step', summary: [
                 'generales' => 0,
                 'contacto' => 0,
@@ -418,7 +493,7 @@ class CrearInscripcion extends Component
 
             $this->dispatch('ir-a-step', step: 'generales');
 
-            //  limpio campos
+            // Limpia campos
             $this->reset([
                 'user_id',
                 'curp',
@@ -452,16 +527,18 @@ class CrearInscripcion extends Component
                 'curpModoPruebas',
             ]);
 
+            // Reinicia catálogos dependientes
             $this->fecha_inscripcion = now()->toDateString();
             $this->states = [];
             $this->cities = [];
+            $this->generaciones = collect();
+            $this->cuatrimestres = collect();
 
             $this->dispatch('swal', [
                 'title' => '¡Inscripción creada correctamente!',
                 'icon' => 'success',
                 'position' => 'top-end',
             ]);
-
         } catch (ValidationException $e) {
             $errorKeys = array_keys($e->validator->errors()->toArray());
             $step = $this->obtenerPrimerStepConError($errorKeys);
@@ -473,12 +550,12 @@ class CrearInscripcion extends Component
         }
     }
 
-
     protected function obtenerPrimerStepConError(array $errorKeys): string
     {
         foreach ($this->stepMap as $step => $fields) {
-            if (empty($fields))
+            if (empty($fields)) {
                 continue;
+            }
 
             if (count(array_intersect($fields, $errorKeys)) > 0) {
                 return $step;

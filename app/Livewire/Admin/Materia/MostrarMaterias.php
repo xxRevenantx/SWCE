@@ -39,22 +39,22 @@ class MostrarMaterias extends Component
         return Materia::query()
             ->with(['cuatrimestre', 'licenciatura'])
 
-            // ✅ Filtro: Licenciatura
+            // Filtro: Licenciatura
             ->when($this->filtrar_licenciatura, function ($q) {
                 $q->where('licenciatura_id', $this->filtrar_licenciatura);
             })
 
-            // ✅ Filtro: Cuatrimestre
+            // Filtro: Cuatrimestre
             ->when($this->filtrar_cuatrimestre, function ($q) {
                 $q->where('cuatrimestre_id', $this->filtrar_cuatrimestre);
             })
 
-            // ✅ Filtro: Calificable
+            // Filtro: Calificable
             ->when($this->filtrar_calificable !== '', function ($q) {
                 $q->where('calificable', $this->filtrar_calificable === '1');
             })
 
-            // ✅ Búsqueda (agrupada)
+            // Búsqueda (agrupada)
             ->when($search !== '', function ($q) use ($search) {
                 $q->where(function ($qq) use ($search) {
                     $qq->where('nombre', 'like', "%{$search}%")
@@ -70,11 +70,11 @@ class MostrarMaterias extends Component
                 });
             })
 
-            // ✅ Agrupado por licenciatura
+            // Agrupado por licenciatura
             ->orderBy('licenciatura_id', 'desc')
             ->orderBy('cuatrimestre_id', 'asc')
 
-            // ✅ tu sort adicional
+
             ->orderBy($sortField, $sortDirection)
 
             ->paginate(10);
@@ -83,7 +83,7 @@ class MostrarMaterias extends Component
 
 
     /**
-     * ✅ Resetear paginación al cambiar búsqueda o filtros
+     * Resetear paginación al cambiar búsqueda o filtros
      */
     public function updatingSearch()
     {
@@ -123,9 +123,9 @@ class MostrarMaterias extends Component
     #[On('refreshMaterias')]
     public function render()
     {
-        $licenciaturas = Licenciatura::orderBy('id', 'desc')->get();
+        $licenciaturas = Licenciatura::orderBy('id', 'asc')->get();
 
-        $cuatrimestres = Cuatrimestre::orderBy('id', 'desc')->get();
+        $cuatrimestres = Cuatrimestre::orderBy('id', 'asc')->get();
 
         return view('livewire.admin.materia.mostrar-materias', [
             'materias' => $this->materias,

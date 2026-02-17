@@ -111,7 +111,7 @@
         </div>
 
 
-        <!-- WRAPPER que se desenfoca mientras se busca -->
+
         <div class="transition ease-out duration-200" wire:loading.class="blur-sm opacity-80 pointer-events-none"
             wire:target="search, eliminarGeneracion">
             <!-- Tabla (desktop) -->
@@ -145,7 +145,7 @@
                                     $licNombre = $materia->licenciatura?->nombre ?? 'SIN LICENCIATURA';
                                 @endphp
 
-                                {{-- ✅ Encabezado del grupo --}}
+                                {{--  Encabezado del grupo --}}
                                 @if ($licActual !== $licId)
                                     @php
                                         $licActual = $licId;
@@ -171,8 +171,8 @@
                                     {{-- # (reinicia por licenciatura) --}}
                                     <td class="px-4 py-3 text-sm">{{ $contadorGrupo }}</td>
 
-                                    <td class="px-4 py-3 text-sm text-center">{{ $materia->nombre }}</td>
-                                    <td class="px-4 py-3 text-sm text-center">{{ $materia->slug }}</td>
+                                    <td class="px-4 py-3 text-sm text-left">{{ $materia->nombre }}</td>
+                                    <td class="px-4 py-3 text-sm text-left">{{ $materia->slug }}</td>
                                     <td class="px-4 py-3 text-sm text-center">{{ $materia->clave }}</td>
                                     <td class="px-4 py-3 text-sm text-center">{{ $materia->creditos }}</td>
                                     <td class="px-4 py-3 text-sm text-center">

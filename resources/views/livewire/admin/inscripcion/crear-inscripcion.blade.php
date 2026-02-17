@@ -411,19 +411,8 @@
 
                 </div>
 
-                {{-- ✅ FILA 2 (igual que la imagen): Generación | Licenciatura | Fecha | Cuatrimestre --}}
+                {{-- FILA 2: Generación | Licenciatura | Cuatrimestre | Fecha --}}
                 <div class="px-4 sm:px-6 pb-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <flux:field>
-                        <flux:label badge="Requerido">Generación</flux:label>
-                        <flux:select wire:model="generacion_id">
-                            <flux:select.option value="">Selecciona una generación…</flux:select.option>
-                            @foreach ($generaciones as $gen)
-                                <flux:select.option value="{{ $gen->id }}">{{ $gen->generacion }}
-                                </flux:select.option>
-                            @endforeach
-                        </flux:select>
-                        <flux:error name="generacion_id" />
-                    </flux:field>
 
                     <flux:field>
                         <flux:label badge="Requerido">Licenciatura</flux:label>
@@ -438,12 +427,25 @@
                     </flux:field>
 
                     <flux:field>
+                        <flux:label badge="Requerido">Generación</flux:label>
+                        <flux:select wire:model.live="generacion_id" :disabled="!$licenciatura_id">
+                            <flux:select.option value="">Selecciona una generación…</flux:select.option>
+                            @foreach ($generaciones as $gen)
+                                <flux:select.option value="{{ $gen->id }}">{{ $gen->generacion }}
+                                </flux:select.option>
+                            @endforeach
+                        </flux:select>
+                        <flux:error name="generacion_id" />
+                    </flux:field>
+
+                    <flux:field>
                         <flux:label badge="Requerido">Cuatrimestre</flux:label>
-                        <flux:select wire:model.live="cuatrimestre_id">
+                        <flux:select wire:model.live="cuatrimestre_id"
+                            :disabled="!$licenciatura_id || !$generacion_id">
                             <flux:select.option value="">Selecciona un cuatrimestre…</flux:select.option>
                             @foreach ($cuatrimestres as $cuat)
                                 <flux:select.option value="{{ $cuat->id }}">
-                                    {{ $cuat->no_cuatrimestre ?? $cuat->id }}
+                                    {{ $cuat->nombre_cuatrimestre }}
                                 </flux:select.option>
                             @endforeach
                         </flux:select>
@@ -456,10 +458,9 @@
                         <flux:error name="fecha_inscripcion" />
                     </flux:field>
 
-
                 </div>
 
-                {{-- ✅ STATUS (debajo, como en la imagen) --}}
+
                 <div class="px-4 sm:px-6 pb-5">
                     <flux:field>
                         <flux:label>Status</flux:label>

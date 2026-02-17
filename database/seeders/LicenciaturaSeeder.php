@@ -16,41 +16,6 @@ class LicenciaturaSeeder extends Seeder
         $licenciaturas = [
 
             [
-                'nombre' => 'Cultura Física y Deportes',
-                'slug' => 'cultura-fisica-y-deportes',
-                'RVOE' => 'SEG/101/2022',
-                'nombre_corto' => 'Física y Deportes',
-                'logo' => null,
-            ],
-            [
-                'nombre' => 'Ciencias de la Educación',
-                'slug' => 'ciencias-de-la-educacion',
-                'RVOE' => 'SEG/102/2022',
-                'nombre_corto' => 'Ciencias de la Educación',
-                'logo' => null,
-            ],
-            [
-                'nombre' => 'Criminalística, Criminología y Técnicas Periciales',
-                'slug' => 'criminologia-criminalista-y-tecnicas-periciales',
-                'RVOE' => 'SEG/032/2021',
-                'nombre_corto' => 'Criminalística',
-                'logo' => null,
-            ],
-            [
-                'nombre' => 'Ciencias Políticas y Administración Pública',
-                'slug' => 'ciencias-politicas-y-administracion-publica',
-                'RVOE' => null, // Sin RVOE
-                'nombre_corto' => 'Ciencias Políticas',
-                'logo' => null,
-            ],
-            [
-                'nombre' => 'Administración Empresarial',
-                'slug' => 'administracion-empresarial',
-                'RVOE' => 'SEG/0011/2021',
-                'nombre_corto' => 'Administración Emp.',
-                'logo' => null,
-            ],
-            [
                 'nombre' => 'Nutrición',
                 'slug' => 'nutricion',
                 'RVOE' => null, // Sin RVOE
@@ -58,13 +23,55 @@ class LicenciaturaSeeder extends Seeder
                 'logo' => null,
 
             ],
+
+            [
+                'nombre' => 'Administración Empresarial',
+                'slug' => 'administracion-empresarial',
+                'RVOE' => 'SEG/0011/2021',
+                'nombre_corto' => 'Administración Emp.',
+                'logo' => null,
+            ],
+
+            [
+                'nombre' => 'Ciencias Políticas y Administración Pública',
+                'slug' => 'ciencias-politicas-y-administracion-publica',
+                'RVOE' => null, // Sin RVOE
+                'nombre_corto' => 'Ciencias Políticas',
+                'logo' => null,
+            ],
+
+            [
+                'nombre' => 'Criminalística, Criminología y Técnicas Periciales',
+                'slug' => 'criminologia-criminalista-y-tecnicas-periciales',
+                'RVOE' => 'SEG/032/2021',
+                'nombre_corto' => 'Criminalística',
+                'logo' => null,
+            ],
+
+            [
+                'nombre' => 'Ciencias de la Educación',
+                'slug' => 'ciencias-de-la-educacion',
+                'RVOE' => 'SEG/102/2022',
+                'nombre_corto' => 'Ciencias de la Educación',
+                'logo' => null,
+            ],
+
+            [
+                'nombre' => 'Cultura Física y Deportes',
+                'slug' => 'cultura-fisica-y-deportes',
+                'RVOE' => 'SEG/101/2022',
+                'nombre_corto' => 'Física y Deportes',
+                'logo' => null,
+            ],
+
+
+
+
+
         ];
 
         foreach ($licenciaturas as $licenciatura) {
             \App\Models\Licenciatura::create($licenciatura);
         }
-
-
-
     }
 }

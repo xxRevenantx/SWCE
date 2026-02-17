@@ -12,67 +12,60 @@ use Livewire\Component;
 
 class CrearCalificacion extends Component
 {
-    /** Catálogos para los filtros */
+    /** Listas para los selects */
     public $licenciaturas = [];
     public $generaciones = [];
     public $cuatrimestres = [];
 
-    /** Valores seleccionados en los filtros */
+    /** Filtros */
     public ?int $licenciatura_id = null;
     public ?int $generacion_id = null;
     public ?int $cuatrimestre_id = null;
 
-    /**
-     * Materias como ARRAY (para evitar problemas de Collection/array en Livewire)
-     * Cada elemento:
-     *  - id (asignacion_materias.id)
-     *  - materia (nombre)
-     *  - profesor (nombre completo o '—')
-     */
+    /** Columnas (materias asignadas) */
     public array $materias = [];
 
-    /**
-     * Filas (inscripciones) como ARRAY
-     * Cada elemento:
-     *  - inscripcion_id
-     *  - alumno_id
-     *  - matricula
-     *  - alumno (nombre completo)
-     */
+    /** Filas (inscripciones/alumnos) */
     public array $inscripciones = [];
 
     /** Matriz: [inscripcion_id][asignacion_materia_id] => calificacion */
     public array $calificaciones = [];
 
-    /** UI */
+    /** Estado simple de UI */
     public bool $hayCambios = false;
 
     public function mount(): void
     {
+        // Carga licenciaturas para el primer filtro
         $this->licenciaturas = Licenciatura::query()
-            ->orderBy('nombre')
+            ->orderBy('id')
             ->get();
 
-        $this->cuatrimestres = Cuatrimestre::query()
-            ->orderBy('no_cuatrimestre')
-            ->get();
+        // Al inicio no se muestran generaciones ni cuatrimestres
+        $this->generaciones = [];
+        $this->cuatrimestres = [];
     }
 
     public function updatedLicenciaturaId(): void
     {
+        // Limpia filtros dependientes
         $this->generacion_id = null;
         $this->cuatrimestre_id = null;
 
+        // Limpia datos de la tabla
         $this->generaciones = [];
+        $this->cuatrimestres = [];
         $this->materias = [];
         $this->inscripciones = [];
         $this->calificaciones = [];
         $this->hayCambios = false;
 
+        // Si no hay licenciatura, se queda vacío
         if (!$this->licenciatura_id) {
             return;
         }
 
+        // Generaciones disponibles según asignar_generaciones
         $idsGeneracion = AsignarGeneracion::query()
             ->where('licenciatura_id', $this->licenciatura_id)
             ->pluck('generacion_id')
@@ -83,39 +76,52 @@ class CrearCalificacion extends Component
             ->whereIn('id', $idsGeneracion)
             ->orderBy('generacion')
             ->get();
+
+        // Cuatrimestres disponibles según asignacion_materias
+        $idsCuatrimestre = AsignacionMateria::query()
+            ->where('licenciatura_id', $this->licenciatura_id)
+            ->pluck('cuatrimestre_id')
+            ->unique()
+            ->values();
+
+        $this->cuatrimestres = Cuatrimestre::query()
+            ->whereIn('id', $idsCuatrimestre)
+            ->orderBy('no_cuatrimestre')
+            ->get();
     }
 
     public function updatedGeneracionId(): void
     {
-        $this->cuatrimestre_id = null;
-
+        // Limpia datos dependientes
         $this->materias = [];
         $this->inscripciones = [];
         $this->calificaciones = [];
         $this->hayCambios = false;
 
+        // Carga si ya están completos los filtros
         $this->cargarDatosSiListo();
     }
 
     public function updatedCuatrimestreId(): void
     {
+        // Limpia datos dependientes
         $this->materias = [];
         $this->inscripciones = [];
         $this->calificaciones = [];
         $this->hayCambios = false;
 
+        // Carga si ya están completos los filtros
         $this->cargarDatosSiListo();
     }
 
     private function cargarDatosSiListo(): void
     {
+        // Se requieren los 3 filtros
         if (!$this->licenciatura_id || !$this->generacion_id || !$this->cuatrimestre_id) {
             return;
         }
 
-        // =========================
-        // Materias (igual que Horarios)
-        // =========================
+        // 1) Materias asignadas a esa licenciatura y cuatrimestre
         $asignaciones = AsignacionMateria::query()
             ->with(['materia', 'profesor'])
             ->where('licenciatura_id', $this->licenciatura_id)
@@ -125,20 +131,24 @@ class CrearCalificacion extends Component
 
         $this->materias = $asignaciones->map(function ($a) {
             $nombreMateria = $a->materia?->nombre ?? 'MATERIA';
-            $prof = $a->profesor
-                ? trim(($a->profesor->nombre ?? '') . ' ' . ($a->profesor->apellido_paterno ?? '') . ' ' . ($a->profesor->apellido_materno ?? ''))
+
+            // Nombre real del profesor (con tus columnas)
+            $profesor = $a->profesor
+                ? trim(
+                    ($a->profesor->nombre ?? '') . ' ' .
+                        ($a->profesor->apellido_paterno ?? '') . ' ' .
+                        ($a->profesor->apellido_materno ?? '')
+                )
                 : '—';
 
             return [
-                'id' => (int) $a->id, // asignacion_materias.id
+                'id' => (int) $a->id,            // asignacion_materias.id
                 'materia' => $nombreMateria,
-                'profesor' => $prof ?: '—',
+                'profesor' => $profesor !== '' ? $profesor : '—',
             ];
         })->values()->toArray();
 
-        // =========================
-        // Inscripciones + Matrícula real (datos_escolares)
-        // =========================
+        // 2) Alumnos inscritos en esa licenciatura, generación y cuatrimestre
         $ins = DB::table('inscripciones')
             ->join('alumnos', 'alumnos.id', '=', 'inscripciones.alumno_id')
             ->leftJoin('datos_escolares', 'datos_escolares.alumno_id', '=', 'alumnos.id')
@@ -161,10 +171,10 @@ class CrearCalificacion extends Component
             'alumno' => $r->alumno ?: '—',
         ])->toArray();
 
-        // Matriz en blanco
+        // 3) Matriz vacía para capturar
         $this->prepararCalificacionesEnBlanco();
 
-        // Cargar guardadas si existe tabla calificaciones
+        // 4) Si existe la tabla, se cargan calificaciones guardadas
         $this->cargarCalificacionesGuardadas();
     }
 
@@ -184,6 +194,7 @@ class CrearCalificacion extends Component
 
     private function cargarCalificacionesGuardadas(): void
     {
+        // Si no existe tabla, se omite
         if (!DB::getSchemaBuilder()->hasTable('calificaciones')) {
             return;
         }
@@ -195,8 +206,6 @@ class CrearCalificacion extends Component
             return;
         }
 
-        // Estructura esperada:
-        // calificaciones: inscripcion_id, asignacion_materia_id, calificacion
         $guardadas = DB::table('calificaciones')
             ->whereIn('inscripcion_id', $idsIns)
             ->whereIn('asignacion_materia_id', $idsAsig)
@@ -214,11 +223,13 @@ class CrearCalificacion extends Component
 
     public function limpiarFiltros(): void
     {
+        // Deja todo en cero
         $this->licenciatura_id = null;
         $this->generacion_id = null;
         $this->cuatrimestre_id = null;
 
         $this->generaciones = [];
+        $this->cuatrimestres = [];
         $this->materias = [];
         $this->inscripciones = [];
         $this->calificaciones = [];
@@ -227,6 +238,7 @@ class CrearCalificacion extends Component
 
     public function marcarCambio(): void
     {
+        // Habilita el botón de guardar
         $this->hayCambios = true;
     }
 
@@ -288,6 +300,7 @@ class CrearCalificacion extends Component
 
     public function guardarCalificaciones(): void
     {
+        // Si falta tabla, se muestra error
         if (!DB::getSchemaBuilder()->hasTable('calificaciones')) {
             $this->addError('calificaciones', 'No existe la tabla calificaciones. Crea la tabla para guardar.');
             return;
@@ -301,11 +314,14 @@ class CrearCalificacion extends Component
                     $asigId = (int) $m['id'];
                     $valor = $this->calificaciones[$insId][$asigId] ?? null;
 
+                    // Si está vacío, se ignora
                     if ($valor === null || $valor === '' || !is_numeric($valor)) {
                         continue;
                     }
 
                     $valor = (float) $valor;
+
+                    // Solo 0 a 10
                     if ($valor < 0 || $valor > 10) {
                         continue;
                     }
@@ -317,6 +333,7 @@ class CrearCalificacion extends Component
                         ],
                         [
                             'calificacion' => $valor,
+                            'fecha_captura' => now(),
                             'updated_at' => now(),
                             'created_at' => now(),
                         ]

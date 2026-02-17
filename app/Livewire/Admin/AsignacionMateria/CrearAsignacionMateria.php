@@ -9,43 +9,40 @@ use App\Models\Materia;
 use App\Models\Profesor;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
+use Livewire\WithPagination;
 
 class CrearAsignacionMateria extends Component
 {
+    use WithPagination;
+
     public string $search = '';
 
     /** Filtros */
     public ?int $filtrar_licenciatura = null;
     public ?int $filtrar_cuatrimestre = null;
 
+    /** Paginación */
+    public int $por_pagina = 25;
+
     /** Catálogos */
     public $licenciaturas = [];
     public $cuatrimestres = [];
     public $profesores = [];
 
-    /** id => "#rrggbb" */
     public array $colorMap = [];
-
-    /** IDs válidos de profesor para validar sin queries extra */
     public array $profesoresValidos = [];
-
-    /**
-     * Estado del select por fila:
-     * key = "licID_cuatID_matID" => profesor_id|null
-     */
     public array $profesorSeleccionado = [];
 
     public function mount(): void
     {
         $this->licenciaturas = Licenciatura::query()
-            ->orderBy('nombre')
+            ->orderBy('id')
             ->get(['id', 'nombre']);
 
         $this->cuatrimestres = Cuatrimestre::query()
             ->orderBy('no_cuatrimestre')
             ->get(['id', 'no_cuatrimestre', 'nombre_cuatrimestre']);
 
-        // IMPORTANTE: traer también "color"
         $this->profesores = Profesor::query()
             ->orderBy('nombre')
             ->get(['id', 'nombre', 'apellido_paterno', 'apellido_materno', 'color']);
@@ -75,40 +72,62 @@ class CrearAsignacionMateria extends Component
         $this->filtrar_licenciatura = null;
         $this->filtrar_cuatrimestre = null;
         $this->search = '';
+        $this->resetPage();
     }
 
+    /** Al cambiar búsqueda/filtros, regresar a página 1 */
+    public function updatedSearch(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedFiltrarLicenciatura(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedFiltrarCuatrimestre(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedPorPagina(): void
+    {
+        $this->resetPage();
+    }
 
     private function makeKey(int $licId, int $cuatId, int $matId): string
     {
         return "{$licId}_{$cuatId}_{$matId}";
     }
 
-
     private function parseKey(string $key): ?array
     {
         $parts = explode('_', $key);
-        if (count($parts) !== 3)
+        if (count($parts) !== 3) {
             return null;
+        }
 
         [$licId, $cuatId, $matId] = array_map('intval', $parts);
-        if ($licId <= 0 || $cuatId <= 0 || $matId <= 0)
+        if ($licId <= 0 || $cuatId <= 0 || $matId <= 0) {
             return null;
+        }
 
         return [$licId, $cuatId, $matId];
     }
 
-
     public function guardarProfesor(string $key, $value): void
     {
         $parsed = $this->parseKey($key);
-        if (!$parsed)
+        if (!$parsed) {
             return;
+        }
 
         [$licId, $cuatId, $matId] = $parsed;
 
         $profesorId = ($value === '' || $value === null) ? null : (int) $value;
 
-        // Validación segura sin query extra
+        // Validación sin query extra
         if ($profesorId !== null && !in_array($profesorId, $this->profesoresValidos, true)) {
             $this->dispatch('toast', type: 'error', message: 'Profesor inválido.');
             $this->profesorSeleccionado[$key] = $this->profesorSeleccionado[$key] ?? null;
@@ -128,14 +147,17 @@ class CrearAsignacionMateria extends Component
             );
         });
 
-        // Mantén estado en memoria
         $this->profesorSeleccionado[$key] = $profesorId;
 
         $this->dispatch('toast', type: 'success', message: 'Asignación guardada.');
     }
 
-
-    public function getMatrizProperty(): array
+    /**
+     * Regresa:
+     * - $matriz (array agrupado con SOLO la página actual)
+     * - $paginacion (LengthAwarePaginator)
+     */
+    private function obtenerMatrizPaginada(): array
     {
         $q = Materia::query()
             ->with([
@@ -172,11 +194,12 @@ class CrearAsignacionMateria extends Component
             });
         }
 
-        $materias = $q->get();
+        $paginacion = $q->paginate($this->por_pagina);
 
+        // Agrupar SOLO lo de la página actual
         $out = [];
 
-        foreach ($materias as $m) {
+        foreach ($paginacion->getCollection() as $m) {
             $licId = (int) $m->licenciatura_id;
             $cuatId = (int) $m->cuatrimestre_id;
 
@@ -196,20 +219,23 @@ class CrearAsignacionMateria extends Component
 
             $out[$licId]['cuatrimestres'][$cuatId]['materias'][] = $m;
 
-            // asegurar estado del select
+            // Asegurar estado del select
             $key = $this->makeKey($licId, $cuatId, (int) $m->id);
             if (!array_key_exists($key, $this->profesorSeleccionado)) {
                 $this->profesorSeleccionado[$key] = null;
             }
         }
 
-        return $out;
+        return [$out, $paginacion];
     }
 
     public function render()
     {
+        [$matriz, $paginacion] = $this->obtenerMatrizPaginada();
+
         return view('livewire.admin.asignacion-materia.crear-asignacion-materia', [
-            'matriz' => $this->matriz,
+            'matriz' => $matriz,
+            'paginacion' => $paginacion,
         ]);
     }
 }

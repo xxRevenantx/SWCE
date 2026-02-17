@@ -32,7 +32,7 @@
 
             {{-- Filtros --}}
             <div class="grid gap-3 sm:grid-cols-12">
-                <div class="sm:col-span-5">
+                <div class="sm:col-span-4">
                     <label class="text-xs font-semibold text-neutral-600 dark:text-neutral-300">Filtrar por
                         Licenciatura</label>
                     <select wire:model.live="filtrar_licenciatura"
@@ -46,7 +46,7 @@
                     </select>
                 </div>
 
-                <div class="sm:col-span-5">
+                <div class="sm:col-span-4">
                     <label class="text-xs font-semibold text-neutral-600 dark:text-neutral-300">Filtrar por
                         Cuatrimestre</label>
                     <select wire:model.live="filtrar_cuatrimestre"
@@ -59,6 +59,19 @@
                                 {{ $c->nombre_cuatrimestre ?? 'Cuatrimestre ' . $c->no_cuatrimestre }}
                             </option>
                         @endforeach
+                    </select>
+                </div>
+
+                <div class="sm:col-span-2">
+                    <label class="text-xs font-semibold text-neutral-600 dark:text-neutral-300">Por página</label>
+                    <select wire:model.live="por_pagina"
+                        class="mt-2 w-full rounded-2xl border border-neutral-200 bg-white px-3 py-2.5 text-sm
+                               focus:ring-2 focus:ring-sky-400 focus:border-sky-400
+                               dark:border-neutral-800 dark:bg-neutral-950 dark:text-white">
+                        <option value="10">10</option>
+                        <option value="25">25</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
                     </select>
                 </div>
 
@@ -91,7 +104,6 @@
         </div>
 
         @php
-            // IMPORTANTE: ya viene desde el componente con colorMap, pero por si quieres:
             $colors = $colorMap ?? [];
         @endphp
 
@@ -145,14 +157,13 @@
 
                                     @foreach ($bloque['materias'] as $m)
                                         @php
-                                            // ✅ key seguro: lic_cuat_mat
                                             $key = $licId . '_' . $cuatId . '_' . $m->id;
                                             $entangleKey = "profesorSeleccionado.$key";
                                         @endphp
 
                                         <tr wire:key="row-{{ $key }}"
                                             class="hover:bg-neutral-50 dark:hover:bg-neutral-950/60 transition">
-                                            <td class="px-4 py-3">
+                                            <td class="px-4 ">
                                                 <div class="flex flex-col">
                                                     <span
                                                         class="text-sm font-semibold text-neutral-900 dark:text-white">
@@ -164,21 +175,17 @@
                                                 </div>
                                             </td>
 
-                                            <td class="px-4 py-3 text-sm text-neutral-700 dark:text-neutral-200">
+                                            <td class="px-4  text-sm text-neutral-700 dark:text-neutral-200">
                                                 {{ $m->clave ?? '—' }}
                                             </td>
 
-                                            <td class="px-4 py-3">
+                                            <td class="px-4 ">
                                                 <div class="rounded-2xl p-2 transition" x-data="{
                                                     selected: @entangle($entangleKey),
                                                     colors: @js($colors),
-                                                
                                                     dot: '#9ca3af',
                                                     selectStyle: '',
                                                     cellStyle: '',
-                                                    badgeStyle: '',
-                                                    badgeText: 'Sin asignar',
-                                                
                                                     contrast(hex) {
                                                         if (!hex) return '#111827';
                                                         hex = hex.replace('#', '');
@@ -190,7 +197,6 @@
                                                         const l = 0.299 * r + 0.587 * g + 0.114 * b;
                                                         return (l < 140) ? '#ffffff' : '#111827';
                                                     },
-                                                
                                                     rgba(hex, a = 0.10) {
                                                         if (!hex) return '';
                                                         hex = hex.replace('#', '');
@@ -201,40 +207,23 @@
                                                             b = parseInt(hex.slice(4, 6), 16);
                                                         return `rgba(${r},${g},${b},${a})`;
                                                     },
-                                                
                                                     apply() {
                                                         const id = this.selected ? Number(this.selected) : null;
                                                         const bg = id ? (this.colors[id] ?? null) : null;
                                                 
                                                         if (bg) {
                                                             const txt = this.contrast(bg);
-                                                
                                                             this.selectStyle = `background-color:${bg};color:${txt};border-color:${bg};`;
                                                             this.cellStyle = `background-color:${this.rgba(bg, 0.12)}; border:1px solid ${this.rgba(bg, 0.35)};`;
-                                                
-                                                            this.badgeStyle = `background-color:${this.rgba(bg, 0.18)}; color:${bg}; border:1px solid ${this.rgba(bg, 0.35)};`;
-                                                            this.badgeText = 'Asignado';
-                                                
                                                             this.dot = bg;
                                                         } else {
                                                             this.selectStyle = '';
                                                             this.cellStyle = '';
-                                                            this.badgeStyle = 'background-color: rgba(148,163,184,.15); color: #64748b; border: 1px solid rgba(148,163,184,.25);';
-                                                            this.badgeText = 'Sin asignar';
                                                             this.dot = '#9ca3af';
                                                         }
                                                     }
                                                 }"
                                                     x-init="apply()" x-effect="apply()" :style="cellStyle">
-                                                    <div class="flex items-center justify-between gap-2 mb-2">
-                                                        <span
-                                                            class="inline-flex items-center gap-2 rounded-full px-2.5 py-1 text-[11px] font-semibold"
-                                                            :style="badgeStyle">
-                                                            <span class="h-1.5 w-1.5 rounded-full"
-                                                                :style="`background-color:${dot}`"></span>
-                                                            <span x-text="badgeText"></span>
-                                                        </span>
-                                                    </div>
 
                                                     <div class="relative">
                                                         <span
@@ -272,7 +261,7 @@
                     {{-- Mobile --}}
                     <div class="md:hidden divide-y divide-neutral-100 dark:divide-neutral-800">
                         @foreach ($grupo['cuatrimestres'] as $cuatId => $bloque)
-                            <div class="px-4 py-3 bg-neutral-50/80 dark:bg-neutral-950/60">
+                            <div class="px-4 bg-neutral-50/80 dark:bg-neutral-950/60">
                                 <span
                                     class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold bg-amber-50 text-amber-800 dark:bg-amber-500/10 dark:text-amber-300">
                                     {{ $bloque['cuat']->nombre_cuatrimestre ?? 'Cuatrimestre ' . ($bloque['cuat']->no_cuatrimestre ?? '') }}
@@ -287,25 +276,23 @@
 
                                 <div wire:key="mrow-{{ $key }}" class="p-4">
                                     <p class="text-sm font-semibold text-neutral-900 dark:text-white">
-                                        {{ $m->nombre }}</p>
+                                        {{ $m->nombre }}
+                                    </p>
                                     <p class="mt-0.5 text-xs text-neutral-500 dark:text-neutral-400">
                                         {{ $m->clave ?? '—' }} · {{ $m->slug ?? '' }}
                                     </p>
 
                                     <div class="mt-3">
-                                        <label
-                                            class="text-xs font-semibold text-neutral-700 dark:text-neutral-300">Profesor</label>
+                                        <label class="text-xs font-semibold text-neutral-700 dark:text-neutral-300">
+                                            Profesor
+                                        </label>
 
                                         <div class="rounded-2xl p-2 mt-2 transition" x-data="{
                                             selected: @entangle($entangleKey),
                                             colors: @js($colors),
-                                        
                                             dot: '#9ca3af',
                                             selectStyle: '',
                                             cellStyle: '',
-                                            badgeStyle: '',
-                                            badgeText: 'Sin asignar',
-                                        
                                             contrast(hex) {
                                                 if (!hex) return '#111827';
                                                 hex = hex.replace('#', '');
@@ -317,7 +304,6 @@
                                                 const l = 0.299 * r + 0.587 * g + 0.114 * b;
                                                 return (l < 140) ? '#ffffff' : '#111827';
                                             },
-                                        
                                             rgba(hex, a = 0.10) {
                                                 if (!hex) return '';
                                                 hex = hex.replace('#', '');
@@ -328,7 +314,6 @@
                                                     b = parseInt(hex.slice(4, 6), 16);
                                                 return `rgba(${r},${g},${b},${a})`;
                                             },
-                                        
                                             apply() {
                                                 const id = this.selected ? Number(this.selected) : null;
                                                 const bg = id ? (this.colors[id] ?? null) : null;
@@ -337,28 +322,15 @@
                                                     const txt = this.contrast(bg);
                                                     this.selectStyle = `background-color:${bg};color:${txt};border-color:${bg};`;
                                                     this.cellStyle = `background-color:${this.rgba(bg, 0.12)}; border:1px solid ${this.rgba(bg, 0.35)};`;
-                                                    this.badgeStyle = `background-color:${this.rgba(bg, 0.18)}; color:${bg}; border:1px solid ${this.rgba(bg, 0.35)};`;
-                                                    this.badgeText = 'Asignado';
                                                     this.dot = bg;
                                                 } else {
                                                     this.selectStyle = '';
                                                     this.cellStyle = '';
-                                                    this.badgeStyle = 'background-color: rgba(148,163,184,.15); color: #64748b; border: 1px solid rgba(148,163,184,.25);';
-                                                    this.badgeText = 'Sin asignar';
                                                     this.dot = '#9ca3af';
                                                 }
                                             }
                                         }"
                                             x-init="apply()" x-effect="apply()" :style="cellStyle">
-                                            <div class="flex items-center justify-between gap-2 mb-2">
-                                                <span
-                                                    class="inline-flex items-center gap-2 rounded-full px-2.5 py-1 text-[11px] font-semibold"
-                                                    :style="badgeStyle">
-                                                    <span class="h-1.5 w-1.5 rounded-full"
-                                                        :style="`background-color:${dot}`"></span>
-                                                    <span x-text="badgeText"></span>
-                                                </span>
-                                            </div>
 
                                             <div class="relative">
                                                 <span
@@ -379,8 +351,9 @@
                                                 </select>
                                             </div>
 
-                                            <p class="mt-1 text-[11px] text-neutral-500 dark:text-neutral-400">Se
-                                                guarda al cambiar</p>
+                                            <p class="mt-1 text-[11px] text-neutral-500 dark:text-neutral-400">
+                                                Se guarda al cambiar
+                                            </p>
                                         </div>
                                     </div>
                                 </div>
@@ -396,6 +369,16 @@
                     <p class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">Ajusta filtros o revisa datos.</p>
                 </div>
             @endforelse
+
+            @if (isset($paginacion) && $paginacion->hasPages())
+                <div class="mt-6">
+                    <div
+                        class="rounded-2xl border border-neutral-200 bg-white px-4 shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
+                        {{ $paginacion->onEachSide(1)->links() }}
+                    </div>
+                </div>
+            @endif
+
         </div>
     </div>
 
