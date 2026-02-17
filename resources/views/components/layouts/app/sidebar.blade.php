@@ -140,7 +140,8 @@
                         {{ __('Horarios') }}
                     </flux:navlist.item>
 
-                    <flux:navlist.item class="py-4" icon="book-check" wire:navigate>
+                    <flux:navlist.item class="py-4" icon="book-check" :href="route('calificaciones.index')"
+                        :current="request()->routeIs('calificaciones.index')" wire:navigate>
                         {{ __('Calificaciones') }}
                     </flux:navlist.item>
                 </flux:navlist.group>

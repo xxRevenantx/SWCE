@@ -57,15 +57,15 @@ class Horario extends Component
         // Se cargan los días y se ordenan de lunes a viernes
         $this->dias = Dia::query()
             ->orderByRaw("
-                CASE dia
-                    WHEN 'Lunes' THEN 1
-                    WHEN 'Martes' THEN 2
-                    WHEN 'Miércoles' THEN 3
-                    WHEN 'Jueves' THEN 4
-                    WHEN 'Viernes' THEN 5
-                    ELSE 99
-                END
-            ")
+                    CASE dia
+                        WHEN 'Lunes' THEN 1
+                        WHEN 'Martes' THEN 2
+                        WHEN 'Miércoles' THEN 3
+                        WHEN 'Jueves' THEN 4
+                        WHEN 'Viernes' THEN 5
+                        ELSE 99
+                    END
+                ")
             ->get();
 
         // Se cargan cuatrimestres (catálogo completo)

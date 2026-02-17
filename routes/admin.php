@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\LicenciaturaController;
 use App\Http\Controllers\Admin\MateriaController;
 use App\Http\Controllers\Admin\PDFController;
 use App\Http\Controllers\Admin\ProfesorController;
+use App\Http\Controllers\CalificacionController;
 use App\Http\Controllers\CuatrimestreController;
 use App\Http\Controllers\GeneracionController;
 use App\Http\Controllers\InscripcionController;
@@ -38,6 +39,9 @@ Route::middleware(['auth'])->group(function () {
 
     //HORARIO
     Route::resource('horarios', HorarioController::class)->middleware('can:admin.horarios')->names('horarios');
+
+    // CALIFICACIONES
+    Route::resource('calificaciones', CalificacionController::class)->middleware('can:admin.calificaciones')->names('calificaciones');
 
 
     //Inscripción

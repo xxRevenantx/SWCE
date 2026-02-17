@@ -59,6 +59,9 @@ class RoleSeeder extends Seeder
         // Permisos para 'horarios' y asignación al rol 'Admin'
         Permission::create(['name' => 'admin.horarios'])->syncRoles([$role1]);
 
+        // Permisos para 'calificaciones' y asignación al rol 'Admin'
+        Permission::create(['name' => 'admin.calificaciones'])->syncRoles([$role1]);
+
 
         // Permisos para 'pdf.expediente_alumno' y asignación al rol 'Admin'
         Permission::create(['name' => 'admin.pdf.expediente_alumno'])->syncRoles([$role1]);

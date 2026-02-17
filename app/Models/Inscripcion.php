@@ -42,4 +42,9 @@ class Inscripcion extends Model
     {
         return $this->belongsTo(Cuatrimestre::class);
     }
+
+    public function calificaciones()
+    {
+        return $this->hasMany(Calificacion::class);
+    }
 }

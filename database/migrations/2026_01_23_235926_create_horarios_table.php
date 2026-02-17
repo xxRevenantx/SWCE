@@ -18,7 +18,6 @@ return new class extends Migration {
             $table->unsignedBigInteger('licenciatura_id');
             $table->unsignedBigInteger('generacion_id');
             $table->unsignedBigInteger('asignacion_materia_id');
-            $table->unsignedBigInteger('profesor_id');
 
 
 
@@ -27,7 +26,6 @@ return new class extends Migration {
             $table->foreign('licenciatura_id')->references('id')->on('licenciaturas')->onDelete('cascade');
             $table->foreign('generacion_id')->references('id')->on('generaciones')->onDelete('cascade');
             $table->foreign('asignacion_materia_id')->references('id')->on('asignacion_materias')->onDelete('cascade');
-            $table->foreign('profesor_id')->references('id')->on('profesores')->onDelete('cascade');
 
 
 

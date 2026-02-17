@@ -17,7 +17,6 @@ class Horario extends Model
         'licenciatura_id',
         'generacion_id',
         'asignacion_materia_id',
-        'profesor_id',
     ];
 
     // RELACIONES
@@ -45,11 +44,6 @@ class Horario extends Model
     public function asignacionMateria()
     {
         return $this->belongsTo(AsignacionMateria::class);
-    }
-
-    public function profesor()
-    {
-        return $this->belongsTo(Profesor::class);
     }
 
 
