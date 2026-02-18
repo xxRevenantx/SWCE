@@ -51,7 +51,7 @@ class CurpService
         $seed = abs(crc32($curp));
         mt_srand($seed);
 
-        $nombres = ['CARLOS', 'ALBERTO', 'MARIA', 'FERNANDA', 'JUAN', 'PEDRO', 'ANGEL', 'SOFIA', 'DANIEL', 'PAOLA'];
+        $nombres = ['CARLOS', 'ALBERTO', 'MARIA', 'MELISA', 'JUAN', 'PEDRO', 'ANGEL', 'YULISA', 'DANIEL', 'PAOLA'];
         $apellidos = ['NUNEZ', 'PEREZ', 'GARCIA', 'HERNANDEZ', 'LOPEZ', 'MARTINEZ', 'SANCHEZ', 'RAMIREZ', 'FLORES', 'TORRES'];
 
         $nombre1 = $nombres[mt_rand(0, count($nombres) - 1)];
@@ -87,5 +87,4 @@ class CurpService
             ],
         ];
     }
-
 }

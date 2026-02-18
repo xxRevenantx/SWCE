@@ -200,6 +200,39 @@
 
         </div>
 
+        <div class="px-5 pt-5">
+            <div
+                class="rounded-2xl border shadow-sm px-4 py-3 flex items-center justify-between gap-4
+                        {{ $hayCambios
+                            ? 'border-amber-200 dark:border-amber-900 bg-amber-50 dark:bg-amber-950/30'
+                            : 'border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-950/40' }}">
+
+                <div class="flex items-center gap-3">
+                    <span class="relative flex h-3 w-3">
+                        @if ($hayCambios)
+                            <span
+                                class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-500 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-3 w-3 bg-amber-600"></span>
+                        @else
+                            <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-600"></span>
+                        @endif
+                    </span>
+
+                    <div class="min-w-0">
+                        <div class="text-sm font-semibold text-neutral-900 dark:text-neutral-100">
+                            {{ $hayCambios ? 'Hay cambios por guardar' : 'No hay cambios por guardar' }}
+                        </div>
+                        <div class="text-xs text-neutral-600 dark:text-neutral-300">
+                            {{ $hayCambios ? 'Guarda para aplicar los cambios.' : 'Todo está al día.' }}
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+
+
         {{-- Tabla --}}
         <div
             class="mt-6 rounded-2xl border bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-700 shadow-sm overflow-hidden">

@@ -121,13 +121,22 @@ class CrearCalificacion extends Component
             return;
         }
 
-        // 1) Materias asignadas a esa licenciatura y cuatrimestre
+        // 1) Materias asignadas a esa licenciatura y cuatrimestre (solo calificables)
         $asignaciones = AsignacionMateria::query()
-            ->with(['materia', 'profesor'])
             ->where('licenciatura_id', $this->licenciatura_id)
             ->where('cuatrimestre_id', $this->cuatrimestre_id)
+            ->whereHas('materia', function ($q) {
+                $q->where('calificable', 'si');
+            })
+            ->with([
+                'materia' => function ($q) {
+                    $q->where('calificable', 'si');
+                },
+                'profesor',
+            ])
             ->orderBy('id')
             ->get();
+
 
         $this->materias = $asignaciones->map(function ($a) {
             $nombreMateria = $a->materia?->nombre ?? 'MATERIA';
@@ -136,8 +145,8 @@ class CrearCalificacion extends Component
             $profesor = $a->profesor
                 ? trim(
                     ($a->profesor->nombre ?? '') . ' ' .
-                    ($a->profesor->apellido_paterno ?? '') . ' ' .
-                    ($a->profesor->apellido_materno ?? '')
+                        ($a->profesor->apellido_paterno ?? '') . ' ' .
+                        ($a->profesor->apellido_materno ?? '')
                 )
                 : '—';
 
