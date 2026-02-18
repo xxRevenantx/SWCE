@@ -71,7 +71,7 @@ class MostrarMaterias extends Component
             })
 
             // Agrupado por licenciatura
-            ->orderBy('licenciatura_id', 'desc')
+            ->orderBy('licenciatura_id', 'asc')
             ->orderBy('cuatrimestre_id', 'asc')
 
 

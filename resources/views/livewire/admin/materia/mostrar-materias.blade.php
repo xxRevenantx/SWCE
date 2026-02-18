@@ -168,7 +168,6 @@
                                 @php $contadorGrupo++; @endphp
 
                                 <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-900/40">
-                                    {{-- # (reinicia por licenciatura) --}}
                                     <td class="px-4 py-3 text-sm">{{ $contadorGrupo }}</td>
 
                                     <td class="px-4 py-3 text-sm text-left">{{ $materia->nombre }}</td>
@@ -180,7 +179,7 @@
                                     </td>
 
                                     <td class="px-4 py-3 text-sm text-center">
-                                        @if ($materia->calificable)
+                                        @if ($materia->calificable == 'si')
                                             <span
                                                 class="inline-flex items-center rounded-lg bg-emerald-100 px-2 py-1 text-xs font-semibold text-emerald-700">
                                                 SÍ

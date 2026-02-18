@@ -136,8 +136,8 @@ class CrearCalificacion extends Component
             $profesor = $a->profesor
                 ? trim(
                     ($a->profesor->nombre ?? '') . ' ' .
-                        ($a->profesor->apellido_paterno ?? '') . ' ' .
-                        ($a->profesor->apellido_materno ?? '')
+                    ($a->profesor->apellido_paterno ?? '') . ' ' .
+                    ($a->profesor->apellido_materno ?? '')
                 )
                 : '—';
 
@@ -187,10 +187,12 @@ class CrearCalificacion extends Component
 
             foreach ($this->materias as $m) {
                 $asigId = (int) $m['id'];
-                $this->calificaciones[$insId][$asigId] = '0';
+
+                $this->calificaciones[$insId][$asigId] = '';
             }
         }
     }
+
 
     private function cargarCalificacionesGuardadas(): void
     {
@@ -258,7 +260,12 @@ class CrearCalificacion extends Component
                 $asigId = (int) $m['id'];
                 $v = $this->calificaciones[$insId][$asigId] ?? null;
 
-                if ($v !== null && $v !== '' && is_numeric($v) && (float) $v >= 0 && (float) $v <= 10) {
+                // Si está vacío, no cuenta
+                if ($v === null || $v === '') {
+                    continue;
+                }
+
+                if (is_numeric($v) && (float) $v >= 0 && (float) $v <= 10) {
                     $capturadas++;
                 }
             }
@@ -266,6 +273,7 @@ class CrearCalificacion extends Component
 
         return $capturadas;
     }
+
 
     public function getPorcentajeCapturaProperty(): float
     {
@@ -279,24 +287,36 @@ class CrearCalificacion extends Component
 
     public function promedioFila(int $inscripcionId): float
     {
+        $totalMaterias = count($this->materias);
+
+        if ($totalMaterias <= 0) {
+            return 0.0;
+        }
+
         $suma = 0.0;
-        $n = 0;
 
         foreach ($this->materias as $m) {
             $asigId = (int) $m['id'];
             $v = $this->calificaciones[$inscripcionId][$asigId] ?? null;
 
-            if ($v !== null && $v !== '' && is_numeric($v)) {
-                $v = (float) $v;
-                if ($v >= 0 && $v <= 10) {
-                    $suma += $v;
-                    $n++;
-                }
+            // Vacía o no numérica: se toma como 0, pero sigue contando en el divisor
+            if ($v === null || $v === '' || !is_numeric($v)) {
+                continue;
             }
+
+            $v = (float) $v;
+
+            // Fuera de rango: se toma como 0, pero sigue contando en el divisor
+            if ($v < 0 || $v > 10) {
+                continue;
+            }
+
+            $suma += $v;
         }
 
-        return $n > 0 ? round($suma / $n, 1) : 0.0;
+        return round($suma / $totalMaterias, 1);
     }
+
 
     public function guardarCalificaciones(): void
     {

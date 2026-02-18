@@ -203,139 +203,153 @@
         {{-- Tabla --}}
         <div
             class="mt-6 rounded-2xl border bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-700 shadow-sm overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="min-w-full text-sm">
-                    <thead class="bg-neutral-50 dark:bg-neutral-950/60 text-white">
-                        <tr class="text-neutral-600 dark:text-neutral-300">
-                            <th class="px-4 py-3 text-left font-semibold w-12 text-white">#</th>
-                            <th class="px-4 py-3 text-left font-semibold text-white">MATRÍCULA</th>
-                            <th class="px-4 py-3 text-left font-semibold text-white">ALUMNO</th>
 
-                            @foreach ($materias as $m)
-                                <th class="px-4 py-3 text-left font-semibold whitespace-nowrap text-white">
-                                    {{ mb_strtoupper($m['materia']) }}
-                                    <div class="text-[11px] font-normal text-neutral-400 dark:text-neutral-500">
-                                        {{ $m['profesor'] }}
-                                    </div>
-                                </th>
-                            @endforeach
+            {{-- Contenedor relativo para que el loading solo cubra la tabla --}}
+            <div class="relative">
 
-                            <th class="px-4 py-3 text-left font-semibold text-white">PROMEDIO</th>
-                            <th class="px-4 py-3 text-right font-semibold w-44 text-white">ACCIONES</th>
-                        </tr>
-                    </thead>
+                {{-- Overlay de carga SOLO para acciones específicas --}}
+                <div wire:loading.flex
+                    wire:target="licenciatura_id,generacion_id,cuatrimestre_id,limpiarFiltros,guardarCalificaciones"
+                    class="absolute inset-0 z-10 items-center justify-center bg-white/70 dark:bg-neutral-950/60 backdrop-blur-sm">
 
-                    <tbody class="divide-y divide-neutral-100 dark:divide-neutral-800">
-                        @forelse ($inscripciones as $index => $fila)
-                            @php($insId = (int) $fila['inscripcion_id'])
+                    <div
+                        class="rounded-2xl bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 shadow-lg px-5 py-4 flex items-center gap-3">
+                        <div
+                            class="h-5 w-5 rounded-full border-2 border-neutral-300 dark:border-neutral-700 border-t-neutral-900 dark:border-t-white animate-spin">
+                        </div>
+                        <div class="text-sm font-semibold text-neutral-800 dark:text-neutral-100">Cargando…</div>
+                    </div>
+                </div>
 
-                            <tr class="hover:bg-neutral-50/70 dark:hover:bg-neutral-950/40">
-                                <td class="px-4 py-3 text-neutral-700 dark:text-neutral-200">{{ $index + 1 }}</td>
-
-                                <td class="px-4 py-3 font-medium text-neutral-900 dark:text-neutral-100">
-                                    {{ $fila['matricula'] }}
-                                </td>
-
-                                <td class="px-4 py-3 text-neutral-700 dark:text-neutral-200">
-                                    {{ $fila['alumno'] }}
-                                </td>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-sm">
+                        <thead class="bg-neutral-50 dark:bg-neutral-950/60 text-white">
+                            <tr class="text-neutral-600 dark:text-neutral-300">
+                                <th class="px-4 py-3 text-left font-semibold w-12 text-white">#</th>
+                                <th class="px-4 py-3 text-left font-semibold text-white">MATRÍCULA</th>
+                                <th class="px-4 py-3 text-left font-semibold text-white">ALUMNO</th>
 
                                 @foreach ($materias as $m)
-                                    @php($asigId = (int) $m['id'])
-                                    <td class="px-4 py-3">
-                                        <input type="number" min="0" max="10" step="0.1"
-                                            wire:model.lazy="calificaciones.{{ $insId }}.{{ $asigId }}"
-                                            wire:change="marcarCambio"
-                                            class="w-24 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-950 px-3 py-1.5 text-center text-sm text-neutral-900 dark:text-neutral-100 focus:outline-none focus:ring-2 focus:ring-sky-300"
-                                            placeholder="0.0" />
-                                    </td>
+                                    <th class="px-4 py-3 text-left font-semibold whitespace-nowrap text-white">
+                                        {{ mb_strtoupper($m['materia']) }}
+                                        <div class="text-[11px] font-normal text-neutral-400 dark:text-neutral-500">
+                                            {{ $m['profesor'] }}
+                                        </div>
+                                    </th>
                                 @endforeach
 
-                                <td class="px-4 py-3 font-semibold text-neutral-900 dark:text-neutral-100">
-                                    {{ $this->promedioFila($insId) }}
-                                </td>
-
-                                <td class="px-4 py-3">
-                                    <div class="flex items-center justify-end gap-2">
-                                        <button type="button"
-                                            class="inline-flex items-center justify-center rounded-xl bg-blue-600 text-white px-3 py-2 text-xs font-semibold shadow hover:opacity-95">
-                                            Boleta
-                                        </button>
-
-                                        <button type="button"
-                                            class="inline-flex items-center justify-center rounded-xl bg-emerald-600 text-white px-3 py-2 text-xs font-semibold shadow hover:opacity-95">
-                                            Enviar
-                                        </button>
-                                    </div>
-                                </td>
+                                <th class="px-4 py-3 text-left font-semibold text-white">PROMEDIO</th>
+                                <th class="px-4 py-3 text-right font-semibold w-44 text-white">ACCIONES</th>
                             </tr>
-                        @empty
-                            <tr>
-                                <td colspan="{{ 5 + count($materias) }}" class="px-6 py-10">
-                                    <div
-                                        class="rounded-2xl border border-dashed border-neutral-200 dark:border-neutral-800 p-6 text-center">
-                                        <div class="text-sm font-semibold text-neutral-800 dark:text-neutral-100">
-                                            No hay datos para mostrar
-                                        </div>
-                                        <div class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
-                                            Selecciona licenciatura, generación y cuatrimestre para cargar alumnos y
-                                            materias.
-                                        </div>
-                                    </div>
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
+                        </thead>
 
-            {{-- Barra de progreso + acciones --}}
-            <div class="border-t border-neutral-200 dark:border-neutral-800 p-5">
-                @error('calificaciones')
-                    <div
-                        class="mb-3 rounded-2xl border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/30 px-4 py-3 text-sm text-red-700 dark:text-red-200">
-                        {{ $message }}
-                    </div>
-                @enderror
+                        <tbody class="divide-y divide-neutral-100 dark:divide-neutral-800">
+                            @forelse ($inscripciones as $index => $fila)
+                                @php($insId = (int) $fila['inscripcion_id'])
 
-                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                    <div class="w-full md:w-2/3">
-                        <div class="flex items-center justify-between text-xs text-neutral-600 dark:text-neutral-300">
-                            <span>
-                                Calificaciones introducidas: {{ $this->celdasCapturadas }} de {{ $this->totalCeldas }}
-                                ({{ $this->porcentajeCaptura }}%)
-                            </span>
+                                <tr class="hover:bg-neutral-50/70 dark:hover:bg-neutral-950/40">
+                                    <td class="px-4 py-3 text-neutral-700 dark:text-neutral-200">{{ $index + 1 }}
+                                    </td>
+
+                                    <td class="px-4 py-3 font-medium text-neutral-900 dark:text-neutral-100">
+                                        {{ $fila['matricula'] }}
+                                    </td>
+
+                                    <td class="px-4 py-3 text-neutral-700 dark:text-neutral-200">
+                                        {{ $fila['alumno'] }}
+                                    </td>
+
+                                    @foreach ($materias as $m)
+                                        @php($asigId = (int) $m['id'])
+                                        <td class="px-4 py-3 text-center">
+                                            <input type="number" min="0" max="10" step="0.1"
+                                                wire:model.lazy="calificaciones.{{ $insId }}.{{ $asigId }}"
+                                                wire:change="marcarCambio"
+                                                class="w-24 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-950 px-3 py-1.5 text-center text-sm text-neutral-900 dark:text-neutral-100 focus:outline-none focus:ring-2 focus:ring-sky-300"
+                                                placeholder="0.0" />
+                                        </td>
+                                    @endforeach
+
+                                    <td
+                                        class="px-4 py-3 font-semibold text-neutral-900 dark:text-neutral-100 text-center">
+                                        {{ $this->promedioFila($insId) }}
+                                    </td>
+
+                                    <td class="px-4 py-3">
+                                        <div class="flex items-center justify-end gap-2">
+                                            <button type="button"
+                                                class="inline-flex items-center justify-center rounded-xl bg-blue-600 text-white px-3 py-2 text-xs font-semibold shadow hover:opacity-95">
+                                                Boleta
+                                            </button>
+
+                                            <button type="button"
+                                                class="inline-flex items-center justify-center rounded-xl bg-emerald-600 text-white px-3 py-2 text-xs font-semibold shadow hover:opacity-95">
+                                                Enviar
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="{{ 5 + count($materias) }}" class="px-6 py-10">
+                                        <div
+                                            class="rounded-2xl border border-dashed border-neutral-200 dark:border-neutral-800 p-6 text-center">
+                                            <div class="text-sm font-semibold text-neutral-800 dark:text-neutral-100">
+                                                No hay datos para mostrar
+                                            </div>
+                                            <div class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
+                                                Selecciona licenciatura, generación y cuatrimestre para cargar alumnos y
+                                                materias.
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+
+                {{-- Barra de progreso + acciones --}}
+                <div class="border-t border-neutral-200 dark:border-neutral-800 p-5">
+                    @error('calificaciones')
+                        <div
+                            class="mb-3 rounded-2xl border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/30 px-4 py-3 text-sm text-red-700 dark:text-red-200">
+                            {{ $message }}
                         </div>
+                    @enderror
 
-                        <div class="mt-2 h-3 w-full rounded-full bg-neutral-100 dark:bg-neutral-950 overflow-hidden">
-                            <div class="h-full rounded-full bg-gradient-to-r from-sky-400 to-indigo-500"
-                                style="width: {{ $this->porcentajeCaptura }}%">
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                        <div class="w-full md:w-2/3">
+                            <div
+                                class="flex items-center justify-between text-xs text-neutral-600 dark:text-neutral-300">
+                                <span>
+                                    Calificaciones introducidas: {{ $this->celdasCapturadas }} de
+                                    {{ $this->totalCeldas }}
+                                    ({{ $this->porcentajeCaptura }}%)
+                                </span>
+                            </div>
+
+                            <div
+                                class="mt-2 h-3 w-full rounded-full bg-neutral-100 dark:bg-neutral-950 overflow-hidden">
+                                <div class="h-full rounded-full bg-gradient-to-r from-sky-400 to-indigo-500"
+                                    style="width: {{ $this->porcentajeCaptura }}%"></div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="flex items-center justify-end gap-3">
-                        <button type="button" wire:click="guardarCalificaciones" @disabled(!$hayCambios)
-                            class="inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-sky-400 to-indigo-500 text-white px-6 py-3 text-sm font-semibold shadow disabled:opacity-60">
-                            Guardar calificaciones
-                        </button>
+                        <div class="flex items-center justify-end gap-3">
+                            <button type="button" wire:click="guardarCalificaciones" @disabled(!$hayCambios)
+                                class="inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-sky-400 to-indigo-500 text-white px-6 py-3 text-sm font-semibold shadow disabled:opacity-60">
+                                Guardar calificaciones
+                            </button>
 
-                        <span class="text-xs text-neutral-500 dark:text-neutral-400">
-                            {{ $hayCambios ? 'Hay cambios por guardar' : 'No hay cambios por guardar' }}
-                        </span>
+
+                        </div>
                     </div>
                 </div>
+
             </div>
         </div>
 
-        {{-- Cargando --}}
-        <div wire:loading.flex class="fixed inset-0 z-50 items-center justify-center bg-black/20 backdrop-blur-sm">
-            <div
-                class="rounded-2xl bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 shadow-lg px-5 py-4 flex items-center gap-3">
-                <div
-                    class="h-5 w-5 rounded-full border-2 border-neutral-300 dark:border-neutral-700 border-t-neutral-900 dark:border-t-white animate-spin">
-                </div>
-                <div class="text-sm font-semibold text-neutral-800 dark:text-neutral-100">Cargando…</div>
-            </div>
-        </div>
+
+
     </div>
