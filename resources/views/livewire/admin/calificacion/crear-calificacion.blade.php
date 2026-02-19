@@ -1,4 +1,18 @@
-    <div class="w-full">
+    <div x-data="{
+        enviarCalificacion(alumno, cuatrimestre, generacion) {
+                Swal.fire({
+                    title: '¿Estás seguro?',
+                    text: `La calificación del alumno en el ${cuatrimestre}° cuatrimestre se enviará a su correo asignado.`,
+                    icon: 'info',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    cancelButtonText: 'Cancelar',
+                    confirmButtonText: 'Sí, enviar'
+                }).then((r) => { if (r.isConfirmed) { @this.call('enviarCalificacion', alumno, cuatrimestre, generacion); } });
+            },
+
+    }" class="w-full">
         {{-- Encabezado --}}
         <div class="sticky top-0 z-10">
             <div
@@ -314,11 +328,16 @@
                                                 class="inline-flex items-center justify-center rounded-xl bg-blue-600 text-white px-3 py-2 text-xs font-semibold shadow hover:opacity-95">
                                                 Boleta
                                             </button>
+                                            <x-button variant="primary"
+                                                class="bg-green-600 hover:bg-green-700 text-white rounded-xl"
+                                                @click="enviarCalificacion({{ $insId }}, {{ $this->cuatrimestre_id }}, {{ $this->generacion_id }})">
+                                                <div class="flex items-center gap-2">
+                                                    <flux:icon.send />
+                                                    <span>Enviar</span>
+                                                </div>
+                                            </x-button>
 
-                                            <button type="button"
-                                                class="inline-flex items-center justify-center rounded-xl bg-emerald-600 text-white px-3 py-2 text-xs font-semibold shadow hover:opacity-95">
-                                                Enviar
-                                            </button>
+
                                         </div>
                                     </td>
                                 </tr>

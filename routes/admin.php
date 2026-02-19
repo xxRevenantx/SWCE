@@ -60,6 +60,11 @@ Route::middleware(['auth'])->group(function () {
     // Credencial de profesor
     Route::get('profesores/credencial/{id}', [PDFController::class, 'credencialProfesor'])->middleware('can:admin.pdf.credencial_profesor')->name('admin.profesores.credencial');
 
+    // Boleta de calificaciones
+    Route::get('calificaciones/boleta/{id}', [PDFController::class, 'boletaCalificacion'])->middleware('can:admin.pdf.boleta_calificacion')->name('admin.pdf.boletaCalificacion');
+
+
+
     // Lista de matrícula
     Route::get('matricula/lista/{filtrar_licenciatura?}/{filtrar_generacion?}/{filtrar_cuatrimestre?}/{search?}', [PDFController::class, 'listaMatricula'])->middleware('can:admin.pdf.lista_matricula')->name('admin.pdf.listaMatricula');
 });

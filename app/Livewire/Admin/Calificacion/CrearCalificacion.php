@@ -2,12 +2,16 @@
 
 namespace App\Livewire\Admin\Calificacion;
 
+use App\Mail\CalificacionMail;
 use App\Models\AsignacionMateria;
 use App\Models\AsignarGeneracion;
+use App\Models\Calificacion;
 use App\Models\Cuatrimestre;
 use App\Models\Generacion;
+use App\Models\Inscripcion;
 use App\Models\Licenciatura;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Livewire\Component;
 
 class CrearCalificacion extends Component
@@ -44,6 +48,76 @@ class CrearCalificacion extends Component
         // Al inicio no se muestran generaciones ni cuatrimestres
         $this->generaciones = [];
         $this->cuatrimestres = [];
+    }
+
+    /** ======================= ENVÍOS ======================= */
+    public function enviarCalificacion(int $alumnoId, int $cuatrimestreId, int $generacionId): void
+    {
+        // 1) Inscripción del alumno para esa generación y cuatrimestre
+        $inscripcion = Inscripcion::with(['alumno.user', 'licenciatura'])
+            ->where('alumno_id', $alumnoId)
+            ->where('generacion_id', $generacionId)
+            ->where('cuatrimestre_id', $cuatrimestreId)
+            ->first();
+
+        if (!$inscripcion) {
+            $this->dispatch('swal', [
+                'icon' => 'error',
+                'title' => 'No se encontró inscripción con esos filtros.',
+                'position' => 'top-end',
+            ]);
+            return;
+        }
+
+        // 2) Correo del alumno (según tus relaciones)
+        $correo = $inscripcion->alumno?->user?->email;
+
+        if (empty($correo)) {
+            $this->dispatch('swal', [
+                'icon' => 'error',
+                'title' => 'El alumno no tiene correo registrado.',
+                'position' => 'top-end',
+            ]);
+            return;
+        }
+
+        // 3) Catálogos
+        $licenciatura = $inscripcion->licenciatura; // ya viene cargada
+        $generacionObj = Generacion::find($generacionId);
+        $cuatrimestreObj = Cuatrimestre::find($cuatrimestreId);
+
+        // 4) Calificaciones por inscripción y por cuatrimestre/licenciatura via asignación
+        $calificaciones = Calificacion::with(['asignacionMateria.materia', 'asignacionMateria.profesor'])
+            ->where('inscripcion_id', $inscripcion->id)
+            ->whereHas('asignacionMateria', function ($query) use ($cuatrimestreId, $licenciatura) {
+                $query->where('cuatrimestre_id', $cuatrimestreId)
+                    ->where('licenciatura_id', $licenciatura->id);
+            })
+            ->get()
+            ->sortBy(fn($item) => $item->asignacionMateria->materia->clave ?? '')
+            ->values();
+
+        // 5) UI
+        $this->dispatch('swal', [
+            'icon' => 'info',
+            'title' => 'Enviando correo, espere…',
+            'position' => 'top',
+        ]);
+
+        // 6) Enviar correo
+        Mail::to($correo)->send(new CalificacionMail(
+            $calificaciones,
+            $inscripcion,
+            $licenciatura,
+            $generacionObj,
+            $cuatrimestreObj
+        ));
+
+        $this->dispatch('swal', [
+            'icon' => 'success',
+            'title' => 'Correo enviado correctamente.',
+            'position' => 'top-end',
+        ]);
     }
 
     public function updatedLicenciaturaId(): void
@@ -145,8 +219,8 @@ class CrearCalificacion extends Component
             $profesor = $a->profesor
                 ? trim(
                     ($a->profesor->nombre ?? '') . ' ' .
-                        ($a->profesor->apellido_paterno ?? '') . ' ' .
-                        ($a->profesor->apellido_materno ?? '')
+                    ($a->profesor->apellido_paterno ?? '') . ' ' .
+                    ($a->profesor->apellido_materno ?? '')
                 )
                 : '—';
 
