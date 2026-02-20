@@ -6,13 +6,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>BOLETA DEL {{ $cuatrimestre->cuatrimestre }}° CUATRIMESTRE</title>
 
+    @php
+        /*
+            Datos fijos del plantel (antes venían de $escuela).
+            Si después quieres moverlos a config('app...') o a una tabla,
+            aquí ya queda centralizado para cambiarlo en un solo lugar.
+        */
+        $plantelNombre = 'Centro Universitario Moctezuma';
+        $plantelCCT = '12PES0105U';
+
+        $plantelCalle = 'Francisco I. Madero Oriente';
+        $plantelNo = '800';
+        $plantelColonia = 'Esquipula';
+        $plantelCP = '40662';
+        $plantelCiudad = 'Ciudad Altamirano';
+        $plantelMunicipio = 'Pungarabato';
+        $plantelEstado = 'Guerrero';
+    @endphp
+
     <style>
         /* ========= Página y tipografías ========= */
         @page {
             margin: 14px 48px 0px 48px;
         }
 
-        /* margen mayor abajo por footer fijo */
         @font-face {
             font-family: 'calibri';
             font-style: normal;
@@ -33,7 +50,6 @@
             line-height: 1.35;
         }
 
-        /* ========= Utilidades ========= */
         .text-center {
             text-align: center;
         }
@@ -90,7 +106,6 @@
             font-size: 16px;
         }
 
-        /* ========= Encabezado ========= */
         .banner {
             border: 1px solid #e5e7eb;
             border-radius: 10px;
@@ -144,7 +159,6 @@
             font-weight: 700;
         }
 
-        /* ========= Marca de agua ========= */
         .watermark {
             position: fixed;
             top: 55%;
@@ -160,7 +174,6 @@
             width: 100%;
         }
 
-        /* ========= Tablas base ========= */
         table {
             width: 100%;
             border-collapse: collapse;
@@ -171,7 +184,6 @@
             padding: 6px 8px;
         }
 
-        /* ========= Tarjeta meta ========= */
         .meta {
             border: 1px solid #e5e7eb;
             border-radius: 10px;
@@ -198,7 +210,6 @@
             background: #f8fafc;
         }
 
-        /* ========= Tabla de calificaciones ========= */
         .grades {
             border: 1px solid #e5e7eb;
             border-radius: 10px;
@@ -234,7 +245,6 @@
             text-align: center;
         }
 
-        /* Chips de calificación */
         .score {
             display: inline-block;
             min-width: 42px;
@@ -275,7 +285,6 @@
             color: #334155;
         }
 
-        /* Promedio final */
         .resumen {
             margin-top: 20px;
             border: 1px dashed #cbd5e1;
@@ -286,7 +295,7 @@
 
         .resumen .lbl {
             font-weight: 700;
-            margin-top: 10px
+            margin-top: 10px;
         }
 
         .resumen .valor {
@@ -301,36 +310,6 @@
             font-size: 13px;
         }
 
-        /* ========= Leyenda y firmas ========= */
-        .leyenda {
-            margin-top: 12px;
-            color: #475569;
-            font-size: 10px;
-        }
-
-        .firmas {
-            margin-top: 28px;
-        }
-
-        .firmas td {
-            text-align: center;
-            padding-top: 24px;
-        }
-
-        .firma-linea {
-            border-top: 1px solid #94a3b8;
-            padding-top: 4px;
-            margin-top: 40px;
-            display: inline-block;
-            width: 85%;
-        }
-
-        .cargo {
-            color: #475569;
-            font-size: 10px;
-        }
-
-        /* ========= Footer fijo ========= */
         footer {
             position: fixed;
             left: 0;
@@ -348,7 +327,6 @@
             line-height: 1.25;
         }
 
-        /* Evitar cortes feos */
         tr,
         td,
         th {
@@ -363,30 +341,29 @@
 
 <body>
 
-    <!-- Marca de agua -->
     <div class="watermark">
         <img src="{{ public_path('storage/letra.png') }}" alt="Watermark">
     </div>
 
-    <!-- Encabezado -->
     <div class="banner">
         <table class="banner-table">
             <tr>
                 <td style="width:92px;">
-                    <img class="logo" src="{{ public_path('storage/letra2.jpg') }}" alt="Logo Izquierdo">
+                    <img class="logo" src="{{ public_path('imagenes_publicas/logo-letra.png') }}"
+                        alt="Logo Izquierdo">
                 </td>
                 <td class="titular">
-                    <h1 class="uppercase" style="font-size: 25px">Centro Universitario Moctezuma</h1>
-                    <h2 class="uppercase" style="font-size: 20px">Ciclo Escolar {{ $ciclo_escolar->ciclo_escolar }}</h2>
-                    <div class="chip uppercase" style="font-size: 18px">Boleta de Calificaciones ·
-                        {{ $cuatrimestre->cuatrimestre }}° Cuatrimestre</div>
+                    <h1 class="uppercase" style="font-size: 25px">{{ $plantelNombre }}</h1>
+                    <h2 class="uppercase" style="font-size: 20px">
+                        Ciclo Escolar {{ $ciclo_escolar->ciclo_escolar ?? '' }}
+                    </h2>
+                    <div class="chip uppercase" style="font-size: 18px">
+                        Boleta de Calificaciones · {{ $cuatrimestre->cuatrimestre }}° Cuatrimestre
+                    </div>
                 </td>
                 <td style="width:92px; text-align:right;">
-                    @if (!empty($licenciatura->imagen) && file_exists(public_path('storage/licenciaturas/' . $licenciatura->imagen)))
-                        <img class="logo" src="{{ public_path('storage/licenciaturas/' . $licenciatura->imagen) }}"
-                            alt="Logo Licenciatura">
-                    @else
-                        <img class="logo" src="{{ public_path('storage/logo-moctezuma.jpg') }}"
+                    @if (!empty($licenciatura->logo) && file_exists(public_path('storage/licenciaturas/' . $licenciatura->logo)))
+                        <img class="logo" src="{{ public_path('storage/licenciaturas/' . $licenciatura->logo) }}"
                             alt="Logo Licenciatura">
                     @endif
                 </td>
@@ -394,7 +371,6 @@
         </table>
     </div>
 
-    <!-- Meta / Identificación -->
     <table class="meta avoid-break">
         <thead>
             <tr>
@@ -407,23 +383,27 @@
         </thead>
         <tbody>
             <tr class="row-alt">
-                <td class="uppercase fw-700">{{ $licenciatura->nombre }}</td>
-                <td class="uppercase fw-700">{{ $escuela->CCT }}</td>
-                <td class="uppercase fw-700">{{ $cuatrimestre->cuatrimestre }}°</td>
-                <td class="uppercase fw-700">{{ $periodo->mes->meses_corto }}</td>
-                <td class="uppercase fw-700">{{ $periodo->generacion->generacion }}</td>
+                <td class="uppercase fw-700">{{ $licenciatura->nombre ?? '' }}</td>
+                <td class="uppercase fw-700">{{ $plantelCCT }}</td>
+                <td class="uppercase fw-700">{{ $cuatrimestre->cuatrimestre ?? '' }}°</td>
+                <td class="uppercase fw-700">{{ $periodo->mes->meses_corto ?? '' }}</td>
+                <td class="uppercase fw-700">{{ $periodo->generacion->generacion ?? '' }}</td>
             </tr>
+
             <tr>
-                <td colspan="3" class="uppercase">{{ $escuela->calle }} #{{ $escuela->no_exterior }} · Col.
-                    {{ $escuela->colonia }} · Cd. {{ $escuela->ciudad }}</td>
-                <td class="uppercase">{{ $escuela->municipio }}</td>
-                <td class="uppercase">{{ $escuela->estado }}</td>
+                <td colspan="3" class="uppercase">
+                    {{ $plantelCalle }} #{{ $plantelNo }} · Col. {{ $plantelColonia }} · Cd. {{ $plantelCiudad }}
+                </td>
+                <td class="uppercase">{{ $plantelMunicipio }}</td>
+                <td class="uppercase">{{ $plantelEstado }}</td>
             </tr>
+
             <tr class="row-alt">
-                <td colspan="2" class="uppercase fw-700">{{ $inscripcion->apellido_paterno }}</td>
-                <td class="uppercase fw-700">{{ $inscripcion->apellido_materno }}</td>
-                <td colspan="2" class="uppercase fw-700">{{ $inscripcion->nombre }}</td>
+                <td colspan="2" class="uppercase fw-700">{{ $inscripcion->apellido_paterno ?? '' }}</td>
+                <td class="uppercase fw-700">{{ $inscripcion->apellido_materno ?? '' }}</td>
+                <td colspan="2" class="uppercase fw-700">{{ $inscripcion->nombre ?? '' }}</td>
             </tr>
+
             <tr>
                 <td colspan="2" class="xs muted">Apellido paterno</td>
                 <td class="xs muted">Apellido materno</td>
@@ -432,7 +412,6 @@
         </tbody>
     </table>
 
-    <!-- Calificaciones -->
     <table class="grades avoid-break">
         <thead>
             <tr class="uppercase">
@@ -444,7 +423,7 @@
             @php
                 $suma = 0;
                 $cuenta = 0;
-                $hasNP = false; // bandera para detectar NP
+                $hasNP = false;
             @endphp
 
             @foreach ($calificaciones as $calificacion)
@@ -458,16 +437,19 @@
                         $suma += (float) $val;
                         $cuenta++;
                     } elseif ($isNP) {
-                        $hasNP = true; // marcar que hay NP
+                        $hasNP = true;
                     }
                 @endphp
+
                 <tr>
-                    <td class="col-asig uppercase">{{ $calificacion->asignacionMateria->materia->nombre }}</td>
+                    <td class="col-asig uppercase">
+                        {{ $calificacion->asignacionMateria->materia->nombre ?? '' }}
+                    </td>
                     <td class="col-cal">
                         @if ($isNP)
                             <span class="score np">NP</span>
                         @elseif($isNum)
-                            <span class="score {{ $clase }}">{{ floor($val * 10) / 10 }}</span>
+                            <span class="score {{ $clase }}">{{ floor(((float) $val) * 10) / 10 }}</span>
                         @else
                             <span class="score enproceso">EN PROCESO</span>
                         @endif
@@ -480,36 +462,35 @@
                 <td class="col-cal">
                     @php
                         if ($hasNP) {
-                            $prom = 0; // si hay al menos un NP, forzar a 0
+                            $prom = 0;
                         } else {
                             $prom = $cuenta ? floor(($suma / $cuenta) * 10) / 10 : 'N/A';
                         }
+
+                        $claseProm = 'enproceso';
+                        if ($prom !== 'N/A') {
+                            $claseProm = (float) $prom >= 6 ? 'ok' : 'rep';
+                        }
                     @endphp
-                    <span
-                        class="score {{ $prom !== 'N/A' && (float) $prom >= 6 ? 'ok' : ($prom !== 'N/A' && (float) $prom < 6 ? 'rep' : 'enproceso') }}">
-                        {{ $prom }}
-                    </span>
+
+                    <span class="score {{ $claseProm }}">{{ $prom }}</span>
                 </td>
             </tr>
         </tbody>
     </table>
 
-
-    <!-- Resumen / leyenda -->
     <div class="resumen avoid-break">
         <span class="lbl">Leyenda:</span>
         <span class="score ok">≥ 6 Aprobada</span>
-        <span class="score rep"> &lt; 6 Reprobada</span>
+        <span class="score rep">&lt; 6 Reprobada</span>
         <span class="score np">NP No presentó</span>
     </div>
 
-
-    <!-- Footer -->
     <footer>
-        <p class="uppercase fw-700">{{ $escuela->nombre }} · C.C.T. {{ $escuela->CCT }}</p>
+        <p class="uppercase fw-700">{{ $plantelNombre }} · C.C.T. {{ $plantelCCT }}</p>
         <p>
-            C. {{ $escuela->calle }} No. {{ $escuela->no_exterior }}, Col. {{ $escuela->colonia }},
-            C.P. {{ $escuela->codigo_postal }}, Cd. {{ $escuela->ciudad }}, {{ $escuela->estado }}.
+            C. {{ $plantelCalle }} No. {{ $plantelNo }}, Col. {{ $plantelColonia }},
+            C.P. {{ $plantelCP }}, Cd. {{ $plantelCiudad }}, {{ $plantelEstado }}.
         </p>
         <p>Fecha de expedición: {{ now()->translatedFormat('d \\d\\e F \\d\\e\\l Y \\a \\l\\a\\s H:i') }}</p>
     </footer>

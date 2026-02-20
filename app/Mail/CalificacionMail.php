@@ -35,7 +35,7 @@ class CalificacionMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Calificaciones del ' . $this->cuatrimestre->cuatrimestre . '° Cuatrimestre | ' .
+            subject: 'Calificaciones del ' . $this->cuatrimestre->no_cuatrimestre . '° Cuatrimestre | ' .
             $this->inscripcion->nombre . ' ' . $this->inscripcion->apellido_paterno . ' ' . $this->inscripcion->apellido_materno,
         );
     }
@@ -52,26 +52,30 @@ class CalificacionMail extends Mailable
         );
     }
 
-    // public function attachments(): array
-    // {
-    //     // Generar PDF (en memoria) desde una vista Blade:
-    //     $pdf = Pdf::loadView('admin.pdf.boletaCalificacionPDF', [
-    //         'calificaciones' => $this->calificaciones,
-    //         'inscripcion' => $this->inscripcion,
-    //         'licenciatura' => $this->licenciatura,
-    //         'generacion' => $this->generacion,
-    //         'cuatrimestre' => $this->cuatrimestre,
-    //     ])->setPaper('letter', 'portrait');
+    public function attachments(): array
+    {
+        // Generar PDF (en memoria) desde una vista Blade:
+        $pdf = Pdf::loadView('admin.pdf.boletaCalificacionPDF', [
+            'calificaciones' => $this->calificaciones,
+            'inscripcion' => $this->inscripcion,
+            'licenciatura' => $this->licenciatura,
+            'generacion' => $this->generacion,
+            'cuatrimestre' => $this->cuatrimestre,
+        ])->setPaper('letter', 'portrait');
 
-    //     $nombrePdf = 'CALIFICACIONES_' .
-    //         $this->cuatrimestre->cuatrimestre . '°_CUATRIMESTRE_' .
-    //         $this->inscripcion->nombre . '_' .
-    //         $this->inscripcion->apellido_paterno . '_' .
-    //         $this->inscripcion->apellido_materno . '.pdf';
+        $nombreAlumno = trim(
+            ($this->inscripcion->nombre ?? '') . '_' .
+            ($this->inscripcion->apellido_paterno ?? '') . '_' .
+            ($this->inscripcion->apellido_materno ?? '')
+        );
 
-    //     return [
-    //         Attachment::fromData(fn() => $pdf->output(), $nombrePdf)
-    //             ->withMime('application/pdf'),
-    //     ];
-    // }
+        $nombrePdf = 'CALIFICACIONES_' .
+            ($this->cuatrimestre->cuatrimestre ?? '') . '°_CUATRIMESTRE_' .
+            ($nombreAlumno !== '' ? $nombreAlumno : 'ALUMNO') . '.pdf';
+
+        return [
+            Attachment::fromData(fn() => $pdf->output(), $nombrePdf)
+                ->withMime('application/pdf'),
+        ];
+    }
 }
