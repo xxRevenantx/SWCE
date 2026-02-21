@@ -79,4 +79,21 @@ class PDFController extends Controller
         $pdf = Pdf::loadView('admin.pdf.listaMatriculaPDF', $data)->setPaper('letter', 'landscape');
         return $pdf->stream("LISTA_MATRICULA.pdf");
     }
+
+    // BOLETA DE CALIFICACIONES
+    public function boletaCalificacion($id)
+    {
+        $calificacion = \App\Models\Calificacion::findOrFail($id);
+
+        dd($calificacion);
+
+        if (!$calificacion) {
+            abort(404);
+        }
+        $data = [
+            'calificacion' => $calificacion,
+        ];
+        $pdf = Pdf::loadView('admin.pdf.boletaCalificacionPDF', $data)->setPaper('letter', 'portrait');
+        return $pdf->stream("BOLETA_CALIFICACIONES_" . mb_strtoupper($calificacion->alumno->nombre . "_" . $calificacion->alumno->apellido_paterno . "_" . $calificacion->alumno->apellido_materno) . ".pdf");
+    }
 }

@@ -11,7 +11,7 @@
                     confirmButtonText: 'Sí, enviar'
                 }).then((r) => { if (r.isConfirmed) { @this.call('enviarCalificacion', alumno, cuatrimestre, generacion); } });
             },
-
+    
     }" class="w-full">
         {{-- Encabezado --}}
         <div class="sticky top-0 z-10">
@@ -325,6 +325,8 @@
                                     <td class="px-4 py-3">
                                         <div class="flex items-center justify-end gap-2">
                                             <button type="button"
+                                                href="{{ route('admin.pdf.boletaCalificacion', $insId) }}"
+                                                target="_blank"
                                                 class="inline-flex items-center justify-center rounded-xl bg-blue-600 text-white px-3 py-2 text-xs font-semibold shadow hover:opacity-95">
                                                 Boleta
                                             </button>

@@ -54,7 +54,7 @@ class CalificacionMail extends Mailable
 
     public function attachments(): array
     {
-        // Generar PDF (en memoria) desde una vista Blade:
+
         $pdf = Pdf::loadView('admin.pdf.boletaCalificacionPDF', [
             'calificaciones' => $this->calificaciones,
             'inscripcion' => $this->inscripcion,
