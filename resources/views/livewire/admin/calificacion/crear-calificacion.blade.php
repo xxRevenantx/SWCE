@@ -324,12 +324,12 @@
 
                                     <td class="px-4 py-3">
                                         <div class="flex items-center justify-end gap-2">
-                                            <button type="button"
+                                            <x-button type="button" variant="primary"
                                                 href="{{ route('admin.pdf.boletaCalificacion', $insId) }}"
                                                 target="_blank"
-                                                class="inline-flex items-center justify-center rounded-xl bg-blue-600 text-white px-3 py-2 text-xs font-semibold shadow hover:opacity-95">
+                                                class="bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl">
                                                 Boleta
-                                            </button>
+                                            </x-button>
                                             <x-button variant="primary"
                                                 class="bg-green-600 hover:bg-green-700 text-white rounded-xl"
                                                 @click="enviarCalificacion({{ $insId }}, {{ $this->cuatrimestre_id }}, {{ $this->generacion_id }})">
