@@ -55,22 +55,29 @@ class CalificacionMail extends Mailable
     public function attachments(): array
     {
 
+
+
+
         $pdf = Pdf::loadView('admin.pdf.boletaCalificacionPDF', [
             'calificaciones' => $this->calificaciones,
-            'inscripcion' => $this->inscripcion,
+            'alumno' => $this->inscripcion,
             'licenciatura' => $this->licenciatura,
             'generacion' => $this->generacion,
             'cuatrimestre' => $this->cuatrimestre,
         ])->setPaper('letter', 'portrait');
 
+
+
+
+
         $nombreAlumno = trim(
-            ($this->inscripcion->nombre ?? '') . '_' .
-            ($this->inscripcion->apellido_paterno ?? '') . '_' .
-            ($this->inscripcion->apellido_materno ?? '')
+            ($this->inscripcion->alumno->nombre ?? '') . '_' .
+            ($this->inscripcion->alumno->apellido_paterno ?? '') . '_' .
+            ($this->inscripcion->alumno->apellido_materno ?? '')
         );
 
         $nombrePdf = 'CALIFICACIONES_' .
-            ($this->cuatrimestre->cuatrimestre ?? '') . '°_CUATRIMESTRE_' .
+            ($this->cuatrimestre->no_cuatrimestre ?? '') . '°_CUATRIMESTRE_' .
             ($nombreAlumno !== '' ? $nombreAlumno : 'ALUMNO') . '.pdf';
 
         return [

@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Generacion;
+use App\Models\Inscripcion;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 
@@ -83,17 +85,44 @@ class PDFController extends Controller
     // BOLETA DE CALIFICACIONES
     public function boletaCalificacion($id)
     {
-        $calificacion = \App\Models\Calificacion::findOrFail($id);
+        $calificaciones = \App\Models\Calificacion::query()
+            ->where('inscripcion_id', $id)
+            ->join('asignacion_materias', 'asignacion_materias.id', '=', 'calificaciones.asignacion_materia_id')
+            ->join('materias', 'materias.id', '=', 'asignacion_materias.materia_id')
+            ->orderByRaw("COALESCE(materias.clave,'') ASC")
+            ->select('calificaciones.*')
+            ->get();
 
-        dd($calificacion);
+        $cuatrimestre = Inscripcion::where('id', $id)->with('cuatrimestre')->first()->cuatrimestre;
 
-        if (!$calificacion) {
+        $licenciatura = Inscripcion::where('id', $id)->with('licenciatura')->first()->licenciatura;
+
+        $generacion = Inscripcion::where('id', $id)->with('generacion')->first()->generacion;
+        // dd($cuatrimestre);
+
+        $alumno = Inscripcion::where('id', $id)->with('alumno')->first();
+
+
+
+
+        $nombreAlumno = trim(
+            ($alumno->alumno->nombre ?? '') . '_' .
+            ($alumno->alumno->apellido_paterno ?? '') . '_' .
+            ($alumno->alumno->apellido_materno ?? '')
+        );
+
+
+        if (!$calificaciones) {
             abort(404);
         }
         $data = [
-            'calificacion' => $calificacion,
+            'calificaciones' => $calificaciones,
+            'cuatrimestre' => $cuatrimestre,
+            'licenciatura' => $licenciatura,
+            'generacion' => $generacion,
+            'alumno' => $alumno,
         ];
         $pdf = Pdf::loadView('admin.pdf.boletaCalificacionPDF', $data)->setPaper('letter', 'portrait');
-        return $pdf->stream("BOLETA_CALIFICACIONES_" . mb_strtoupper($calificacion->alumno->nombre . "_" . $calificacion->alumno->apellido_paterno . "_" . $calificacion->alumno->apellido_materno) . ".pdf");
+        return $pdf->stream("BOLETA_CALIFICACIONES_" . $nombreAlumno . "_" . $cuatrimestre->no_cuatrimestre . "°_CUATRIMESTRE.pdf");
     }
 }

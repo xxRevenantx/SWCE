@@ -197,18 +197,22 @@ class CrearCalificacion extends Component
 
         // 1) Materias asignadas a esa licenciatura y cuatrimestre (solo calificables)
         $asignaciones = AsignacionMateria::query()
-            ->where('licenciatura_id', $this->licenciatura_id)
-            ->where('cuatrimestre_id', $this->cuatrimestre_id)
+            ->where('asignacion_materias.licenciatura_id', $this->licenciatura_id)
+            ->where('asignacion_materias.cuatrimestre_id', $this->cuatrimestre_id)
             ->whereHas('materia', function ($q) {
                 $q->where('calificable', 'si');
             })
+            // Orden por clave (materias.clave)
+            ->join('materias', 'materias.id', '=', 'asignacion_materias.materia_id')
+            ->where('materias.calificable', 'si')
+            ->orderByRaw("COALESCE(materias.clave,'') ASC")
+            ->select('asignacion_materias.*')
             ->with([
                 'materia' => function ($q) {
                     $q->where('calificable', 'si');
                 },
                 'profesor',
             ])
-            ->orderBy('id')
             ->get();
 
 

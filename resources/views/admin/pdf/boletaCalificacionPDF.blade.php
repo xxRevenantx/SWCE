@@ -4,16 +4,13 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>BOLETA DEL {{ $cuatrimestre->cuatrimestre }}° CUATRIMESTRE</title>
+    <link rel="icon" href="{{ public_path('imagenes_publicas/logo-letra.png') }}" type="image/png">
+    <title>BOLETA DEL {{ $cuatrimestre->no_cuatrimestre }}° CUATRIMESTRE</title>
 
     @php
-        /*
-            Datos fijos del plantel (antes venían de $escuela).
-            Si después quieres moverlos a config('app...') o a una tabla,
-            aquí ya queda centralizado para cambiarlo en un solo lugar.
-        */
+
         $plantelNombre = 'Centro Universitario Moctezuma';
-        $plantelCCT = '12PES0105U';
+        $plantelCCT = '12PSU0173I';
 
         $plantelCalle = 'Francisco I. Madero Oriente';
         $plantelNo = '800';
@@ -44,10 +41,10 @@
 
         html,
         body {
-            font-family: 'calibri';
+            font-family: sans-serif;
             color: #1f2937;
             font-size: 11px;
-            line-height: 1.35;
+            line-height: 25px;
         }
 
         .text-center {
@@ -196,7 +193,7 @@
             font-weight: 700;
             letter-spacing: .4px;
             padding: 6px 8px;
-            font-size: 10px;
+            font-size: 13px;
             text-align: center;
         }
 
@@ -341,9 +338,14 @@
 
 <body>
 
+
+
     <div class="watermark">
-        <img src="{{ public_path('storage/letra.png') }}" alt="Watermark">
+        <img src="{{ public_path('imagenes_publicas/logo-letra.png') }}" alt="Watermark">
     </div>
+
+
+
 
     <div class="banner">
         <table class="banner-table">
@@ -353,12 +355,9 @@
                         alt="Logo Izquierdo">
                 </td>
                 <td class="titular">
-                    <h1 class="uppercase" style="font-size: 25px">{{ $plantelNombre }}</h1>
-                    <h2 class="uppercase" style="font-size: 20px">
-                        Ciclo Escolar {{ $ciclo_escolar->ciclo_escolar ?? '' }}
-                    </h2>
+                    <h1 class="uppercase" style="font-size: 20px">{{ $plantelNombre }}</h1>
                     <div class="chip uppercase" style="font-size: 18px">
-                        Boleta de Calificaciones · {{ $cuatrimestre->cuatrimestre }}° Cuatrimestre
+                        Boleta de Calificaciones
                     </div>
                 </td>
                 <td style="width:92px; text-align:right;">
@@ -374,34 +373,25 @@
     <table class="meta avoid-break">
         <thead>
             <tr>
-                <th>Licenciatura</th>
+                <th>LICENCIATURA</th>
                 <th>C.C.T.</th>
-                <th>Cuatrimestre</th>
-                <th>Periodo Esc.</th>
-                <th>Generación</th>
+                <th>CUATRIMESTRE</th>
+                <th>GENERACIÓN</th>
             </tr>
         </thead>
         <tbody>
             <tr class="row-alt">
                 <td class="uppercase fw-700">{{ $licenciatura->nombre ?? '' }}</td>
                 <td class="uppercase fw-700">{{ $plantelCCT }}</td>
-                <td class="uppercase fw-700">{{ $cuatrimestre->cuatrimestre ?? '' }}°</td>
-                <td class="uppercase fw-700">{{ $periodo->mes->meses_corto ?? '' }}</td>
-                <td class="uppercase fw-700">{{ $periodo->generacion->generacion ?? '' }}</td>
+                <td class="uppercase fw-700">{{ $cuatrimestre->no_cuatrimestre ?? '' }}°</td>
+                <td class="uppercase fw-700">{{ $generacion->generacion ?? '' }}</td>
             </tr>
 
-            <tr>
-                <td colspan="3" class="uppercase">
-                    {{ $plantelCalle }} #{{ $plantelNo }} · Col. {{ $plantelColonia }} · Cd. {{ $plantelCiudad }}
-                </td>
-                <td class="uppercase">{{ $plantelMunicipio }}</td>
-                <td class="uppercase">{{ $plantelEstado }}</td>
-            </tr>
 
             <tr class="row-alt">
-                <td colspan="2" class="uppercase fw-700">{{ $inscripcion->apellido_paterno ?? '' }}</td>
-                <td class="uppercase fw-700">{{ $inscripcion->apellido_materno ?? '' }}</td>
-                <td colspan="2" class="uppercase fw-700">{{ $inscripcion->nombre ?? '' }}</td>
+                <td colspan="2" class="uppercase fw-700">{{ $alumno->alumno->apellido_paterno ?? '' }}</td>
+                <td class="uppercase fw-700">{{ $alumno->alumno->apellido_materno ?? '' }}</td>
+                <td colspan="2" class="uppercase fw-700">{{ $alumno->alumno->nombre ?? '' }}</td>
             </tr>
 
             <tr>
@@ -411,6 +401,8 @@
             </tr>
         </tbody>
     </table>
+
+
 
     <table class="grades avoid-break">
         <thead>
@@ -481,7 +473,7 @@
 
     <div class="resumen avoid-break">
         <span class="lbl">Leyenda:</span>
-        <span class="score ok">≥ 6 Aprobada</span>
+        <span class="score ok"> 6 Aprobada</span>
         <span class="score rep">&lt; 6 Reprobada</span>
         <span class="score np">NP No presentó</span>
     </div>
@@ -494,6 +486,8 @@
         </p>
         <p>Fecha de expedición: {{ now()->translatedFormat('d \\d\\e F \\d\\e\\l Y \\a \\l\\a\\s H:i') }}</p>
     </footer>
+
+
 </body>
 
 </html>
