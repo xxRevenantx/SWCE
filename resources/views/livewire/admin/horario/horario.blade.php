@@ -105,7 +105,9 @@
                                             $textoProfesor = trim(
                                                 ($asignacionSeleccionada->profesor->nombre ?? '') .
                                                     ' ' .
-                                                    ($asignacionSeleccionada->profesor->apellidos ?? ''),
+                                                    ($asignacionSeleccionada->profesor->apellido_paterno ?? '') .
+                                                    ' ' .
+                                                    ($asignacionSeleccionada->profesor->apellido_materno ?? ''),
                                             );
                                         }
 
