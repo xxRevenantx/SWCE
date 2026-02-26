@@ -45,21 +45,50 @@ class CurpService
         ];
     }
 
+    /**
+     * Saco el sexo de la CURP (posición 11): H o M.
+     * Si no se puede leer, regreso null.
+     */
+    protected function obtenerSexoDeCurp(string $curp): ?string
+    {
+        // Validación mínima: CURP de 18 caracteres
+        if (mb_strlen($curp) !== 18) {
+            return null;
+        }
+
+        // Posición 11 (1-indexed) = índice 10 (0-indexed)
+        $sexo = mb_substr($curp, 10, 1);
+
+        if ($sexo === 'H' || $sexo === 'M') {
+            return $sexo;
+        }
+
+        return null;
+    }
 
     protected function fakeResponse(string $curp): array
     {
         $seed = abs(crc32($curp));
         mt_srand($seed);
 
-        $nombres = ['CARLOS', 'ALBERTO', 'MARIA', 'MELISA', 'JUAN', 'PEDRO', 'ANGEL', 'YULISA', 'DANIEL', 'PAOLA'];
+        // Listas separadas para evitar mezclar nombres
+        $nombresHombre = ['CARLOS', 'ALBERTO', 'JUAN', 'PEDRO', 'ANGEL', 'DANIEL', 'MIGUEL', 'JOSE', 'LUIS', 'FERNANDO'];
+        $nombresMujer  = ['MARIA', 'MELISA', 'PAOLA', 'YULISA', 'KARLA', 'ANDREA', 'SOFIA', 'DANIELA', 'FERNANDA', 'VALERIA'];
+
         $apellidos = ['NUNEZ', 'PEREZ', 'GARCIA', 'HERNANDEZ', 'LOPEZ', 'MARTINEZ', 'SANCHEZ', 'RAMIREZ', 'FLORES', 'TORRES'];
 
-        $nombre1 = $nombres[mt_rand(0, count($nombres) - 1)];
-        $nombre2 = $nombres[mt_rand(0, count($nombres) - 1)];
+        // Intento tomar el sexo desde la CURP; si no, lo hago aleatorio
+        $claveSexo = $this->obtenerSexoDeCurp($curp) ?? ((mt_rand(0, 1) === 0) ? 'H' : 'M');
+
+        // Selecciono la lista correcta según el sexo
+        $listaNombres = ($claveSexo === 'H') ? $nombresHombre : $nombresMujer;
+
+        $nombre1 = $listaNombres[mt_rand(0, count($listaNombres) - 1)];
+        $nombre2 = $listaNombres[mt_rand(0, count($listaNombres) - 1)];
+
         $apellidoP = $apellidos[mt_rand(0, count($apellidos) - 1)];
         $apellidoM = $apellidos[mt_rand(0, count($apellidos) - 1)];
 
-        $claveSexo = (mt_rand(0, 1) === 0) ? 'H' : 'M';
         $sexoTexto = ($claveSexo === 'H') ? 'Hombre' : 'Mujer';
 
         $year = mt_rand(1985, 2006);
