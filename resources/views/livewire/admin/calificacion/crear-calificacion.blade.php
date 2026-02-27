@@ -1,17 +1,44 @@
     <div x-data="{
+        // Listas en el orden real de la tabla
+        insIds: @js(collect($inscripciones)->pluck('inscripcion_id')->values()),
+        asigIds: @js(collect($materias)->pluck('id')->values()),
+
         enviarCalificacion(alumno, cuatrimestre, generacion) {
-                Swal.fire({
-                    title: '¿Estás seguro?',
-                    text: `La calificación del alumno en el ${cuatrimestre}° cuatrimestre se enviará a su correo asignado.`,
-                    icon: 'info',
-                    showCancelButton: true,
-                    confirmButtonColor: '#3085d6',
-                    cancelButtonColor: '#d33',
-                    cancelButtonText: 'Cancelar',
-                    confirmButtonText: 'Sí, enviar'
-                }).then((r) => { if (r.isConfirmed) { @this.call('enviarCalificacion', alumno, cuatrimestre, generacion); } });
-            },
-    
+            Swal.fire({
+                title: '¿Estás seguro?',
+                text: `La calificación del alumno en el ${cuatrimestre}° cuatrimestre se enviará a su correo asignado.`,
+                icon: 'info',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                cancelButtonText: 'Cancelar',
+                confirmButtonText: 'Sí, enviar'
+            }).then((r) => {
+                if (r.isConfirmed) {
+                    @this.call('enviarCalificacion', alumno, cuatrimestre, generacion);
+                }
+            });
+        },
+
+        // Enter -> baja a la misma materia en la siguiente fila
+        focusDown(insId, asigId) {
+            const rowIndex = this.insIds.indexOf(insId);
+            const colIndex = this.asigIds.indexOf(asigId);
+
+            if (rowIndex === -1 || colIndex === -1) return;
+
+            const nextRowIndex = rowIndex + 1;
+            if (nextRowIndex >= this.insIds.length) return;
+
+            const nextInsId = this.insIds[nextRowIndex];
+            const nextAsigId = this.asigIds[colIndex];
+
+            const el = document.getElementById(`cal-${nextInsId}-${nextAsigId}`);
+            if (el) {
+                el.focus();
+                el.select?.();
+            }
+        },
     }" class="w-full">
         {{-- Encabezado --}}
         <div class="sticky top-0 z-10">
@@ -217,9 +244,9 @@
         <div class="px-5 pt-5">
             <div
                 class="rounded-2xl border shadow-sm px-4 py-3 flex items-center justify-between gap-4
-                        {{ $hayCambios
-                            ? 'border-amber-200 dark:border-amber-900 bg-amber-50 dark:bg-amber-950/30'
-                            : 'border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-950/40' }}">
+                            {{ $hayCambios
+                                ? 'border-amber-200 dark:border-amber-900 bg-amber-50 dark:bg-amber-950/30'
+                                : 'border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-950/40' }}">
 
                 <div class="flex items-center gap-3">
                     <span class="relative flex h-3 w-3">
@@ -277,7 +304,7 @@
                                 <th class="px-4 py-3 text-left font-semibold text-white">ALUMNO</th>
 
                                 @foreach ($materias as $m)
-                                    <th class="px-4 py-3 text-left font-semibold whitespace-nowrap text-white">
+                                    <th class="px-4 py-2  text-white text-center">
                                         {{ mb_strtoupper($m['materia']) }}
                                         <div class="text-[11px] font-normal text-neutral-400 dark:text-neutral-500">
                                             {{ $m['profesor'] }}
@@ -285,8 +312,8 @@
                                     </th>
                                 @endforeach
 
-                                <th class="px-4 py-3 text-left font-semibold text-white">PROMEDIO</th>
-                                <th class="px-4 py-3 text-right font-semibold w-44 text-white">ACCIONES</th>
+                                <th class="px-4 py-3 text-center font-semibold text-white">PROMEDIO</th>
+                                <th class="px-4 py-3 text-center font-semibold w-44 text-white">ACCIONES</th>
                             </tr>
                         </thead>
 
@@ -309,11 +336,22 @@
                                     @foreach ($materias as $m)
                                         @php($asigId = (int) $m['id'])
                                         <td class="px-4 py-3 text-center">
-                                            <input type="number" min="0" max="10" step="0.1"
-                                                wire:model.lazy="calificaciones.{{ $insId }}.{{ $asigId }}"
-                                                wire:change="marcarCambio"
-                                                class="w-24 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-950 px-3 py-1.5 text-center text-sm text-neutral-900 dark:text-neutral-100 focus:outline-none focus:ring-2 focus:ring-sky-300"
-                                                placeholder="0.0" />
+                                            <div class="w-24 mx-auto">
+                                                <input id="cal-{{ $insId }}-{{ $asigId }}"
+                                                    type="number" min="0" max="10" step="0.1"
+                                                    wire:model.lazy="calificaciones.{{ $insId }}.{{ $asigId }}"
+                                                    wire:change="marcarCambio"
+                                                    @keydown.enter.prevent="focusDown({{ $insId }}, {{ $asigId }})"
+                                                    class="w-24 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-950 px-3 py-1.5 text-center text-sm text-neutral-900 dark:text-neutral-100 focus:outline-none focus:ring-2 focus:ring-sky-300"
+                                                    placeholder="0.0" />
+
+                                                @error('calificaciones.' . $insId . '.' . $asigId)
+                                                    <div
+                                                        class="mt-1 text-[11px] text-red-600 dark:text-red-300 leading-tight">
+                                                        {{ $message }}
+                                                    </div>
+                                                @enderror
+                                            </div>
                                         </td>
                                     @endforeach
 
@@ -332,7 +370,7 @@
                                             </x-button>
                                             <x-button variant="primary"
                                                 class="bg-green-600 hover:bg-green-700 text-white rounded-xl"
-                                                @click="enviarCalificacion({{ $insId }}, {{ $this->cuatrimestre_id }}, {{ $this->generacion_id }})">
+                                                @click="enviarCalificacion({{ $insId }})">
                                                 <div class="flex items-center gap-2">
                                                     <flux:icon.send />
                                                     <span>Enviar</span>
@@ -391,6 +429,27 @@
                         </div>
 
                         <div class="flex items-center justify-end gap-3">
+
+
+
+
+
+                            @php
+                                $pdfUrl =
+                                    $licenciatura_id && $generacion_id && $cuatrimestre_id
+                                        ? route('admin.pdf.calificaciones', [
+                                            $licenciatura_id,
+                                            $generacion_id,
+                                            $cuatrimestre_id,
+                                        ])
+                                        : '#';
+                            @endphp
+
+                            <a href="{{ $pdfUrl }}" target="_blank"
+                                :class="@js($this->puedeGenerarPdf) ? '' : 'pointer-events-none opacity-60 cursor-not-allowed'"
+                                class="inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-sky-400 to-indigo-500 text-white px-6 py-3 text-sm font-semibold shadow">
+                                PDF
+                            </a>
                             <button type="button" wire:click="guardarCalificaciones" @disabled(!$hayCambios)
                                 class="inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-sky-400 to-indigo-500 text-white px-6 py-3 text-sm font-semibold shadow disabled:opacity-60">
                                 Guardar calificaciones

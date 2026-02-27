@@ -26,6 +26,9 @@ class CrearCalificacion extends Component
     public ?int $generacion_id = null;
     public ?int $cuatrimestre_id = null;
 
+    /** Buscador */
+    public string $busqueda = '';
+
     /** Columnas (materias asignadas) */
     public array $materias = [];
 
@@ -50,26 +53,44 @@ class CrearCalificacion extends Component
         $this->cuatrimestres = [];
     }
 
-    /** ======================= ENVÍOS ======================= */
-    public function enviarCalificacion(int $alumnoId, int $cuatrimestreId, int $generacionId): void
+    public function getPuedeGenerarPdfProperty(): bool
     {
-        // 1) Inscripción del alumno para esa generación y cuatrimestre
+        $filtrosCompletos = (bool) ($this->licenciatura_id && $this->generacion_id && $this->cuatrimestre_id);
+
+        // Se habilita SOLO si filtros completos y NO hay cambios por guardar
+        return $filtrosCompletos && !$this->hayCambios;
+    }
+
+    /** ======================= ENVÍOS ======================= */
+    public function enviarCalificacion(int $inscripcionId): void
+    {
         $inscripcion = Inscripcion::with(['alumno.user', 'licenciatura'])
-            ->where('alumno_id', $alumnoId)
-            ->where('generacion_id', $generacionId)
-            ->where('cuatrimestre_id', $cuatrimestreId)
+            ->where('id', $inscripcionId)
             ->first();
 
         if (!$inscripcion) {
             $this->dispatch('swal', [
                 'icon' => 'error',
-                'title' => 'No se encontró inscripción con esos filtros.',
+                'title' => 'No se encontró la inscripción.',
                 'position' => 'top-end',
             ]);
             return;
         }
 
-        // 2) Correo del alumno (según tus relaciones)
+        // Validación extra: que coincida con los filtros actuales
+        if (
+            (int) $inscripcion->licenciatura_id !== (int) $this->licenciatura_id ||
+            (int) $inscripcion->generacion_id !== (int) $this->generacion_id ||
+            (int) $inscripcion->cuatrimestre_id !== (int) $this->cuatrimestre_id
+        ) {
+            $this->dispatch('swal', [
+                'icon' => 'error',
+                'title' => 'La inscripción no coincide con los filtros seleccionados.',
+                'position' => 'top-end',
+            ]);
+            return;
+        }
+
         $correo = $inscripcion->alumno?->user?->email;
 
         if (empty($correo)) {
@@ -81,30 +102,26 @@ class CrearCalificacion extends Component
             return;
         }
 
-        // 3) Catálogos
-        $licenciatura = $inscripcion->licenciatura; // ya viene cargada
-        $generacionObj = Generacion::find($generacionId);
-        $cuatrimestreObj = Cuatrimestre::find($cuatrimestreId);
+        $generacionObj   = Generacion::find($inscripcion->generacion_id);
+        $cuatrimestreObj = Cuatrimestre::find($inscripcion->cuatrimestre_id);
+        $licenciatura    = $inscripcion->licenciatura;
 
-        // 4) Calificaciones por inscripción y por cuatrimestre/licenciatura via asignación
         $calificaciones = Calificacion::with(['asignacionMateria.materia', 'asignacionMateria.profesor'])
             ->where('inscripcion_id', $inscripcion->id)
-            ->whereHas('asignacionMateria', function ($query) use ($cuatrimestreId, $licenciatura) {
-                $query->where('cuatrimestre_id', $cuatrimestreId)
+            ->whereHas('asignacionMateria', function ($q) use ($inscripcion, $licenciatura) {
+                $q->where('cuatrimestre_id', $inscripcion->cuatrimestre_id)
                     ->where('licenciatura_id', $licenciatura->id);
             })
             ->get()
             ->sortBy(fn($item) => $item->asignacionMateria->materia->clave ?? '')
             ->values();
 
-        // 5) UI
         $this->dispatch('swal', [
             'icon' => 'info',
             'title' => 'Enviando correo, espere…',
             'position' => 'top',
         ]);
 
-        // 6) Enviar correo
         Mail::to($correo)->send(new CalificacionMail(
             $calificaciones,
             $inscripcion,
@@ -133,6 +150,7 @@ class CrearCalificacion extends Component
         $this->inscripciones = [];
         $this->calificaciones = [];
         $this->hayCambios = false;
+        $this->busqueda = '';
 
         // Si no hay licenciatura, se queda vacío
         if (!$this->licenciatura_id) {
@@ -171,6 +189,7 @@ class CrearCalificacion extends Component
         $this->inscripciones = [];
         $this->calificaciones = [];
         $this->hayCambios = false;
+        $this->busqueda = '';
 
         // Carga si ya están completos los filtros
         $this->cargarDatosSiListo();
@@ -183,8 +202,19 @@ class CrearCalificacion extends Component
         $this->inscripciones = [];
         $this->calificaciones = [];
         $this->hayCambios = false;
+        $this->busqueda = '';
 
         // Carga si ya están completos los filtros
+        $this->cargarDatosSiListo();
+    }
+
+    public function updatedBusqueda(): void
+    {
+        // Recarga alumnos aplicando el filtro, pero sin tocar materias
+        $this->inscripciones = [];
+        $this->calificaciones = [];
+        $this->hayCambios = false;
+
         $this->cargarDatosSiListo();
     }
 
@@ -195,14 +225,13 @@ class CrearCalificacion extends Component
             return;
         }
 
-        // 1) Materias asignadas a esa licenciatura y cuatrimestre (solo calificables)
+        // 1) Materias asignadas (solo calificables)
         $asignaciones = AsignacionMateria::query()
             ->where('asignacion_materias.licenciatura_id', $this->licenciatura_id)
             ->where('asignacion_materias.cuatrimestre_id', $this->cuatrimestre_id)
             ->whereHas('materia', function ($q) {
                 $q->where('calificable', 'si');
             })
-            // Orden por clave (materias.clave)
             ->join('materias', 'materias.id', '=', 'asignacion_materias.materia_id')
             ->where('materias.calificable', 'si')
             ->orderByRaw("COALESCE(materias.clave,'') ASC")
@@ -215,33 +244,39 @@ class CrearCalificacion extends Component
             ])
             ->get();
 
-
         $this->materias = $asignaciones->map(function ($a) {
             $nombreMateria = $a->materia?->nombre ?? 'MATERIA';
 
-            // Nombre real del profesor (con tus columnas)
             $profesor = $a->profesor
                 ? trim(
                     ($a->profesor->nombre ?? '') . ' ' .
-                    ($a->profesor->apellido_paterno ?? '') . ' ' .
-                    ($a->profesor->apellido_materno ?? '')
+                        ($a->profesor->apellido_paterno ?? '') . ' ' .
+                        ($a->profesor->apellido_materno ?? '')
                 )
                 : '—';
 
             return [
-                'id' => (int) $a->id,            // asignacion_materias.id
+                'id' => (int) $a->id,
                 'materia' => $nombreMateria,
                 'profesor' => $profesor !== '' ? $profesor : '—',
             ];
         })->values()->toArray();
 
-        // 2) Alumnos inscritos en esa licenciatura, generación y cuatrimestre
+        // 2) Alumnos inscritos (con búsqueda)
+        $busqueda = trim($this->busqueda);
+
         $ins = DB::table('inscripciones')
             ->join('alumnos', 'alumnos.id', '=', 'inscripciones.alumno_id')
             ->leftJoin('datos_escolares', 'datos_escolares.alumno_id', '=', 'alumnos.id')
             ->where('inscripciones.licenciatura_id', $this->licenciatura_id)
             ->where('inscripciones.generacion_id', $this->generacion_id)
             ->where('inscripciones.cuatrimestre_id', $this->cuatrimestre_id)
+            ->when($busqueda !== '', function ($q) use ($busqueda) {
+                $q->where(function ($qq) use ($busqueda) {
+                    $qq->where('datos_escolares.matricula', 'like', "%{$busqueda}%")
+                        ->orWhere(DB::raw("TRIM(CONCAT(alumnos.nombre,' ',IFNULL(alumnos.apellido_paterno,''),' ',IFNULL(alumnos.apellido_materno,'')))"), 'like', "%{$busqueda}%");
+                });
+            })
             ->select(
                 'inscripciones.id as inscripcion_id',
                 'alumnos.id as alumno_id',
@@ -261,7 +296,7 @@ class CrearCalificacion extends Component
         // 3) Matriz vacía para capturar
         $this->prepararCalificacionesEnBlanco();
 
-        // 4) Si existe la tabla, se cargan calificaciones guardadas
+        // 4) Carga calificaciones guardadas
         $this->cargarCalificacionesGuardadas();
     }
 
@@ -274,16 +309,13 @@ class CrearCalificacion extends Component
 
             foreach ($this->materias as $m) {
                 $asigId = (int) $m['id'];
-
                 $this->calificaciones[$insId][$asigId] = '';
             }
         }
     }
 
-
     private function cargarCalificacionesGuardadas(): void
     {
-        // Si no existe tabla, se omite
         if (!DB::getSchemaBuilder()->hasTable('calificaciones')) {
             return;
         }
@@ -312,7 +344,6 @@ class CrearCalificacion extends Component
 
     public function limpiarFiltros(): void
     {
-        // Deja todo en cero
         $this->licenciatura_id = null;
         $this->generacion_id = null;
         $this->cuatrimestre_id = null;
@@ -323,11 +354,50 @@ class CrearCalificacion extends Component
         $this->inscripciones = [];
         $this->calificaciones = [];
         $this->hayCambios = false;
+        $this->busqueda = '';
+
+        $this->resetErrorBag();
     }
 
     public function marcarCambio(): void
     {
-        // Habilita el botón de guardar
+        $this->hayCambios = true;
+    }
+
+    /**
+     * Validación por celda cuando se actualiza una calificación.
+     * Se valida el rango 0 a 10 y se muestra error directamente en la celda.
+     */
+    public function updated($propiedad, $valor): void
+    {
+        if (!str_starts_with($propiedad, 'calificaciones.')) {
+            return;
+        }
+
+        $partes = explode('.', $propiedad);
+        if (count($partes) !== 3) {
+            return;
+        }
+
+        // Si se limpia el input, se quita el error de esa celda y se marcan cambios
+        if ($valor === '' || $valor === null) {
+            $this->resetValidation($propiedad);
+            $this->hayCambios = true;
+            return;
+        }
+
+        $this->validateOnly(
+            $propiedad,
+            [
+                $propiedad => 'nullable|numeric|min:0|max:10',
+            ],
+            [
+                'numeric' => 'Debe ser un número.',
+                'min' => 'Debe estar entre 0 y 10.',
+                'max' => 'Debe estar entre 0 y 10.',
+            ]
+        );
+
         $this->hayCambios = true;
     }
 
@@ -347,7 +417,6 @@ class CrearCalificacion extends Component
                 $asigId = (int) $m['id'];
                 $v = $this->calificaciones[$insId][$asigId] ?? null;
 
-                // Si está vacío, no cuenta
                 if ($v === null || $v === '') {
                     continue;
                 }
@@ -361,7 +430,6 @@ class CrearCalificacion extends Component
         return $capturadas;
     }
 
-
     public function getPorcentajeCapturaProperty(): float
     {
         $total = $this->totalCeldas;
@@ -372,42 +440,115 @@ class CrearCalificacion extends Component
         return round(($this->celdasCapturadas / $total) * 100, 1);
     }
 
+    /**
+     * Promedio real: solo con calificaciones válidas capturadas.
+     */
     public function promedioFila(int $inscripcionId): float
     {
-        $totalMaterias = count($this->materias);
-
-        if ($totalMaterias <= 0) {
-            return 0.0;
-        }
-
         $suma = 0.0;
+        $cont = 0;
 
         foreach ($this->materias as $m) {
             $asigId = (int) $m['id'];
             $v = $this->calificaciones[$inscripcionId][$asigId] ?? null;
 
-            // Vacía o no numérica: se toma como 0, pero sigue contando en el divisor
             if ($v === null || $v === '' || !is_numeric($v)) {
                 continue;
             }
 
             $v = (float) $v;
 
-            // Fuera de rango: se toma como 0, pero sigue contando en el divisor
             if ($v < 0 || $v > 10) {
                 continue;
             }
 
             $suma += $v;
+            $cont++;
         }
 
-        return round($suma / $totalMaterias, 1);
+        if ($cont === 0) {
+            return 0.0;
+        }
+
+        return round($suma / $cont, 1);
     }
 
+    public function guardarFila(int $inscripcionId): void
+    {
+        // Si hay errores visibles, no se guarda
+        if ($this->getErrorBag()->isNotEmpty()) {
+            $this->dispatch('swal', [
+                'icon' => 'error',
+                'title' => 'Hay calificaciones con error.',
+                'position' => 'top-end',
+            ]);
+            return;
+        }
+
+        if (!DB::getSchemaBuilder()->hasTable('calificaciones')) {
+            $this->addError('calificaciones', 'No existe la tabla calificaciones. Crea la tabla para guardar.');
+            return;
+        }
+
+        DB::transaction(function () use ($inscripcionId) {
+            foreach ($this->materias as $m) {
+                $asigId = (int) $m['id'];
+                $valor = $this->calificaciones[$inscripcionId][$asigId] ?? null;
+
+                // Si está vacío, se borra en BD para no dejar calificación vieja
+                if ($valor === null || $valor === '') {
+                    DB::table('calificaciones')
+                        ->where('inscripcion_id', $inscripcionId)
+                        ->where('asignacion_materia_id', $asigId)
+                        ->delete();
+                    continue;
+                }
+
+                if (!is_numeric($valor)) {
+                    continue;
+                }
+
+                $valor = (float) $valor;
+
+                if ($valor < 0 || $valor > 10) {
+                    continue;
+                }
+
+                DB::table('calificaciones')->updateOrInsert(
+                    [
+                        'inscripcion_id' => $inscripcionId,
+                        'asignacion_materia_id' => $asigId,
+                    ],
+                    [
+                        'calificacion' => $valor,
+                        'fecha_captura' => now(),
+                        'updated_at' => now(),
+                        'created_at' => now(),
+                    ]
+                );
+            }
+        });
+
+        $this->hayCambios = false;
+
+        $this->dispatch('swal', [
+            'icon' => 'success',
+            'title' => 'Fila guardada',
+            'position' => 'top-end',
+        ]);
+    }
 
     public function guardarCalificaciones(): void
     {
-        // Si falta tabla, se muestra error
+        if ($this->getErrorBag()->isNotEmpty()) {
+            $this->dispatch('swal', [
+                'icon' => 'error',
+                'title' => 'Hay calificaciones con error. Corrige los valores antes de guardar.',
+                'position' => 'top-end',
+            ]);
+            return;
+        }
+
         if (!DB::getSchemaBuilder()->hasTable('calificaciones')) {
             $this->addError('calificaciones', 'No existe la tabla calificaciones. Crea la tabla para guardar.');
             return;
@@ -421,14 +562,21 @@ class CrearCalificacion extends Component
                     $asigId = (int) $m['id'];
                     $valor = $this->calificaciones[$insId][$asigId] ?? null;
 
-                    // Si está vacío, se ignora
-                    if ($valor === null || $valor === '' || !is_numeric($valor)) {
+                    // Si está vacío, se borra en BD para no dejar calificación vieja
+                    if ($valor === null || $valor === '') {
+                        DB::table('calificaciones')
+                            ->where('inscripcion_id', $insId)
+                            ->where('asignacion_materia_id', $asigId)
+                            ->delete();
+                        continue;
+                    }
+
+                    if (!is_numeric($valor)) {
                         continue;
                     }
 
                     $valor = (float) $valor;
 
-                    // Solo 0 a 10
                     if ($valor < 0 || $valor > 10) {
                         continue;
                     }
