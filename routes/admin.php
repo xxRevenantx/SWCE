@@ -63,6 +63,9 @@ Route::middleware(['auth'])->group(function () {
     // Boleta de calificaciones
     Route::get('calificaciones/boleta/{id}', [PDFController::class, 'boletaCalificacion'])->middleware('can:admin.pdf.boleta_calificacion')->name('admin.pdf.boletaCalificacion');
 
+    // CALIFICACIONES GENERALES
+    Route::get('calificaciones/generales/{filtrar_licenciatura?}/{filtrar_generacion?}/{filtrar_cuatrimestre?}', [PDFController::class, 'calificacionesGenerales'])->middleware('can:admin.pdf.calificaciones')->name('admin.pdf.calificaciones');
+
 
 
     // Lista de matrícula

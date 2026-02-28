@@ -53,11 +53,14 @@ class CrearCalificacion extends Component
         $this->cuatrimestres = [];
     }
 
+    /**
+     * Se habilita SOLO si filtros completos y NO hay cambios por guardar.
+     * Se usa en Blade como: $this->puedeGenerarPdf
+     */
     public function getPuedeGenerarPdfProperty(): bool
     {
         $filtrosCompletos = (bool) ($this->licenciatura_id && $this->generacion_id && $this->cuatrimestre_id);
 
-        // Se habilita SOLO si filtros completos y NO hay cambios por guardar
         return $filtrosCompletos && !$this->hayCambios;
     }
 
@@ -102,9 +105,9 @@ class CrearCalificacion extends Component
             return;
         }
 
-        $generacionObj   = Generacion::find($inscripcion->generacion_id);
+        $generacionObj = Generacion::find($inscripcion->generacion_id);
         $cuatrimestreObj = Cuatrimestre::find($inscripcion->cuatrimestre_id);
-        $licenciatura    = $inscripcion->licenciatura;
+        $licenciatura = $inscripcion->licenciatura;
 
         $calificaciones = Calificacion::with(['asignacionMateria.materia', 'asignacionMateria.profesor'])
             ->where('inscripcion_id', $inscripcion->id)
@@ -152,7 +155,6 @@ class CrearCalificacion extends Component
         $this->hayCambios = false;
         $this->busqueda = '';
 
-        // Si no hay licenciatura, se queda vacío
         if (!$this->licenciatura_id) {
             return;
         }
@@ -184,33 +186,28 @@ class CrearCalificacion extends Component
 
     public function updatedGeneracionId(): void
     {
-        // Limpia datos dependientes
         $this->materias = [];
         $this->inscripciones = [];
         $this->calificaciones = [];
         $this->hayCambios = false;
         $this->busqueda = '';
 
-        // Carga si ya están completos los filtros
         $this->cargarDatosSiListo();
     }
 
     public function updatedCuatrimestreId(): void
     {
-        // Limpia datos dependientes
         $this->materias = [];
         $this->inscripciones = [];
         $this->calificaciones = [];
         $this->hayCambios = false;
         $this->busqueda = '';
 
-        // Carga si ya están completos los filtros
         $this->cargarDatosSiListo();
     }
 
     public function updatedBusqueda(): void
     {
-        // Recarga alumnos aplicando el filtro, pero sin tocar materias
         $this->inscripciones = [];
         $this->calificaciones = [];
         $this->hayCambios = false;
@@ -220,7 +217,6 @@ class CrearCalificacion extends Component
 
     private function cargarDatosSiListo(): void
     {
-        // Se requieren los 3 filtros
         if (!$this->licenciatura_id || !$this->generacion_id || !$this->cuatrimestre_id) {
             return;
         }
@@ -229,9 +225,6 @@ class CrearCalificacion extends Component
         $asignaciones = AsignacionMateria::query()
             ->where('asignacion_materias.licenciatura_id', $this->licenciatura_id)
             ->where('asignacion_materias.cuatrimestre_id', $this->cuatrimestre_id)
-            ->whereHas('materia', function ($q) {
-                $q->where('calificable', 'si');
-            })
             ->join('materias', 'materias.id', '=', 'asignacion_materias.materia_id')
             ->where('materias.calificable', 'si')
             ->orderByRaw("COALESCE(materias.clave,'') ASC")
@@ -250,8 +243,8 @@ class CrearCalificacion extends Component
             $profesor = $a->profesor
                 ? trim(
                     ($a->profesor->nombre ?? '') . ' ' .
-                        ($a->profesor->apellido_paterno ?? '') . ' ' .
-                        ($a->profesor->apellido_materno ?? '')
+                    ($a->profesor->apellido_paterno ?? '') . ' ' .
+                    ($a->profesor->apellido_materno ?? '')
                 )
                 : '—';
 
@@ -274,7 +267,11 @@ class CrearCalificacion extends Component
             ->when($busqueda !== '', function ($q) use ($busqueda) {
                 $q->where(function ($qq) use ($busqueda) {
                     $qq->where('datos_escolares.matricula', 'like', "%{$busqueda}%")
-                        ->orWhere(DB::raw("TRIM(CONCAT(alumnos.nombre,' ',IFNULL(alumnos.apellido_paterno,''),' ',IFNULL(alumnos.apellido_materno,'')))"), 'like', "%{$busqueda}%");
+                        ->orWhere(
+                            DB::raw("TRIM(CONCAT(alumnos.nombre,' ',IFNULL(alumnos.apellido_paterno,''),' ',IFNULL(alumnos.apellido_materno,'')))"),
+                            'like',
+                            "%{$busqueda}%"
+                        );
                 });
             })
             ->select(
@@ -293,7 +290,7 @@ class CrearCalificacion extends Component
             'alumno' => $r->alumno ?: '—',
         ])->toArray();
 
-        // 3) Matriz vacía para capturar
+        // 3) Matriz vacía
         $this->prepararCalificacionesEnBlanco();
 
         // 4) Carga calificaciones guardadas
@@ -365,8 +362,7 @@ class CrearCalificacion extends Component
     }
 
     /**
-     * Validación por celda cuando se actualiza una calificación.
-     * Se valida el rango 0 a 10 y se muestra error directamente en la celda.
+     * Valida cada celda cuando se modifica una calificación.
      */
     public function updated($propiedad, $valor): void
     {
@@ -379,7 +375,6 @@ class CrearCalificacion extends Component
             return;
         }
 
-        // Si se limpia el input, se quita el error de esa celda y se marcan cambios
         if ($valor === '' || $valor === null) {
             $this->resetValidation($propiedad);
             $this->hayCambios = true;
@@ -440,9 +435,6 @@ class CrearCalificacion extends Component
         return round(($this->celdasCapturadas / $total) * 100, 1);
     }
 
-    /**
-     * Promedio real: solo con calificaciones válidas capturadas.
-     */
     public function promedioFila(int $inscripcionId): float
     {
         $suma = 0.0;
@@ -473,71 +465,6 @@ class CrearCalificacion extends Component
         return round($suma / $cont, 1);
     }
 
-    public function guardarFila(int $inscripcionId): void
-    {
-        // Si hay errores visibles, no se guarda
-        if ($this->getErrorBag()->isNotEmpty()) {
-            $this->dispatch('swal', [
-                'icon' => 'error',
-                'title' => 'Hay calificaciones con error.',
-                'position' => 'top-end',
-            ]);
-            return;
-        }
-
-        if (!DB::getSchemaBuilder()->hasTable('calificaciones')) {
-            $this->addError('calificaciones', 'No existe la tabla calificaciones. Crea la tabla para guardar.');
-            return;
-        }
-
-        DB::transaction(function () use ($inscripcionId) {
-            foreach ($this->materias as $m) {
-                $asigId = (int) $m['id'];
-                $valor = $this->calificaciones[$inscripcionId][$asigId] ?? null;
-
-                // Si está vacío, se borra en BD para no dejar calificación vieja
-                if ($valor === null || $valor === '') {
-                    DB::table('calificaciones')
-                        ->where('inscripcion_id', $inscripcionId)
-                        ->where('asignacion_materia_id', $asigId)
-                        ->delete();
-                    continue;
-                }
-
-                if (!is_numeric($valor)) {
-                    continue;
-                }
-
-                $valor = (float) $valor;
-
-                if ($valor < 0 || $valor > 10) {
-                    continue;
-                }
-
-                DB::table('calificaciones')->updateOrInsert(
-                    [
-                        'inscripcion_id' => $inscripcionId,
-                        'asignacion_materia_id' => $asigId,
-                    ],
-                    [
-                        'calificacion' => $valor,
-                        'fecha_captura' => now(),
-                        'updated_at' => now(),
-                        'created_at' => now(),
-                    ]
-                );
-            }
-        });
-
-        $this->hayCambios = false;
-
-        $this->dispatch('swal', [
-            'icon' => 'success',
-            'title' => 'Fila guardada',
-            'position' => 'top-end',
-        ]);
-    }
-
     public function guardarCalificaciones(): void
     {
         if ($this->getErrorBag()->isNotEmpty()) {
@@ -562,7 +489,6 @@ class CrearCalificacion extends Component
                     $asigId = (int) $m['id'];
                     $valor = $this->calificaciones[$insId][$asigId] ?? null;
 
-                    // Si está vacío, se borra en BD para no dejar calificación vieja
                     if ($valor === null || $valor === '') {
                         DB::table('calificaciones')
                             ->where('inscripcion_id', $insId)
