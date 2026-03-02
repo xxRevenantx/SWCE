@@ -3,8 +3,11 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Calificacion;
+use App\Models\Cuatrimestre;
 use App\Models\Generacion;
 use App\Models\Inscripcion;
+use App\Models\Licenciatura;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 
@@ -124,5 +127,145 @@ class PDFController extends Controller
         ];
         $pdf = Pdf::loadView('admin.pdf.boletaCalificacionPDF', $data)->setPaper('letter', 'portrait');
         return $pdf->stream("BOLETA_CALIFICACIONES_" . $nombreAlumno . "_" . $cuatrimestre->no_cuatrimestre . "°_CUATRIMESTRE.pdf");
+    }
+
+    public function calificacionesGenerales($licenciatura, $generacion, $cuatrimestre)
+    {
+
+
+        $alumnos = Inscripcion::query()
+            ->join('alumnos', 'alumnos.id', '=', 'inscripciones.alumno_id')
+            ->leftJoin('datos_escolares', 'datos_escolares.alumno_id', '=', 'alumnos.id')
+            ->where('inscripciones.licenciatura_id', $licenciatura)
+            ->where('inscripciones.generacion_id', $generacion)
+            ->where('inscripciones.cuatrimestre_id', $cuatrimestre)
+            ->orderBy('alumnos.apellido_paterno')
+            ->orderBy('alumnos.apellido_materno')
+            ->orderBy('alumnos.nombre')
+            ->select([
+                'inscripciones.id as inscripcion_id',
+                'alumnos.id as alumno_id',
+                'datos_escolares.matricula as matricula',
+                'alumnos.nombre as nombre',
+                'alumnos.apellido_paterno as apellido_paterno',
+                'alumnos.apellido_materno as apellido_materno',
+            ])
+            ->get()
+            ->map(function ($r) {
+                return (object) [
+                    'inscripcion_id' => $r->inscripcion_id,
+                    'alumno_id' => $r->alumno_id,
+                    'matricula' => $r->matricula,
+                    'nombre_completo' => trim(
+                        ($r->apellido_paterno ?? '') . ' ' .
+                        ($r->apellido_materno ?? '') . ' ' .
+                        ($r->nombre ?? '')
+                    ),
+                ];
+            });
+
+        if ($alumnos->isEmpty()) {
+            abort(404);
+        }
+
+        $inscripcionIds = $alumnos->pluck('inscripcion_id')->values();
+
+        /**
+         * 2) Calificaciones SOLO de esas inscripciones
+         */
+        $calificacionesRaw = Calificacion::query()
+            ->join('asignacion_materias', 'asignacion_materias.id', '=', 'calificaciones.asignacion_materia_id')
+            ->join('materias', 'materias.id', '=', 'asignacion_materias.materia_id')
+            ->whereIn('calificaciones.inscripcion_id', $inscripcionIds)
+            ->orderByRaw("COALESCE(materias.clave,'') ASC")
+            ->select([
+                'calificaciones.inscripcion_id',
+                'calificaciones.asignacion_materia_id',
+                'calificaciones.calificacion',
+                'materias.clave as materia_clave',
+                'materias.nombre as materia_nombre',
+            ])
+            ->get();
+
+        /**
+         * 3) Materias (columnas)
+         *    Si no hay ninguna calificación todavía, aquí quedaría vacío.
+         *    En ese caso, mandamos un arreglo vacío y el PDF mostrará solo alumnos + promedio.
+         */
+        $materias = $calificacionesRaw
+            ->map(function ($r) {
+                return (object) [
+                    'asignacion_materia_id' => $r->asignacion_materia_id,
+                    'clave' => $r->materia_clave,
+                    'nombre' => $r->materia_nombre,
+                ];
+            })
+            ->unique('asignacion_materia_id')
+            ->sortBy(fn($m) => $m->clave ?? '')
+            ->values();
+
+        /**
+         * 4) Matriz: [inscripcion_id][asignacion_materia_id] = calificacion
+         */
+        $matriz = [];
+        foreach ($calificacionesRaw as $r) {
+            $matriz[$r->inscripcion_id][$r->asignacion_materia_id] = $r->calificacion;
+        }
+
+        /**
+         * 5) Promedio por alumno (solo considera numéricos)
+         *    Si no tiene calificaciones, queda null
+         */
+        $promedios = [];
+        foreach ($alumnos as $a) {
+            $valores = [];
+
+            foreach ($materias as $m) {
+                $valor = $matriz[$a->inscripcion_id][$m->asignacion_materia_id] ?? null;
+                if (is_numeric($valor)) {
+                    $valores[] = (float) $valor;
+                }
+            }
+
+            $promedios[$a->inscripcion_id] = count($valores)
+                ? round(array_sum($valores) / count($valores), 1)
+                : null;
+        }
+
+        /**
+         * 6) Datos generales
+         */
+        $lic = Licenciatura::query()->select('id', 'nombre')->find($licenciatura);
+        $gen = Generacion::query()->select('id', 'generacion')->find($generacion);
+        $cuat = Cuatrimestre::query()->select('id', 'no_cuatrimestre')->find($cuatrimestre);
+
+        $nombreLicenciatura = $lic?->nombre ?? 'LICENCIATURA_DESCONOCIDA';
+        $nombreGeneracion = $gen?->generacion ?? 'GEN_DESCONOCIDA';
+        $nombreCuatrimestre = $cuat?->no_cuatrimestre ?? 'CUATRIMESTRE_DESCONOCIDO';
+
+        /**
+         * 7) PDF
+         */
+        $data = [
+            'materias' => $materias,
+            'alumnos' => $alumnos,
+            'matriz' => $matriz,
+            'promedios' => $promedios,
+
+            'nombreLicenciatura' => $nombreLicenciatura,
+            'nombreGeneracion' => $nombreGeneracion,
+            'nombreCuatrimestre' => $nombreCuatrimestre,
+        ];
+
+        $pdf = Pdf::loadView('admin.pdf.calificacionesGeneralesPDF', $data)
+            ->setPaper('letter', 'landscape');
+
+        $filename = "CALIFICACIONES_GENERALES_" .
+            mb_strtoupper($nombreLicenciatura) . "_" .
+            mb_strtoupper($nombreGeneracion) . "_" .
+            mb_strtoupper($nombreCuatrimestre) . ".pdf";
+
+        return $pdf->stream($filename);
+
     }
 }

@@ -64,6 +64,60 @@ class CrearCalificacion extends Component
         return $filtrosCompletos && !$this->hayCambios;
     }
 
+    /**
+     * URL del PDF (solo útil cuando hay filtros completos).
+     * Se usa en Blade como: $this->pdfUrl
+     */
+    public function getPdfUrlProperty(): string
+    {
+        $filtrosCompletos = (bool) ($this->licenciatura_id && $this->generacion_id && $this->cuatrimestre_id);
+
+        if (!$filtrosCompletos) {
+            return '#';
+        }
+
+        return route('admin.pdf.calificaciones', [
+            $this->licenciatura_id,
+            $this->generacion_id,
+            $this->cuatrimestre_id,
+        ]);
+    }
+
+    /**
+     * Clases del botón PDF según estado.
+     * Se usa en Blade como: $this->clasePdf
+     */
+    public function getClasePdfProperty(): string
+    {
+        $base = 'inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-sky-400 to-indigo-500 text-white px-6 py-3 text-sm font-semibold shadow transition';
+
+        return $this->puedeGenerarPdf
+            ? $base . ' hover:opacity-95'
+            : $base . ' pointer-events-none opacity-60 cursor-not-allowed';
+    }
+
+    /**
+     * Se puede guardar si hay cambios y no hay errores.
+     * Se usa en Blade como: $this->puedeGuardar
+     */
+    public function getPuedeGuardarProperty(): bool
+    {
+        return $this->hayCambios && $this->getErrorBag()->isEmpty();
+    }
+
+    /**
+     * Clases del botón Guardar según estado.
+     * Se usa en Blade como: $this->claseGuardar
+     */
+    public function getClaseGuardarProperty(): string
+    {
+        $base = 'inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-sky-400 to-indigo-500 text-white px-6 py-3 text-sm font-semibold shadow transition';
+
+        return $this->puedeGuardar
+            ? $base . ' hover:opacity-95'
+            : $base . ' opacity-60 cursor-not-allowed';
+    }
+
     /** ======================= ENVÍOS ======================= */
     public function enviarCalificacion(int $inscripcionId): void
     {
@@ -467,6 +521,16 @@ class CrearCalificacion extends Component
 
     public function guardarCalificaciones(): void
     {
+        // Evita guardar si no hay cambios
+        if (!$this->hayCambios) {
+            $this->dispatch('swal', [
+                'icon' => 'info',
+                'title' => 'No hay cambios por guardar.',
+                'position' => 'top-end',
+            ]);
+            return;
+        }
+
         if ($this->getErrorBag()->isNotEmpty()) {
             $this->dispatch('swal', [
                 'icon' => 'error',

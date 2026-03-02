@@ -1,5 +1,3 @@
-{{-- prettier-ignore-start --}}
-{{-- @formatter:off --}}
 <div x-data="{
     insIds: @js(collect($inscripciones)->pluck('inscripcion_id')->values()->all()),
     asigIds: @js(collect($materias)->pluck('id')->values()->all()),
@@ -149,12 +147,12 @@
                 <table class="min-w-full text-sm">
                     <thead class="bg-neutral-50 dark:bg-neutral-950/60">
                         <tr class="text-neutral-600 dark:text-neutral-300">
-                            <th class="px-4 py-3 text-left font-semibold w-12">#</th>
-                            <th class="px-4 py-3 text-left font-semibold">MATRÍCULA</th>
-                            <th class="px-4 py-3 text-left font-semibold">ALUMNO</th>
+                            <th class="px-4 py-3 text-left font-semibold w-12 text-white">#</th>
+                            <th class="px-4 py-3 text-left font-semibold text-white">MATRÍCULA</th>
+                            <th class="px-4 py-3 text-left font-semibold text-white">ALUMNO</th>
 
                             @foreach ($materias as $m)
-                                <th class="px-4 py-2 text-center">
+                                <th class="px-4 py-2 text-center text-white font-semibold">
                                     {{ mb_strtoupper($m['materia']) }}
                                     <div class="text-[11px] font-normal text-neutral-400 dark:text-neutral-500">
                                         {{ $m['profesor'] }}
@@ -162,8 +160,8 @@
                                 </th>
                             @endforeach
 
-                            <th class="px-4 py-3 text-center font-semibold">PROMEDIO</th>
-                            <th class="px-4 py-3 text-center font-semibold w-44">ACCIONES</th>
+                            <th class="px-4 py-3 text-center font-semibold text-white">PROMEDIO</th>
+                            <th class="px-4 py-3 text-center font-semibold w-44 text-white  ">ACCIONES</th>
                         </tr>
                     </thead>
 
@@ -271,30 +269,18 @@
                     </div>
 
                     <div class="flex items-center justify-end gap-3">
-                    @php
-                        $filtrosCompletos = !empty($licenciatura_id) && !empty($generacion_id) && !empty($cuatrimestre_id);
+                        {{-- Botón PDF --}}
+                        <a href="{{ $this->puedeGenerarPdf ? $this->pdfUrl : '#' }}"
+                            target="{{ $this->puedeGenerarPdf ? '_blank' : '_self' }}"
+                            rel="{{ $this->puedeGenerarPdf ? 'noopener' : '' }}"
+                            aria-disabled="{{ $this->puedeGenerarPdf ? 'false' : 'true' }}"
+                            tabindex="{{ $this->puedeGenerarPdf ? '0' : '-1' }}" class="{{ $this->clasePdf }}">
+                            PDF
+                        </a>
 
-                        $pdfUrl = $filtrosCompletos
-                            ? route('admin.pdf.calificaciones', [$licenciatura_id, $generacion_id, $cuatrimestre_id])
-                            : '#';
-
-                        // Computed de Livewire
-                        $puedePdf = (bool) $this->puedeGenerarPdf;
-
-                        $clasePdf = 'inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-sky-400 to-indigo-500 text-white px-6 py-3 text-sm font-semibold shadow transition';
-                        $clasePdf .= $puedePdf ? ' hover:opacity-95' : ' pointer-events-none opacity-60 cursor-not-allowed';
-                    @endphp
-
-                    <a href="{{ $puedePdf ? $pdfUrl : '#' }}"
-                    target="{{ $puedePdf ? '_blank' : '_self' }}"
-                    rel="{{ $puedePdf ? 'noopener' : '' }}"
-                    aria-disabled="{{ $puedePdf ? 'false' : 'true' }}"
-                    tabindex="{{ $puedePdf ? '0' : '-1' }}"
-                    class="{{ $clasePdf }}">
-                        PDF
-                    </a>
-                        <button type="button" wire:click="guardarCalificaciones" @disabled(!$hayCambios)
-                            class="inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-sky-400 to-indigo-500 text-white px-6 py-3 text-sm font-semibold shadow disabled:opacity-60 disabled:cursor-not-allowed">
+                        {{-- Botón Guardar --}}
+                        <button type="button" wire:click="guardarCalificaciones"
+                            {{ $this->puedeGuardar ? '' : 'disabled' }} class="{{ $this->claseGuardar }}">
                             Guardar calificaciones
                         </button>
                     </div>
@@ -304,5 +290,3 @@
         </div>
     </div>
 </div>
-{{-- @formatter:on --}}
-{{-- prettier-ignore-end --}}
