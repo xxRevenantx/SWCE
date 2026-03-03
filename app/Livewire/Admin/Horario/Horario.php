@@ -199,7 +199,7 @@ class Horario extends Component
         $this->llenarHorarioEnBlanco();
     }
 
-    // Dentro de tu clase Horario (App\Livewire\Admin\Horario\Horario)
+
 
     public function getFiltrosListosProperty(): bool
     {
