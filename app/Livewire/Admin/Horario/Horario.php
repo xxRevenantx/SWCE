@@ -199,6 +199,37 @@ class Horario extends Component
         $this->llenarHorarioEnBlanco();
     }
 
+    // Dentro de tu clase Horario (App\Livewire\Admin\Horario\Horario)
+
+    public function getFiltrosListosProperty(): bool
+    {
+        return !empty($this->licenciatura_id) && !empty($this->generacion_id) && !empty($this->cuatrimestre_id);
+    }
+
+    public function getPdfUrlProperty(): string
+    {
+        if (!$this->filtrosListos) {
+            return '#';
+        }
+
+        return route('admin.pdf.horario', [
+            $this->licenciatura_id,
+            $this->generacion_id,
+            $this->cuatrimestre_id,
+        ]);
+    }
+
+    public function getClasePdfProperty(): string
+    {
+        $base = 'inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-sky-400 to-indigo-500 text-white px-6 py-3 text-sm font-semibold shadow transition';
+
+        return $this->filtrosListos
+            ? $base . ' hover:opacity-95'
+            : $base . ' pointer-events-none opacity-60 cursor-not-allowed';
+    }
+
+
+
     public function actualizarHorario(int $dia_id, string $hora, $asignacion_materia_id): void
     {
         // Si faltan filtros, no se guarda nada

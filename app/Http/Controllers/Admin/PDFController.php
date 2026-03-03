@@ -110,8 +110,8 @@ class PDFController extends Controller
 
         $nombreAlumno = trim(
             ($alumno->alumno->nombre ?? '') . '_' .
-            ($alumno->alumno->apellido_paterno ?? '') . '_' .
-            ($alumno->alumno->apellido_materno ?? '')
+                ($alumno->alumno->apellido_paterno ?? '') . '_' .
+                ($alumno->alumno->apellido_materno ?? '')
         );
 
 
@@ -158,8 +158,8 @@ class PDFController extends Controller
                     'matricula' => $r->matricula,
                     'nombre_completo' => trim(
                         ($r->apellido_paterno ?? '') . ' ' .
-                        ($r->apellido_materno ?? '') . ' ' .
-                        ($r->nombre ?? '')
+                            ($r->apellido_materno ?? '') . ' ' .
+                            ($r->nombre ?? '')
                     ),
                 ];
             });
@@ -266,6 +266,29 @@ class PDFController extends Controller
             mb_strtoupper($nombreCuatrimestre) . ".pdf";
 
         return $pdf->stream($filename);
+    }
 
+
+    // HORARIO
+    public function horario($licenciatura, $generacion, $cuatrimestre)
+    {
+        $horario = \App\Models\Horario::query()
+            ->where('licenciatura_id', $licenciatura)
+            ->where('generacion_id', $generacion)
+            ->where('cuatrimestre_id', $cuatrimestre)
+            ->with(['asignacionMateria.materia', 'dia'])
+            ->get();
+
+        dd($horario);
+
+
+        $data = [
+            'licenciatura' => Licenciatura::find($licenciatura),
+            'generacion' => Generacion::find($generacion),
+            'cuatrimestre' => Cuatrimestre::find($cuatrimestre),
+        ];
+
+        $pdf = Pdf::loadView('admin.pdf.horarioPDF', $data)->setPaper('letter', 'landscape');
+        return $pdf->stream("HORARIO_" . mb_strtoupper($data['licenciatura']->nombre) . "_" . mb_strtoupper($data['generacion']->generacion) . "_" . mb_strtoupper($data['cuatrimestre']->no_cuatrimestre) . "°_CUATRIMESTRE.pdf");
     }
 }

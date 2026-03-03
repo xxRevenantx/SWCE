@@ -63,6 +63,15 @@ Route::middleware(['auth'])->group(function () {
     // Boleta de calificaciones
     Route::get('calificaciones/boleta/{id}', [PDFController::class, 'boletaCalificacion'])->middleware('can:admin.pdf.boleta_calificacion')->name('admin.pdf.boletaCalificacion');
 
+    // Horario
+    Route::get(
+        'horarios/horario/{licenciatura}/{generacion}/{cuatrimestre}',
+        [PDFController::class, 'horario']
+    )
+        ->middleware('can:admin.pdf.horario')
+        ->name('admin.pdf.horario');
+
+
 
     // CALIFICACIONES GENERALES
     Route::get(

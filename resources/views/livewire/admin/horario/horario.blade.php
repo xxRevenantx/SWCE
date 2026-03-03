@@ -69,6 +69,17 @@
         <div
             class="mt-6 rounded-2xl border bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-700 shadow-sm overflow-hidden">
             <div class="overflow-x-auto">
+
+                {{-- Botón PDF --}}
+                {{-- Botón PDF --}}
+                <a href="{{ $this->filtrosListos ? $this->pdfUrl : '#' }}"
+                    target="{{ $this->filtrosListos ? '_blank' : '_self' }}"
+                    rel="{{ $this->filtrosListos ? 'noopener' : '' }}"
+                    aria-disabled="{{ $this->filtrosListos ? 'false' : 'true' }}"
+                    tabindex="{{ $this->filtrosListos ? '0' : '-1' }}" class="{{ $this->clasePdf }}">
+                    PDF
+                </a>
+
                 <table class="min-w-[960px] w-full border-collapse">
                     <thead class="bg-neutral-50 dark:bg-neutral-800/60">
                         <tr class="text-left text-sm">
