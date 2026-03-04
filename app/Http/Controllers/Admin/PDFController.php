@@ -279,16 +279,14 @@ class PDFController extends Controller
             ->with(['asignacionMateria.materia', 'dia'])
             ->get();
 
-        dd($horario);
-
-
         $data = [
             'licenciatura' => Licenciatura::find($licenciatura),
             'generacion' => Generacion::find($generacion),
             'cuatrimestre' => Cuatrimestre::find($cuatrimestre),
+            'horario' => $horario,
         ];
 
-        $pdf = Pdf::loadView('admin.pdf.horarioPDF', $data)->setPaper('letter', 'landscape');
+        $pdf = Pdf::loadView('admin.pdf.horarioPDF', $data)->setPaper('letter', 'portrait');
         return $pdf->stream("HORARIO_" . mb_strtoupper($data['licenciatura']->nombre) . "_" . mb_strtoupper($data['generacion']->generacion) . "_" . mb_strtoupper($data['cuatrimestre']->no_cuatrimestre) . "°_CUATRIMESTRE.pdf");
     }
 }

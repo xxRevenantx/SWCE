@@ -65,21 +65,39 @@
             </div>
         </div>
 
+        {{-- Botón PDF --}}
+        <a href="{{ $this->filtrosListos ? $this->pdfUrl : '#' }}"
+            target="{{ $this->filtrosListos ? '_blank' : '_self' }}" rel="{{ $this->filtrosListos ? 'noopener' : '' }}"
+            aria-disabled="{{ $this->filtrosListos ? 'false' : 'true' }}"
+            tabindex="{{ $this->filtrosListos ? '0' : '-1' }}" class="{{ $this->clasePdf }}">
+            Descargar horario en PDF
+        </a>
+
         {{-- Tabla del horario --}}
         <div
-            class="mt-6 rounded-2xl border bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-700 shadow-sm overflow-hidden">
+            class="mt-2 rounded-2xl border bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-700 shadow-sm overflow-hidden relative">
+
+            {{-- LOADER (solo cuando cambian filtros / se recarga por filtros) --}}
+            <div wire:loading.flex wire:target="licenciatura_id,generacion_id,cuatrimestre_id,limpiarFiltros"
+                class="absolute inset-0 z-20 items-center justify-center bg-white/70 dark:bg-neutral-900/70 backdrop-blur-sm">
+
+                <div
+                    class="flex items-center gap-3 rounded-2xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-5 py-4 shadow-lg">
+                    <svg class="h-5 w-5 animate-spin text-sky-600" xmlns="http://www.w3.org/2000/svg" fill="none"
+                        viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                            stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                    </svg>
+
+                    <div class="leading-tight">
+                        <p class="text-sm font-semibold text-neutral-900 dark:text-neutral-100">Cargando horario…</p>
+                        <p class="text-xs text-neutral-600 dark:text-neutral-300">Aplicando filtros</p>
+                    </div>
+                </div>
+            </div>
+
             <div class="overflow-x-auto">
-
-                {{-- Botón PDF --}}
-                {{-- Botón PDF --}}
-                <a href="{{ $this->filtrosListos ? $this->pdfUrl : '#' }}"
-                    target="{{ $this->filtrosListos ? '_blank' : '_self' }}"
-                    rel="{{ $this->filtrosListos ? 'noopener' : '' }}"
-                    aria-disabled="{{ $this->filtrosListos ? 'false' : 'true' }}"
-                    tabindex="{{ $this->filtrosListos ? '0' : '-1' }}" class="{{ $this->clasePdf }}">
-                    PDF
-                </a>
-
                 <table class="min-w-[960px] w-full border-collapse">
                     <thead class="bg-neutral-50 dark:bg-neutral-800/60">
                         <tr class="text-left text-sm">
@@ -100,17 +118,12 @@
                                     {{ $hora }}
                                 </td>
 
-                                {{-- Cada celda tiene un select y una pastilla de profesor --}}
                                 @foreach ($dias as $dia)
                                     @php
-                                        // Id seleccionado en esa celda
                                         $seleccion = (string) ($horario[$dia->id][$hora] ?? '0');
-
-                                        // Datos de la asignación seleccionada (si existe)
                                         $asignacionSeleccionada =
                                             $seleccion !== '0' ? $materiasPorId[$seleccion] ?? null : null;
 
-                                        // Texto del profesor para la pastilla
                                         $textoProfesor = '';
                                         if ($asignacionSeleccionada && $asignacionSeleccionada->profesor) {
                                             $textoProfesor = trim(
@@ -122,27 +135,21 @@
                                             );
                                         }
 
-                                        // Color del profesor (si existe en la tabla profesores)
                                         $colorProfesor = $asignacionSeleccionada?->profesor?->color ?? null;
                                     @endphp
 
                                     <td class="px-4 py-2 align-top">
-                                        {{-- Select de materia --}}
                                         <select
                                             class="w-full rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-3 py-2 text-sm text-neutral-800 dark:text-neutral-100 shadow-sm focus:outline-none focus:ring-2 focus:ring-sky-400/40 disabled:opacity-60"
                                             @disabled(!$filtrosListos)
                                             wire:change="actualizarHorario({{ $dia->id }}, '{{ $hora }}', $event.target.value)">
-                                            <option value="0" @selected($seleccion === '0')>
-                                                --Selecciona una opción--
-                                            </option>
+                                            <option value="0" @selected($seleccion === '0')>--Selecciona una
+                                                opción--</option>
 
                                             @foreach ($materias as $asig)
                                                 @php
                                                     $nombreMateria = $asig->materia->nombre ?? 'Materia';
-
-                                                    // Si tu materia tiene clave, aquí se puede mostrar como (LN840)
                                                     $claveMateria = $asig->materia->clave ?? null;
-
                                                     $textoMateria = $claveMateria
                                                         ? $nombreMateria . ' (' . $claveMateria . ')'
                                                         : $nombreMateria;
@@ -154,16 +161,13 @@
                                             @endforeach
                                         </select>
 
-                                        {{-- Pastilla de profesor --}}
                                         @if ($seleccion !== '0' && $textoProfesor !== '')
                                             <div class="mt-2 inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold shadow-sm border border-black/5"
                                                 style="{{ $colorProfesor ? 'background-color:' . $colorProfesor . '; color:#111827;' : 'background-color:#E5E7EB; color:#111827;' }}">
                                                 Profesor: {{ $textoProfesor }}
                                             </div>
                                         @else
-                                            <div class="mt-2 text-[11px] text-neutral-400">
-                                                Sin profesor asignado
-                                            </div>
+                                            <div class="mt-2 text-[11px] text-neutral-400">Sin profesor asignado</div>
                                         @endif
                                     </td>
                                 @endforeach

@@ -75,6 +75,9 @@ class RoleSeeder extends Seeder
         // Permisos para 'pdf.boleta_calificacion' y asignación al rol 'Admin'
         Permission::create(['name' => 'admin.pdf.boleta_calificacion'])->syncRoles([$role1]);
 
+        // Permisos para 'pdf.horario' y asignación al rol 'Admin'
+        Permission::create(['name' => 'admin.pdf.horario'])->syncRoles([$role1]);
+
 
         // Crear el permiso 'profesor.dashboard' y asignarlo al rol 'Profesor'
         Permission::create(['name' => 'profesor.dashboard'])->syncRoles([$role2]);
