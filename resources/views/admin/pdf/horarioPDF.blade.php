@@ -5,172 +5,228 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <title>Horario de clases</title>
 
-
     <style>
         body {
-            font-family: "sans-serif";
+            font-family: sans-serif;
             font-size: 11px;
             color: #0f172a;
+            margin: 0;
+            padding: 0;
         }
 
-        .header {
-            border: 1px solid #cbd5e1;
+        /* Contenedor general tipo tarjeta */
+        .sheet {
+            border: 1px solid #e5e7eb;
             border-radius: 12px;
-            padding: 12px;
-            margin-bottom: 12px;
+            padding: 14px;
             background: #fff;
         }
 
-        .header-table {
-            width: 100%;
-            border-collapse: collapse;
+        /* Header */
+        .top-line {
+            height: 3px;
+            background: #0ea5e9;
+            border-radius: 8px;
+            margin-bottom: 10px;
         }
 
-        .header-table td {
-            border: none;
+        .header {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 8px;
+        }
+
+        .header td {
             vertical-align: middle;
         }
 
         .logo {
-            width: 58px;
-            height: 58px;
-            border: 1px solid #e2e8f0;
-            border-radius: 10px;
+            width: 52px;
+            height: 52px;
+            border-radius: 999px;
+            border: 1px solid #e5e7eb;
             padding: 6px;
         }
 
-        .titulo {
-            font-size: 18px;
+        .title {
+            text-align: center;
             font-weight: 800;
-            margin: 0;
-            color: #0b3b8a;
+            letter-spacing: .7px;
+            font-size: 14px;
         }
 
-        .subtitulo {
-            margin: 3px 0 0 0;
-            color: #475569;
+        .subtitle {
+            text-align: center;
+            margin-top: 2px;
+            font-weight: 700;
             font-size: 10px;
+            color: #334155;
+        }
+
+        /* Píldoras */
+        .pills {
+            text-align: center;
+            margin: 8px 0 10px 0;
         }
 
         .pill {
             display: inline-block;
-            padding: 3px 8px;
-            border-radius: 999px;
             background: #eef2ff;
+            border: 1px solid #dbeafe;
             color: #1e3a8a;
-            font-weight: 700;
-            font-size: 10px;
+            border-radius: 999px;
+            padding: 4px 8px;
+            font-size: 9px;
+            margin: 0 4px 4px 0;
         }
 
-        .meta {
-            text-align: right;
-            font-size: 10px;
-            color: #334155;
-            line-height: 1.4;
-        }
-
-        .linea {
-            height: 1px;
-            background: #e2e8f0;
-            margin: 10px 0 0 0;
-        }
-
+        /* Tabla horario */
         table.horario {
             width: 100%;
-            font-family: 'sans-serif';
             border-collapse: collapse;
-            border: 1px solid #0f172a;
+            border: 1px solid #cbd5e1;
+            border-radius: 12px;
+            overflow: hidden;
         }
 
         table.horario th,
         table.horario td {
-            border: 1px solid #0f172a;
-            padding: 7px;
-            vertical-align: top;
+            border: 1px solid #e5e7eb;
+            padding: 8px 8px;
+            vertical-align: middle;
         }
 
         table.horario thead th {
-            background: #0b3b8a;
-            color: #fff;
+            background: #cbd5e1;
+            color: #0f172a;
             font-weight: 800;
+            text-transform: uppercase;
+            font-size: 10px;
             text-align: center;
-            font-size: 11px;
         }
 
         .col-hora {
-            width: 16%;
-            background: #f8fafc;
-            font-weight: 800;
+            width: 15%;
             text-align: center;
-        }
-
-        tbody tr:nth-child(even) td {
-            background: #fbfdff;
-        }
-
-        tbody tr:nth-child(even) td.col-hora {
-            background: #f1f5f9;
-        }
-
-        .card {
-            border: 1px solid #cbd5e1;
-            border-radius: 10px;
-            padding: 7px;
-            margin-bottom: 6px;
-            background: #fff;
+            font-weight: 800;
+            background: #f8fafc;
+            white-space: nowrap;
         }
 
         .materia {
-            font-weight: 800;
-            font-size: 11px;
-        }
-
-        .badge {
-            display: inline-block;
-            padding: 2px 6px;
-            border-radius: 999px;
-            background: #ecfeff;
-            color: #155e75;
-            font-weight: 800;
-            font-size: 9px;
-            border: 1px solid #a5f3fc;
-            margin-top: 3px;
-        }
-
-        .vacio {
-            color: #94a3b8;
             text-align: center;
-            padding-top: 10px;
+            font-weight: 700;
+            font-size: 10px;
+            line-height: 1.25;
         }
 
+        .dash {
+            width: 18px;
+            height: 18px;
+            border: 1px solid #e5e7eb;
+            border-radius: 999px;
+            display: inline-block;
+            text-align: center;
+            line-height: 18px;
+            font-weight: 800;
+            color: #475569;
+            background: #f8fafc;
+            margin: 0 auto;
+        }
+
+        /* Receso a lo ancho */
+        .receso-row td {
+            background: #ffffff;
+        }
+
+        .receso-cell {
+            text-align: center;
+            letter-spacing: 6px;
+            font-weight: 900;
+            color: #0f172a;
+            padding: 10px 0;
+        }
+
+        /* Resumen */
+        .box {
+            margin-top: 12px;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #f8fafc;
+        }
+
+        .box-title {
+            padding: 10px 12px;
+            font-weight: 900;
+            text-transform: uppercase;
+            font-size: 10px;
+            color: #0f172a;
+        }
+
+        table.resumen {
+            width: 100%;
+            border-collapse: collapse;
+            background: #fff;
+            margin: 0 0 10px 0;
+        }
+
+        table.resumen th,
+        table.resumen td {
+            border: 1px solid #e5e7eb;
+            padding: 8px;
+            font-size: 10px;
+        }
+
+        table.resumen thead th {
+            background: #cbd5e1;
+            text-transform: uppercase;
+            font-weight: 900;
+            text-align: center;
+        }
+
+        .total {
+            padding: 0 12px 12px 12px;
+            font-weight: 900;
+            font-size: 10px;
+        }
+
+        /* Footer */
         .footer {
-            margin-top: 10px;
+            margin-top: 14px;
+            padding-top: 10px;
+            border-top: 2px solid #cbd5e1;
+            text-align: center;
             font-size: 9px;
-            color: #64748b;
-            text-align: right;
+            color: #334155;
+            line-height: 1.45;
         }
     </style>
 </head>
 
 <body>
     @php
-        // DÍAS: uso dia_id como llave (más limpio)
-        // Ordeno por dia_id (asumiendo que en tu seeder Lunes=1, Martes=2, etc.)
+        // ===== CONFIG =====
+        $horaReceso = '10:00am-10:30am';
+        $turno = $turno ?? 'Matutino';
+
+        // ===== DÍAS (Lunes a Viernes por id) =====
         $dias = $horario
-            ->map(function ($h) {
-                return [
-                    'id' => $h->dia_id,
-                    'nombre' => mb_strtoupper($h->dia->dia ?? ''),
-                ];
-            })
+            ->map(fn($h) => ['id' => $h->dia_id, 'nombre' => mb_strtoupper($h->dia->dia ?? '')])
             ->unique('id')
             ->sortBy('id')
             ->values();
 
-        // HORAS únicas
-        $horas = $horario->pluck('hora')->unique()->values()->all();
+        // Si por alguna razón no llegan días (colección vacía), fallback a 5 columnas
+        $diasCount = max(1, $dias->count());
 
-        // Orden por hora inicial (si tu formato es 8:00am-9:00am)
+        // ===== HORAS (aseguro receso) =====
+        $horas = $horario->pluck('hora')->unique()->values()->all();
+        if (!in_array($horaReceso, $horas, true)) {
+            $horas[] = $horaReceso;
+        }
+
+        // Orden por hora inicial
         $aMin = function ($rango) {
             $rango = trim((string) $rango);
             $ini = explode('-', $rango)[0] ?? $rango;
@@ -181,116 +237,241 @@
             if (!preg_match('/^(\d{1,2})(?::(\d{2}))?(am|pm)$/', $ini, $m)) {
                 return 99999;
             }
+
             $h = (int) $m[1];
             $min = isset($m[2]) ? (int) $m[2] : 0;
             $ampm = $m[3];
+
             if ($ampm === 'pm' && $h !== 12) {
                 $h += 12;
             }
             if ($ampm === 'am' && $h === 12) {
                 $h = 0;
             }
+
             return $h * 60 + $min;
         };
         usort($horas, fn($x, $y) => $aMin($x) <=> $aMin($y));
 
-        // MATRIZ: [hora][dia_id] => items
+        // Duración de un rango "8:00am-9:00am" en minutos
+        $duracionMin = function ($rango) use ($aMin) {
+            $rango = trim((string) $rango);
+            $partes = explode('-', $rango);
+            $ini = trim($partes[0] ?? $rango);
+            $fin = trim($partes[1] ?? $rango);
+
+            $mIni = $aMin($ini);
+            $mFin = $aMin($fin);
+
+            if ($mIni === 99999 || $mFin === 99999) {
+                return 0;
+            }
+            $dif = $mFin - $mIni;
+            return $dif > 0 ? $dif : 0;
+        };
+
+        // ===== MATRIZ: [hora][dia_id] => texto materia (1 por celda) =====
         $matriz = [];
+        $usadasAsignacion = collect(); // para resumen
+        $totalMinutosSemana = 0;
 
         foreach ($horario as $h) {
+            if (($h->hora ?? '') === $horaReceso) {
+                continue;
+            }
+
             $hora = $h->hora;
             $diaId = $h->dia_id;
 
-            $materia = $h->asignacionMateria->materia->nombre ?? 'Sin materia';
-            $clave = $h->asignacionMateria->materia->clave ?? '';
+            $materia = $h->asignacionMateria->materia->nombre ?? null;
 
-            $matriz[$hora][$diaId][] = [
-                'materia' => $materia,
-                'clave' => $clave,
-            ];
+            // Si no hay asignación, no cuenta
+            if (!$materia) {
+                continue;
+            }
+
+            $matriz[$hora][$diaId] = $materia;
+
+            // Resumen (por asignación)
+            if (!empty($h->asignacion_materia_id)) {
+                $usadasAsignacion->push($h->asignacion_materia_id);
+            }
+
+            // Total semanal: suma duración por cada registro (día+hora con materia)
+            $totalMinutosSemana += $duracionMin($hora);
         }
 
+        // ===== RESUMEN DE CARGAS =====
+        $idsAsignacion = $usadasAsignacion->unique()->values();
+
+        $resumen = $horario
+            ->filter(fn($h) => !empty($h->asignacion_materia_id))
+            ->unique('asignacion_materia_id')
+            ->values()
+            ->map(function ($h, $i) {
+                $clave = $h->asignacionMateria->materia->clave ?? '—';
+                $materia = $h->asignacionMateria->materia->nombre ?? '—';
+
+                $prof = $h->asignacionMateria->profesor ?? null;
+                $profesor = $prof
+                    ? trim(
+                        ($prof->nombre ?? '') .
+                            ' ' .
+                            ($prof->apellido_paterno ?? '') .
+                            ' ' .
+                            ($prof->apellido_materno ?? ''),
+                    )
+                    : '—';
+
+                return [
+                    '#' => $i + 1,
+                    'clave' => $clave,
+                    'materia' => $materia,
+                    'profesor' => $profesor,
+                ];
+            });
+
+        // Formato HH:MM
+        $formatHM = function ($min) {
+            $h = intdiv($min, 60);
+            $m = $min % 60;
+            return str_pad((string) $h, 2, '0', STR_PAD_LEFT) . ':' . str_pad((string) $m, 2, '0', STR_PAD_LEFT);
+        };
+
+        // Fecha
         date_default_timezone_set('America/Mexico_City');
         setlocale(LC_TIME, 'spanish');
-        $fecha = strftime('%d de %B de %Y %H:%M');
+        $fecha = strftime('%d/%m/%Y %H:%M:%S');
     @endphp
 
-    <div class="header">
-        <table class="header-table">
+    <div class="sheet">
+        <div class="top-line"></div>
+
+        <table class="header">
             <tr>
                 <td style="width:70px;">
-                    <img class="logo" src="{{ public_path('imagenes_publicas/logo-letra.png') }}" alt="Logo">
+                    {{-- Logo izquierdo --}}
+                    <img class="logo" src="{{ public_path('imagenes_publicas/logo-izquierdo.png') }}" alt="Logo">
                 </td>
 
                 <td>
-                    <p class="titulo">Horario de clases</p>
-                    <p class="subtitulo">
-                        <span class="pill">{{ $licenciatura->nombre ?? '-' }}</span>
-                        &nbsp; · &nbsp;
-                        <span class="pill">Gen. {{ $generacion->generacion ?? '-' }}</span>
-                        &nbsp; · &nbsp;
-                        <span class="pill">{{ $cuatrimestre->no_cuatrimestre ?? '-' }}° Cuatrimestre</span>
-                    </p>
+                    <div class="title">CENTRO UNIVERSITARIO MOCTEZUMA</div>
+                    <div class="subtitle">
+                        HORARIO DE CLASES – {{ mb_strtoupper($licenciatura->nombre ?? '—') }}
+                    </div>
                 </td>
 
-                <td class="meta" style="width:220px;">
-                    <div><strong>Generado:</strong> {{ $fecha }}</div>
+                <td style="width:70px; text-align:right;">
+                    {{-- Logo derecho --}}
+                    <img class="logo" src="{{ public_path('imagenes_publicas/logo-derecho.png') }}" alt="Logo">
                 </td>
             </tr>
         </table>
-        <div class="linea"></div>
-    </div>
 
-    <table class="horario">
-        <thead>
-            <tr>
-                <th class="col-hora">Hora</th>
-                @foreach ($dias as $d)
-                    <th>{{ $d['nombre'] }}</th>
-                @endforeach
-            </tr>
-        </thead>
+        <div class="pills">
+            <span class="pill">Cuat.: {{ $cuatrimestre->no_cuatrimestre ?? '—' }}°</span>
+            <span class="pill">Turno: {{ $turno }}</span>
+            <span class="pill">Generación: {{ $generacion->generacion ?? '—' }}</span>
+            <span class="pill">Total semanal grupo: {{ $formatHM($totalMinutosSemana) }} h</span>
+        </div>
 
-        <tbody>
-            @forelse($horas as $hora)
+        <table class="horario">
+            <thead>
                 <tr>
-                    <td class="col-hora">{{ $hora }}</td>
-
+                    <th class="col-hora">HORA</th>
                     @foreach ($dias as $d)
-                        @php
-                            $diaId = $d['id'];
-                            $items = $matriz[$hora][$diaId] ?? [];
-                        @endphp
-
-                        <td>
-                            @if (count($items))
-                                @foreach ($items as $it)
-                                    <div class="card">
-                                        <div class="materia">{{ $it['materia'] }}</div>
-                                        @if (!empty($it['clave']))
-                                            <div class="badge">{{ $it['clave'] }}</div>
-                                        @endif
-                                    </div>
-                                @endforeach
-                            @else
-                                <div class="vacio">—</div>
-                            @endif
-                        </td>
+                        <th>{{ $d['nombre'] }}</th>
                     @endforeach
                 </tr>
-            @empty
-                <tr>
-                    <td colspan="{{ 1 + max(1, $dias->count()) }}" style="text-align:center; padding:12px;">
-                        No hay horario registrado para los filtros seleccionados.
-                    </td>
-                </tr>
-            @endforelse
-        </tbody>
-    </table>
+            </thead>
 
-    <div class="footer">
-        Centro Universitario Moctezuma A.C. · Control Escolar
+            <tbody>
+                @forelse($horas as $hora)
+                    @php $esReceso = $hora === $horaReceso; @endphp
+
+                    @if ($esReceso)
+                        {{-- ✅ RECESO: una sola vez a todo lo ancho --}}
+                        <tr class="receso-row">
+                            <td class="col-hora">{{ $hora }}</td>
+                            <td colspan="{{ $diasCount }}">
+                                <div class="receso-cell">RECESO</div>
+                            </td>
+                        </tr>
+                    @else
+                        <tr>
+                            <td class="col-hora">{{ $hora }}</td>
+
+                            @foreach ($dias as $d)
+                                @php
+                                    $diaId = $d['id'];
+                                    $texto = $matriz[$hora][$diaId] ?? null;
+                                @endphp
+
+                                <td>
+                                    @if ($texto)
+                                        <div class="materia">{{ $texto }}</div>
+                                    @else
+                                        <div style="text-align:center;">
+                                            <span class="dash">–</span>
+                                        </div>
+                                    @endif
+                                </td>
+                            @endforeach
+                        </tr>
+                    @endif
+                @empty
+                    <tr>
+                        <td colspan="{{ 1 + $diasCount }}" style="text-align:center; padding:12px;">
+                            No hay horario registrado para los filtros seleccionados.
+                        </td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+
+        {{-- Resumen de cargas --}}
+        <div class="box">
+            <div class="box-title">RESUMEN DE CARGAS HORARIAS</div>
+
+            <table class="resumen">
+                <thead>
+                    <tr>
+                        <th style="width:40px;">#</th>
+                        <th style="width:90px;">CLAVE</th>
+                        <th>MATERIA</th>
+                        <th style="width:190px;">PROFESOR</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($resumen as $r)
+                        <tr>
+                            <td style="text-align:center;">{{ $r['#'] }}</td>
+                            <td style="text-align:center;">{{ $r['clave'] }}</td>
+                            <td>{{ $r['materia'] }}</td>
+                            <td>{{ $r['profesor'] }}</td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="4" style="text-align:center; padding:10px; color:#64748b;">
+                                Sin materias asignadas en el horario.
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+
+            <div class="total">
+                Total semanal del grupo: {{ $formatHM($totalMinutosSemana) }} h
+            </div>
+        </div>
+
+        <div class="footer">
+            <strong>Centro Universitario Moctezuma A.C.</strong> — C.C.T. 12PSU0173I<br>
+            C. Francisco I. Madero Ote. No. 800, Col. Esquipula, C.P. 40665, Altamirano, Guerrero · Tel. 7676880774<br>
+            <strong>Fecha de expedición:</strong> {{ $fecha }}
+        </div>
     </div>
+
 </body>
 
 </html>

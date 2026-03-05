@@ -112,10 +112,20 @@
 
                     <tbody class="text-sm">
                         @foreach ($horas as $hora)
-                            <tr class="border-t border-neutral-200 dark:border-neutral-700">
-                                <td
-                                    class="px-4 py-3 font-semibold text-neutral-700 dark:text-neutral-200 whitespace-nowrap">
-                                    {{ $hora }}
+                            @php
+                                $esReceso = $hora === $this->horaReceso;
+                            @endphp
+
+                            <tr wire:key="fila-{{ md5($hora) }}"
+                                class="border-t border-neutral-200 dark:border-neutral-700 {{ $esReceso ? 'bg-amber-50/60 dark:bg-amber-500/10' : '' }}">
+                                <td wire:key="celda-{{ $dia->id }}-{{ md5($hora) }}"
+                                    class="px-4 py-2
+                                    px-4 py-3 font-semibold text-neutral-700 dark:text-neutral-200 whitespace-nowrap">
+                                    <div class="flex items-center justify-between gap-2">
+                                        <span>{{ $hora }}</span>
+
+
+                                    </div>
                                 </td>
 
                                 @foreach ($dias as $dia)
@@ -139,35 +149,48 @@
                                     @endphp
 
                                     <td class="px-4 py-2 align-top">
-                                        <select
-                                            class="w-full rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-3 py-2 text-sm text-neutral-800 dark:text-neutral-100 shadow-sm focus:outline-none focus:ring-2 focus:ring-sky-400/40 disabled:opacity-60"
-                                            @disabled(!$filtrosListos)
-                                            wire:change="actualizarHorario({{ $dia->id }}, '{{ $hora }}', $event.target.value)">
-                                            <option value="0" @selected($seleccion === '0')>--Selecciona una
-                                                opción--</option>
-
-                                            @foreach ($materias as $asig)
-                                                @php
-                                                    $nombreMateria = $asig->materia->nombre ?? 'Materia';
-                                                    $claveMateria = $asig->materia->clave ?? null;
-                                                    $textoMateria = $claveMateria
-                                                        ? $nombreMateria . ' (' . $claveMateria . ')'
-                                                        : $nombreMateria;
-                                                @endphp
-
-                                                <option value="{{ $asig->id }}" @selected($seleccion === (string) $asig->id)>
-                                                    {{ $textoMateria }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-
-                                        @if ($seleccion !== '0' && $textoProfesor !== '')
-                                            <div class="mt-2 inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold shadow-sm border border-black/5"
-                                                style="{{ $colorProfesor ? 'background-color:' . $colorProfesor . '; color:#111827;' : 'background-color:#E5E7EB; color:#111827;' }}">
-                                                Profesor: {{ $textoProfesor }}
+                                        {{-- ✅ RECESO: NO SE MUESTRA SELECT --}}
+                                        @if ($esReceso)
+                                            <div
+                                                class="h-[44px] rounded-xl border border-dashed border-amber-300/80 dark:border-amber-400/30 bg-amber-50 dark:bg-amber-500/10 flex items-center justify-center text-amber-900 dark:text-amber-200 text-xs font-semibold">
+                                                RECESO
+                                            </div>
+                                            <div class="mt-2 text-[11px] text-neutral-400 text-center">
+                                                —
                                             </div>
                                         @else
-                                            <div class="mt-2 text-[11px] text-neutral-400">Sin profesor asignado</div>
+                                            {{-- ✅ NORMAL: SÍ SE MUESTRA SELECT --}}
+                                            <select
+                                                class="w-full rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-3 py-2 text-sm text-neutral-800 dark:text-neutral-100 shadow-sm focus:outline-none focus:ring-2 focus:ring-sky-400/40 disabled:opacity-60"
+                                                @disabled(!$filtrosListos)
+                                                wire:change="actualizarHorario({{ $dia->id }}, '{{ $hora }}', $event.target.value)">
+                                                <option value="0" @selected($seleccion === '0')>--Selecciona una
+                                                    opción--</option>
+
+                                                @foreach ($materias as $asig)
+                                                    @php
+                                                        $nombreMateria = $asig->materia->nombre ?? 'Materia';
+                                                        $claveMateria = $asig->materia->clave ?? null;
+                                                        $textoMateria = $claveMateria
+                                                            ? $nombreMateria . ' (' . $claveMateria . ')'
+                                                            : $nombreMateria;
+                                                    @endphp
+
+                                                    <option value="{{ $asig->id }}" @selected($seleccion === (string) $asig->id)>
+                                                        {{ $textoMateria }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+
+                                            @if ($seleccion !== '0' && $textoProfesor !== '')
+                                                <div class="mt-2 inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold shadow-sm border border-black/5"
+                                                    style="{{ $colorProfesor ? 'background-color:' . $colorProfesor . '; color:#111827;' : 'background-color:#E5E7EB; color:#111827;' }}">
+                                                    Profesor: {{ $textoProfesor }}
+                                                </div>
+                                            @else
+                                                <div class="mt-2 text-[11px] text-neutral-400">Sin profesor asignado
+                                                </div>
+                                            @endif
                                         @endif
                                     </td>
                                 @endforeach
