@@ -49,7 +49,7 @@ class Horario extends Component
         $this->horasDisponibles = [
             "8:00am-9:00am",
             "9:00am-10:00am",
-            "10:00am-10:30am", // Receso
+            "10:00am-10:30am",
             "10:30am-11:30am",
             "11:30am-12:30pm",
             "12:30pm-1:30pm",
@@ -165,7 +165,6 @@ class Horario extends Component
             ->get();
 
         foreach ($horariosBD as $h) {
-
             // Receso: no se pinta aunque exista guardado
             if ($h->hora === $this->horaReceso) {
                 continue;

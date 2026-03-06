@@ -3,12 +3,13 @@
 
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <link rel="icon" type="image/png" href="{{ public_path('imagenes_publicas/logo-letra.png') }}" />
     <title>Horario de clases</title>
 
     <style>
         body {
             font-family: sans-serif;
-            font-size: 11px;
+            font-size: 12px;
             color: #0f172a;
             margin: 0;
             padding: 0;
@@ -41,8 +42,8 @@
         }
 
         .logo {
-            width: 52px;
-            height: 52px;
+            width: 80px;
+            height: 80px;
             border-radius: 999px;
             border: 1px solid #e5e7eb;
             padding: 6px;
@@ -192,14 +193,21 @@
         }
 
         /* Footer */
-        .footer {
-            margin-top: 14px;
-            padding-top: 10px;
-            border-top: 2px solid #cbd5e1;
+        footer {
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: 5px;
             text-align: center;
-            font-size: 9px;
-            color: #334155;
-            line-height: 1.45;
+            font-size: 10px;
+            color: #475569;
+            border-top: 1px solid #cbd5e1;
+            padding-top: 6px;
+        }
+
+        footer p {
+            margin: 0;
+            line-height: 1.25;
         }
     </style>
 </head>
@@ -351,7 +359,7 @@
             <tr>
                 <td style="width:70px;">
                     {{-- Logo izquierdo --}}
-                    <img class="logo" src="{{ public_path('imagenes_publicas/logo-izquierdo.png') }}" alt="Logo">
+                    <img class="logo" src="{{ public_path('imagenes_publicas/logo-letra.png') }}" alt="Logo">
                 </td>
 
                 <td>
@@ -363,7 +371,10 @@
 
                 <td style="width:70px; text-align:right;">
                     {{-- Logo derecho --}}
-                    <img class="logo" src="{{ public_path('imagenes_publicas/logo-derecho.png') }}" alt="Logo">
+                    @if (!empty($licenciatura->logo) && file_exists(public_path('storage/licenciaturas/' . $licenciatura->logo)))
+                        <img class="logo" src="{{ public_path('storage/licenciaturas/' . $licenciatura->logo) }}"
+                            alt="Logo Licenciatura">
+                    @endif
                 </td>
             </tr>
         </table>
@@ -465,12 +476,14 @@
             </div>
         </div>
 
-        <div class="footer">
-            <strong>Centro Universitario Moctezuma A.C.</strong> — C.C.T. 12PSU0173I<br>
-            C. Francisco I. Madero Ote. No. 800, Col. Esquipula, C.P. 40665, Altamirano, Guerrero · Tel. 7676880774<br>
-            <strong>Fecha de expedición:</strong> {{ $fecha }}
-        </div>
+
     </div>
+
+    <footer>
+        <strong>Centro Universitario Moctezuma A.C.</strong> — C.C.T. 12PSU0173I<br>
+        C. Francisco I. Madero Ote. No. 800, Col. Esquipula, C.P. 40665, Altamirano, Guerrero · Tel. 7676880774<br>
+        <strong>Fecha de expedición:</strong> {{ $fecha }}
+    </footer>
 
 </body>
 

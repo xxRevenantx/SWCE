@@ -464,7 +464,7 @@
             min-width: 34px;
         }
     </style>
-    </style>
+
 
     <head>
 

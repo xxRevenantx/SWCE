@@ -1,4 +1,12 @@
-<div>
+<div x-data="{
+    mostrarModalPdf: false,
+    pdfModalUrl: '',
+    cerrarPdf() {
+        this.mostrarModalPdf = false;
+        this.pdfModalUrl = '';
+        document.body.classList.remove('overflow-hidden');
+    }
+}" x-on:keydown.escape.window="cerrarPdf()">
     <section class="w-full">
         {{-- Encabezado --}}
         <div class="sticky top-0 z-10">
@@ -17,7 +25,7 @@
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                 {{-- Licenciatura --}}
                 <flux:select wire:model.live="licenciatura_id" placeholder="Selecciona una licenciatura...">
-                    <flux:select.option value="0">--Selecciona una licenciatura---</flux:select.option>
+                    <flux:select.option value="0">--Selecciona una licenciatura--</flux:select.option>
                     @foreach ($licenciaturas as $lic)
                         <flux:select.option value="{{ $lic->id }}">{{ $lic->nombre }}</flux:select.option>
                     @endforeach
@@ -26,7 +34,7 @@
                 {{-- Generación --}}
                 <flux:select wire:model.live="generacion_id" placeholder="Selecciona una generación..."
                     :disabled="!$licenciatura_id">
-                    <flux:select.option value="0">--Selecciona una generación---</flux:select.option>
+                    <flux:select.option value="0">--Selecciona una generación--</flux:select.option>
                     @foreach ($generaciones as $gen)
                         <flux:select.option value="{{ $gen->id }}">{{ $gen->generacion }}</flux:select.option>
                     @endforeach
@@ -35,9 +43,10 @@
                 {{-- Cuatrimestre --}}
                 <flux:select wire:model.live="cuatrimestre_id" placeholder="Selecciona un cuatrimestre..."
                     :disabled="!$licenciatura_id || !$generacion_id">
-                    <flux:select.option value="0">--Selecciona un cuatrimestre---</flux:select.option>
+                    <flux:select.option value="0">--Selecciona un cuatrimestre--</flux:select.option>
                     @foreach ($cuatrimestres as $cuat)
-                        <flux:select.option value="{{ $cuat->id }}">{{ $cuat->nombre_cuatrimestre }}
+                        <flux:select.option value="{{ $cuat->id }}">
+                            {{ $cuat->nombre_cuatrimestre }}
                         </flux:select.option>
                     @endforeach
                 </flux:select>
@@ -50,8 +59,6 @@
 
             @php
                 $filtrosListos = $licenciatura_id && $generacion_id && $cuatrimestre_id;
-
-                // Permite encontrar rápido la materia/profesor por id
                 $materiasPorId = collect($materias)->keyBy('id');
             @endphp
 
@@ -66,18 +73,24 @@
         </div>
 
         {{-- Botón PDF --}}
-        <a href="{{ $this->filtrosListos ? $this->pdfUrl : '#' }}"
-            target="{{ $this->filtrosListos ? '_blank' : '_self' }}" rel="{{ $this->filtrosListos ? 'noopener' : '' }}"
-            aria-disabled="{{ $this->filtrosListos ? 'false' : 'true' }}"
-            tabindex="{{ $this->filtrosListos ? '0' : '-1' }}" class="{{ $this->clasePdf }}">
-            Descargar horario en PDF
-        </a>
+        <div class="mt-4">
+            <button type="button" :disabled="!$filtrosListos"
+                x-on:click="
+                    pdfModalUrl = '{{ $this->filtrosListos ? $this->pdfUrl : '' }}';
+                    if (!pdfModalUrl) return;
+                    mostrarModalPdf = true;
+                    document.body.classList.add('overflow-hidden');
+                "
+                class="{{ $this->clasePdf }}">
+                Ver horario en PDF
+            </button>
+        </div>
 
         {{-- Tabla del horario --}}
         <div
             class="mt-2 rounded-2xl border bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-700 shadow-sm overflow-hidden relative">
 
-            {{-- LOADER (solo cuando cambian filtros / se recarga por filtros) --}}
+            {{-- Loader de la tabla --}}
             <div wire:loading.flex wire:target="licenciatura_id,generacion_id,cuatrimestre_id,limpiarFiltros"
                 class="absolute inset-0 z-20 items-center justify-center bg-white/70 dark:bg-neutral-900/70 backdrop-blur-sm">
 
@@ -118,13 +131,10 @@
 
                             <tr wire:key="fila-{{ md5($hora) }}"
                                 class="border-t border-neutral-200 dark:border-neutral-700 {{ $esReceso ? 'bg-amber-50/60 dark:bg-amber-500/10' : '' }}">
-                                <td wire:key="celda-{{ $dia->id }}-{{ md5($hora) }}"
-                                    class="px-4 py-2
-                                    px-4 py-3 font-semibold text-neutral-700 dark:text-neutral-200 whitespace-nowrap">
+                                <td
+                                    class="px-4 py-3 font-semibold text-neutral-700 dark:text-neutral-200 whitespace-nowrap">
                                     <div class="flex items-center justify-between gap-2">
                                         <span>{{ $hora }}</span>
-
-
                                     </div>
                                 </td>
 
@@ -149,7 +159,7 @@
                                     @endphp
 
                                     <td class="px-4 py-2 align-top">
-                                        {{-- ✅ RECESO: NO SE MUESTRA SELECT --}}
+                                        {{-- Receso --}}
                                         @if ($esReceso)
                                             <div
                                                 class="h-[44px] rounded-xl border border-dashed border-amber-300/80 dark:border-amber-400/30 bg-amber-50 dark:bg-amber-500/10 flex items-center justify-center text-amber-900 dark:text-amber-200 text-xs font-semibold">
@@ -159,7 +169,7 @@
                                                 —
                                             </div>
                                         @else
-                                            {{-- ✅ NORMAL: SÍ SE MUESTRA SELECT --}}
+                                            {{-- Select normal --}}
                                             <select
                                                 class="w-full rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-3 py-2 text-sm text-neutral-800 dark:text-neutral-100 shadow-sm focus:outline-none focus:ring-2 focus:ring-sky-400/40 disabled:opacity-60"
                                                 @disabled(!$filtrosListos)
@@ -188,7 +198,8 @@
                                                     Profesor: {{ $textoProfesor }}
                                                 </div>
                                             @else
-                                                <div class="mt-2 text-[11px] text-neutral-400">Sin profesor asignado
+                                                <div class="mt-2 text-[11px] text-neutral-400">
+                                                    Sin profesor asignado
                                                 </div>
                                             @endif
                                         @endif
@@ -201,4 +212,53 @@
             </div>
         </div>
     </section>
+
+    {{-- Modal PDF --}}
+    <div x-cloak x-show="mostrarModalPdf" x-transition.opacity.duration.200ms
+        class="fixed inset-0 z-[999] flex items-center justify-center p-4 sm:p-6" aria-labelledby="titulo-modal-pdf"
+        aria-modal="true" role="dialog">
+        {{-- Fondo --}}
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" x-on:click="cerrarPdf()"></div>
+
+        {{-- Ventana --}}
+        <div x-show="mostrarModalPdf" x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0 translate-y-6 sm:translate-y-0 sm:scale-95 blur-sm"
+            x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100 blur-0"
+            x-transition:leave="transition ease-in duration-200"
+            x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100 blur-0"
+            x-transition:leave-end="opacity-0 translate-y-6 sm:translate-y-0 sm:scale-95 blur-sm"
+            class="relative w-full max-w-6xl overflow-hidden rounded-2xl bg-white dark:bg-neutral-900 shadow-2xl ring-1 ring-black/10 dark:ring-white/10">
+            {{-- Encabezado del modal --}}
+            <div
+                class="flex items-center justify-between gap-3 bg-gradient-to-r from-sky-500 via-blue-600 to-indigo-600 px-5 py-4 text-white">
+                <div>
+                    <h2 id="titulo-modal-pdf" class="text-base sm:text-lg font-semibold">
+                        Vista previa del horario en PDF
+                    </h2>
+
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <a x-bind:href="pdfModalUrl" target="_blank" rel="noopener"
+                        class="inline-flex items-center rounded-xl bg-white/15 px-4 py-2 text-sm font-medium text-white hover:bg-white/20 transition">
+                        Abrir en pestaña
+                    </a>
+
+                    <button type="button" x-on:click="cerrarPdf()"
+                        class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white/15 text-white hover:bg-white/20 transition"
+                        aria-label="Cerrar modal">
+                        ✕
+                    </button>
+                </div>
+            </div>
+
+            {{-- Cuerpo del modal --}}
+            <div class="p-4 sm:p-5 bg-neutral-100 dark:bg-neutral-950">
+                <div
+                    class="overflow-hidden rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900">
+                    <iframe x-bind:src="mostrarModalPdf ? pdfModalUrl : ''" class="h-[75vh] w-full"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
