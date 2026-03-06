@@ -360,7 +360,7 @@
                                                 <!-- ícono -->
                                             </flux:button>
 
-                                            {{ $row->alumno->id }}
+
 
                                             <flux:button variant="danger"
                                                 class="cursor-pointer bg-rose-600 hover:bg-rose-700 text-white p-1"
@@ -470,6 +470,14 @@
                                                        focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                                                                 Ver expediente completo
                                                             </a>
+                                                            <button type="button"
+                                                                x-on:click="$dispatch('abrir-modal-documentos')"
+                                                                wire:click="$dispatch('abrir-modal-documentos-livewire', { id: {{ $row->id }} })"
+                                                                class="inline-flex h-9 items-center justify-center gap-2 rounded-xl px-3 text-xs font-bold text-white
+                                                                bg-gradient-to-r from-sky-500 via-blue-600 to-indigo-600 hover:from-sky-600 hover:via-blue-700 hover:to-indigo-700
+                                                                focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                                                Documentación
+                                                            </button>
 
                                                         </div>
                                                     </div>
@@ -588,4 +596,7 @@
             </div>
         </div>
     </div>
+
+    <livewire:admin.documentos.cargar-documentos />
+
 </div>

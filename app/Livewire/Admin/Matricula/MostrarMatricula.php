@@ -5,7 +5,7 @@ namespace App\Livewire\Admin\Matricula;
 use App\Models\Alumno;
 use App\Models\Cuatrimestre;
 use App\Models\Generacion;
-use App\Models\Inscripcion;   // ✅ Aquí uso el modelo Inscripcion porque es el que conecta alumno + licenciatura + generación + cuatrimestre.
+use App\Models\Inscripcion;
 use App\Models\Licenciatura;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -16,11 +16,10 @@ class MostrarMatricula extends Component
 
     public string $search = '';
 
-    // Aquí guardo los filtros como string porque Livewire siempre los trae del URL como texto.
+    // Los filtros se manejan como texto para evitar problemas con Livewire.
     public string $filtrar_licenciatura = '';
     public string $filtrar_generacion = '';
     public string $filtrar_cuatrimestre = '';
-
 
     /** Catálogos */
     public $licenciaturas = [];
@@ -32,14 +31,12 @@ class MostrarMatricula extends Component
         'filtrar_licenciatura' => ['except' => ''],
         'filtrar_generacion' => ['except' => ''],
         'filtrar_cuatrimestre' => ['except' => ''],
-        'page' => ['except' => 1], // ✅ para mantener la página en la URL
+        'page' => ['except' => 1], // Mantiene la página actual en la URL
     ];
-
-
 
     public function mount(): void
     {
-        // Aquí cargo los catálogos para que mis filtros tengan opciones disponibles desde que abre la vista.
+        // Carga los datos de los filtros.
         $this->licenciaturas = Licenciatura::query()->orderBy('nombre')->get(['id', 'nombre']);
         $this->generaciones = Generacion::query()->orderBy('generacion')->get(['id', 'generacion']);
         $this->cuatrimestres = Cuatrimestre::query()
@@ -49,35 +46,30 @@ class MostrarMatricula extends Component
 
     public function updatingSearch(): void
     {
-        // Aquí reinicio la paginación para que al buscar, siempre empiece desde la página 1.
+        // Regresa a la primera página al buscar.
         $this->resetPage();
     }
 
     public function updatingFiltrarLicenciatura(): void
     {
-        // Aquí reinicio la paginación cuando cambio el filtro de licenciatura.
+        // Regresa a la primera página al cambiar el filtro.
         $this->resetPage();
     }
 
     public function updatingFiltrarGeneracion(): void
     {
-        // Aquí reinicio la paginación cuando cambio el filtro de generación.
+        // Regresa a la primera página al cambiar el filtro.
         $this->resetPage();
     }
 
     public function updatingFiltrarCuatrimestre(): void
     {
-        // Aquí reinicio la paginación cuando cambio el filtro de cuatrimestre.
+        // Regresa a la primera página al cambiar el filtro.
         $this->resetPage();
     }
 
-    // ELIMINAR ALUMNO
     public function eliminarAlumno(int $id): void
     {
-
-
-        // dd('Eliminar alumno con ID de inscripción: ' . $id);
-
         $paginaActual = $this->getPage();
 
         $alumno = Alumno::findOrFail($id);
@@ -91,7 +83,7 @@ class MostrarMatricula extends Component
             return;
         }
 
-        $alumno->delete(); // ✅ soft delete
+        $alumno->delete();
 
         $this->dispatch('swal', [
             'position' => 'top',
@@ -99,7 +91,7 @@ class MostrarMatricula extends Component
             'icon' => 'success',
         ]);
 
-        // Mantener página (solo retroceder si quedó vacía)
+        // Mantiene la página actual o retrocede si quedó vacía.
         $registrosEnPagina = $this->registros;
 
         if ($registrosEnPagina->count() === 0 && $registrosEnPagina->total() > 0 && $paginaActual > 1) {
@@ -109,10 +101,9 @@ class MostrarMatricula extends Component
         }
     }
 
-
     public function limpiarFiltros(): void
     {
-        // Aquí limpio todo y dejo los filtros como string vacío para que no truene el tipado.
+        // Limpia búsqueda y filtros.
         $this->reset(['search', 'filtrar_licenciatura', 'filtrar_generacion', 'filtrar_cuatrimestre']);
         $this->filtrar_licenciatura = '';
         $this->filtrar_generacion = '';
@@ -120,51 +111,48 @@ class MostrarMatricula extends Component
         $this->resetPage();
     }
 
-
     public function exportarPdf(): void
     {
-        // Aquí dejo preparado el punto donde después voy a conectar la exportación a PDF.
+        // Punto pendiente para conectar la exportación.
         $this->dispatch('toast', type: 'info', message: 'Aquí va tu exportación PDF (pendiente de conectar).');
     }
 
     public function getRegistrosProperty()
     {
-        // Aquí limpio el texto para evitar que los espacios me afecten en la búsqueda.
+        // Quita espacios al inicio y al final.
         $search = trim($this->search);
 
         return Inscripcion::query()
             ->select('inscripciones.*')
 
-            // Aquí hago join con licenciaturas para ordenar por su nombre y poder agrupar visualmente.
+            // Se une con licenciaturas para ordenar por nombre.
             ->join('licenciaturas', 'licenciaturas.id', '=', 'inscripciones.licenciatura_id')
 
-            // Aquí hago join con alumnos porque la búsqueda incluye nombre y CURP.
+            // Se une con alumnos para buscar por nombre y CURP.
             ->join('alumnos', 'alumnos.id', '=', 'inscripciones.alumno_id')
 
+            // Excluye alumnos eliminados.
+            ->whereNull('alumnos.deleted_at')
 
-            ->whereNull('alumnos.deleted_at') // ✅ excluye alumnos “eliminados”
-
-
-            // Aquí uso leftJoin con datos_escolares porque puede que aún no exista ese registro.
+            // Puede no existir información escolar.
             ->leftJoin('datos_escolares', 'datos_escolares.alumno_id', '=', 'alumnos.id')
 
-            // Aquí cargo relaciones para evitar consultas extra en la vista.
+            // Carga relaciones para evitar consultas extra.
             ->with([
                 'licenciatura:id,nombre',
                 'generacion:id,generacion',
                 'cuatrimestre:id,no_cuatrimestre,nombre_cuatrimestre',
                 'alumno:id,user_id,curp,nombre,apellido_paterno,apellido_materno,fecha_nacimiento,sexo',
-                'alumno.user:id,email,username', // ✅ NUEVO (email/username)
+                'alumno.user:id,email,username',
                 'alumno.datosEscolares:id,alumno_id,matricula,folio,foto',
             ])
 
-            // Aquí aplico los filtros si el usuario los selecciona.
+            // Aplica filtros.
             ->when($this->filtrar_licenciatura !== '', fn($q) => $q->where('inscripciones.licenciatura_id', (int) $this->filtrar_licenciatura))
             ->when($this->filtrar_generacion !== '', fn($q) => $q->where('inscripciones.generacion_id', (int) $this->filtrar_generacion))
             ->when($this->filtrar_cuatrimestre !== '', fn($q) => $q->where('inscripciones.cuatrimestre_id', (int) $this->filtrar_cuatrimestre))
 
-
-            // Aquí hago la búsqueda por matrícula/folio (datos_escolares) y por CURP/nombres (alumnos).
+            // Busca por matrícula, folio, CURP y nombres.
             ->when($search !== '', function ($q) use ($search) {
                 $q->where(function ($qq) use ($search) {
                     $qq->where('datos_escolares.matricula', 'like', "%{$search}%")
@@ -176,26 +164,25 @@ class MostrarMatricula extends Component
                 });
             })
 
-            // Aquí ordeno por licenciatura para que se vea agrupado en la tabla.
+            // Ordena por licenciatura.
             ->orderBy('licenciaturas.nombre', 'asc')
 
-            // Aquí ordeno por la inscripción más reciente dentro de cada licenciatura.
+            // Dentro de cada licenciatura muestra primero los más recientes.
             ->orderByDesc('inscripciones.id')
 
-            // Aquí pagino el resultado.
+            // Pagina los resultados.
             ->paginate(10);
     }
 
-
     public function render()
     {
-        // Aquí obtengo la paginación ya lista.
+        // Obtiene los registros paginados.
         $registros = $this->registros;
 
-        // Aquí tomo solo los registros de la página actual (lo que se está viendo).
+        // Toma solo los registros de la página actual.
         $coleccion = $registros->getCollection();
 
-        // Aquí calculo estadísticas por licenciatura (solo para la página actual).
+        // Calcula datos por licenciatura en la página actual.
         $statsPorLic = $coleccion
             ->groupBy(fn($r) => $r->licenciatura_id ?? 0)
             ->map(function ($items) {
@@ -215,7 +202,7 @@ class MostrarMatricula extends Component
             })
             ->toArray();
 
-        // Aquí tomo el total general de todos los registros filtrados (considerando toda la paginación).
+        // Total general de los registros filtrados.
         $totalGeneral = $registros->total();
 
         return view('livewire.admin.matricula.mostrar-matricula', [

@@ -2,6 +2,9 @@
     insIds: @js(collect($inscripciones)->pluck('inscripcion_id')->values()->all()),
     asigIds: @js(collect($materias)->pluck('id')->values()->all()),
 
+    mostrarModalPdf: false,
+    pdfModalUrl: '',
+
     enviarCalificacion(inscripcionId) {
         Swal.fire({
             title: '¿Estás seguro?',
@@ -37,7 +40,13 @@
             if (typeof el.select === 'function') el.select();
         }
     },
-}" class="w-full">
+
+    cerrarPdf() {
+        this.mostrarModalPdf = false;
+        this.pdfModalUrl = '';
+        document.body.classList.remove('overflow-hidden');
+    }
+}" x-on:keydown.escape.window="cerrarPdf()" class="w-full">
     {{-- Encabezado --}}
     <div class="sticky top-0 z-10">
         <div
@@ -161,7 +170,7 @@
                             @endforeach
 
                             <th class="px-4 py-3 text-center font-semibold text-white">PROMEDIO</th>
-                            <th class="px-4 py-3 text-center font-semibold w-44 text-white  ">ACCIONES</th>
+                            <th class="px-4 py-3 text-center font-semibold w-44 text-white">ACCIONES</th>
                         </tr>
                     </thead>
 
@@ -208,7 +217,7 @@
 
                                 <td class="px-4 py-3">
                                     <div class="flex items-center justify-end gap-2">
-                                        {{-- Boleta: aquí sí existe $insId --}}
+                                        {{-- Boleta --}}
                                         <a href="{{ route('admin.pdf.boletaCalificacion', $insId) }}" target="_blank"
                                             rel="noopener"
                                             class="inline-flex items-center justify-center rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 text-sm font-semibold">
@@ -270,13 +279,19 @@
 
                     <div class="flex items-center justify-end gap-3">
                         {{-- Botón PDF --}}
-                        <a href="{{ $this->puedeGenerarPdf ? $this->pdfUrl : '#' }}"
-                            target="{{ $this->puedeGenerarPdf ? '_blank' : '_self' }}"
-                            rel="{{ $this->puedeGenerarPdf ? 'noopener' : '' }}"
-                            aria-disabled="{{ $this->puedeGenerarPdf ? 'false' : 'true' }}"
-                            tabindex="{{ $this->puedeGenerarPdf ? '0' : '-1' }}" class="{{ $this->clasePdf }}">
+                        <button type="button" {{ $this->puedeGenerarPdf ? '' : 'disabled' }}
+                            data-url="{{ $this->puedeGenerarPdf ? $this->pdfUrl : '' }}"
+                            x-on:click.prevent="
+                                const url = $el.dataset.url;
+                                if (!url) return;
+
+                                pdfModalUrl = url;
+                                mostrarModalPdf = true;
+                                document.body.classList.add('overflow-hidden');
+                            "
+                            class="{{ $this->clasePdf }}">
                             PDF
-                        </a>
+                        </button>
 
                         {{-- Botón Guardar --}}
                         <button type="button" wire:click="guardarCalificaciones"
@@ -286,7 +301,55 @@
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
 
+    {{-- Modal PDF --}}
+    <div x-cloak x-show="mostrarModalPdf" x-transition.opacity.duration.200ms
+        class="fixed inset-0 z-[999] flex items-center justify-center p-4 sm:p-6"
+        aria-labelledby="titulo-modal-pdf-calificaciones" aria-modal="true" role="dialog">
+        {{-- Fondo --}}
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" @click="cerrarPdf()"></div>
+
+        {{-- Panel --}}
+        <div x-show="mostrarModalPdf" x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0 translate-y-6 sm:translate-y-0 sm:scale-95 blur-sm"
+            x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100 blur-0"
+            x-transition:leave="transition ease-in duration-200"
+            x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100 blur-0"
+            x-transition:leave-end="opacity-0 translate-y-6 sm:translate-y-0 sm:scale-95 blur-sm"
+            class="relative w-full max-w-6xl overflow-hidden rounded-2xl bg-white dark:bg-neutral-900 shadow-2xl ring-1 ring-black/10 dark:ring-white/10">
+            {{-- Encabezado del modal --}}
+            <div
+                class="flex items-center justify-between gap-3 bg-gradient-to-r from-sky-500 via-blue-600 to-indigo-600 px-5 py-4 text-white">
+                <div>
+                    <h2 id="titulo-modal-pdf-calificaciones" class="text-base sm:text-lg font-semibold">
+                        Vista previa del PDF de calificaciones
+                    </h2>
+
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <a :href="pdfModalUrl" target="_blank" rel="noopener"
+                        class="inline-flex items-center rounded-xl bg-white/15 px-4 py-2 text-sm font-medium text-white hover:bg-white/20 transition">
+                        Abrir en pestaña
+                    </a>
+
+                    <button type="button" @click="cerrarPdf()"
+                        class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white/15 text-white hover:bg-white/20 transition"
+                        aria-label="Cerrar modal">
+                        ✕
+                    </button>
+                </div>
+            </div>
+
+            {{-- Contenido del modal --}}
+            <div class="p-4 sm:p-5 bg-neutral-100 dark:bg-neutral-950">
+                <div
+                    class="overflow-hidden rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900">
+                    <iframe :src="mostrarModalPdf ? pdfModalUrl : ''" class="h-[75vh] w-full"></iframe>
+                </div>
+            </div>
         </div>
     </div>
 </div>
