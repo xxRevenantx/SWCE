@@ -169,17 +169,17 @@
                     <table class="min-w-full text-sm">
                         <thead class="bg-neutral-100 dark:bg-neutral-800/60 text-neutral-700 dark:text-neutral-200">
                             <tr class="text-left">
-                                <th class="px-4 py-3 font-semibold text-center">#</th>
-                                <th class="px-4 py-3 font-semibold text-center">FOTO</th>
-                                <th class="px-4 py-3 font-semibold text-center">MATRÍCULA</th>
-                                <th class="px-4 py-3 font-semibold text-center">FOLIO</th>
-                                <th class="px-4 py-3 font-semibold text-center">CURP</th>
-                                <th class="px-4 py-3 font-semibold text-center">NOMBRE COMPLETO</th>
-                                <th class="px-4 py-3 font-semibold text-center">GÉNERO</th>
-                                <th class="px-4 py-3 font-semibold text-center">CUATRIMESTRE</th>
-                                <th class="px-4 py-3 font-semibold text-center">GENERACIÓN</th>
-                                <th class="px-4 py-3 font-semibold text-center">STATUS</th>
-                                <th class="px-4 py-3 font-semibold text-center">ACCIONES</th>
+                                <th class="px-4 py-3 font-semibold text-center text-white">#</th>
+                                <th class="px-4 py-3 font-semibold text-center text-white">FOTO</th>
+                                <th class="px-4 py-3 font-semibold text-center text-white">MATRÍCULA</th>
+                                <th class="px-4 py-3 font-semibold text-center text-white">FOLIO</th>
+                                <th class="px-4 py-3 font-semibold text-center text-white">CURP</th>
+                                <th class="px-4 py-3 font-semibold text-center text-white">NOMBRE COMPLETO</th>
+                                <th class="px-4 py-3 font-semibold text-center text-white">GÉNERO</th>
+                                <th class="px-4 py-3 font-semibold text-center text-white">CUATRIMESTRE</th>
+                                <th class="px-4 py-3 font-semibold text-center text-white">GENERACIÓN</th>
+                                <th class="px-4 py-3 font-semibold text-center text-white">STATUS</th>
+                                <th class="px-4 py-3 font-semibold text-center text-white">ACCIONES</th>
                             </tr>
                         </thead>
 
@@ -197,6 +197,7 @@
                                 @php
                                     $alumno = $row->alumno;
                                     $escolares = $alumno?->datosEscolares;
+                                    $documentacion = $alumno?->documentacion;
 
                                     $nombre = trim(
                                         ($alumno?->nombre ?? '') .
@@ -235,6 +236,14 @@
                                     $edad = $alumno?->fecha_nacimiento
                                         ? \Illuminate\Support\Carbon::parse($alumno->fecha_nacimiento)->age
                                         : '—';
+
+                                    $tieneCurpDoc = !empty($documentacion?->url_curp);
+                                    $tieneActaDoc = !empty($documentacion?->url_acta_nacimiento);
+                                    $tieneCertificadoDoc = !empty($documentacion?->url_certificado_estudios);
+
+                                    $totalDocs = collect([$tieneCurpDoc, $tieneActaDoc, $tieneCertificadoDoc])
+                                        ->filter()
+                                        ->count();
                                 @endphp
 
                                 {{-- Header por licenciatura --}}
@@ -479,6 +488,48 @@
                                                                 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                                                                 Documentación
                                                             </button>
+
+                                                            {{-- CHECK DE DOCUMENTOS --}}
+                                                            <div
+                                                                class="inline-flex items-center gap-2 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-3 py-2">
+                                                                <div class="flex items-center gap-2">
+                                                                    <span
+                                                                        class="inline-flex h-6 w-6 items-center justify-center rounded-full {{ $tieneCurpDoc ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-300' : 'bg-rose-100 text-rose-600 dark:bg-rose-500/20 dark:text-rose-300' }}">
+                                                                        {{ $tieneCurpDoc ? '✓' : '✕' }}
+                                                                    </span>
+                                                                    <span
+                                                                        class="text-xs font-semibold text-neutral-700 dark:text-neutral-200">
+                                                                        CURP
+                                                                    </span>
+                                                                </div>
+
+                                                                <div class="flex items-center gap-2">
+                                                                    <span
+                                                                        class="inline-flex h-6 w-6 items-center justify-center rounded-full {{ $tieneActaDoc ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-300' : 'bg-rose-100 text-rose-600 dark:bg-rose-500/20 dark:text-rose-300' }}">
+                                                                        {{ $tieneActaDoc ? '✓' : '✕' }}
+                                                                    </span>
+                                                                    <span
+                                                                        class="text-xs font-semibold text-neutral-700 dark:text-neutral-200">
+                                                                        Acta
+                                                                    </span>
+                                                                </div>
+
+                                                                <div class="flex items-center gap-2">
+                                                                    <span
+                                                                        class="inline-flex h-6 w-6 items-center justify-center rounded-full {{ $tieneCertificadoDoc ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-300' : 'bg-rose-100 text-rose-600 dark:bg-rose-500/20 dark:text-rose-300' }}">
+                                                                        {{ $tieneCertificadoDoc ? '✓' : '✕' }}
+                                                                    </span>
+                                                                    <span
+                                                                        class="text-xs font-semibold text-neutral-700 dark:text-neutral-200">
+                                                                        Certificado
+                                                                    </span>
+                                                                </div>
+
+                                                                <span
+                                                                    class="ml-1 inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-bold bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300">
+                                                                    {{ $totalDocs }}/3
+                                                                </span>
+                                                            </div>
                                                         </div>
                                                     </div>
 
@@ -557,8 +608,6 @@
                                                 </div>
 
                                                 <div class="mt-4 flex flex-wrap items-center justify-between gap-3">
-
-
                                                     <button type="button" @click="toggle('{{ $rowKey }}')"
                                                         class="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-bold bg-neutral-100 hover:bg-neutral-200 dark:bg-neutral-800 dark:hover:bg-neutral-700 text-neutral-800 dark:text-neutral-100 ring-1 ring-neutral-200 dark:ring-neutral-700">
                                                         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none"
@@ -569,8 +618,6 @@
                                                         Cerrar
                                                     </button>
                                                 </div>
-
-
                                             </div>
                                         </div>
                                     </td>

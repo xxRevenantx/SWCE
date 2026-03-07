@@ -53,9 +53,18 @@
                 @can('estudiante.dashboard')
                     <flux:navlist.item class="py-4" icon="home" :href="route('estudiante.dashboard')"
                         :current="request()->routeIs('estudiante.dashboard')" wire:navigate>
-                        Panel del Estudiante
+                        Mi Tablero
+                    </flux:navlist.item>
+
+
+                    <flux:navlist.item class="py-4" icon="home" :href="route('estudiante.perfil')"
+                        :current="request()->routeIs('estudiante.perfil')" wire:navigate>
+                        Mi perfil
                     </flux:navlist.item>
                 @endcan
+
+
+
             </flux:navlist.group>
         </flux:navlist>
 

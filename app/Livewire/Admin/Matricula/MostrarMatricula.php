@@ -7,6 +7,7 @@ use App\Models\Cuatrimestre;
 use App\Models\Generacion;
 use App\Models\Inscripcion;
 use App\Models\Licenciatura;
+use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -31,7 +32,7 @@ class MostrarMatricula extends Component
         'filtrar_licenciatura' => ['except' => ''],
         'filtrar_generacion' => ['except' => ''],
         'filtrar_cuatrimestre' => ['except' => ''],
-        'page' => ['except' => 1], // Mantiene la página actual en la URL
+        'page' => ['except' => 1],
     ];
 
     public function mount(): void
@@ -111,11 +112,7 @@ class MostrarMatricula extends Component
         $this->resetPage();
     }
 
-    public function exportarPdf(): void
-    {
-        // Punto pendiente para conectar la exportación.
-        $this->dispatch('toast', type: 'info', message: 'Aquí va tu exportación PDF (pendiente de conectar).');
-    }
+
 
     public function getRegistrosProperty()
     {
@@ -124,20 +121,10 @@ class MostrarMatricula extends Component
 
         return Inscripcion::query()
             ->select('inscripciones.*')
-
-            // Se une con licenciaturas para ordenar por nombre.
             ->join('licenciaturas', 'licenciaturas.id', '=', 'inscripciones.licenciatura_id')
-
-            // Se une con alumnos para buscar por nombre y CURP.
             ->join('alumnos', 'alumnos.id', '=', 'inscripciones.alumno_id')
-
-            // Excluye alumnos eliminados.
             ->whereNull('alumnos.deleted_at')
-
-            // Puede no existir información escolar.
             ->leftJoin('datos_escolares', 'datos_escolares.alumno_id', '=', 'alumnos.id')
-
-            // Carga relaciones para evitar consultas extra.
             ->with([
                 'licenciatura:id,nombre',
                 'generacion:id,generacion',
@@ -145,14 +132,11 @@ class MostrarMatricula extends Component
                 'alumno:id,user_id,curp,nombre,apellido_paterno,apellido_materno,fecha_nacimiento,sexo',
                 'alumno.user:id,email,username',
                 'alumno.datosEscolares:id,alumno_id,matricula,folio,foto',
+                'alumno.documentacion:id,alumno_id,url_curp,url_acta_nacimiento,url_certificado_estudios',
             ])
-
-            // Aplica filtros.
             ->when($this->filtrar_licenciatura !== '', fn($q) => $q->where('inscripciones.licenciatura_id', (int) $this->filtrar_licenciatura))
             ->when($this->filtrar_generacion !== '', fn($q) => $q->where('inscripciones.generacion_id', (int) $this->filtrar_generacion))
             ->when($this->filtrar_cuatrimestre !== '', fn($q) => $q->where('inscripciones.cuatrimestre_id', (int) $this->filtrar_cuatrimestre))
-
-            // Busca por matrícula, folio, CURP y nombres.
             ->when($search !== '', function ($q) use ($search) {
                 $q->where(function ($qq) use ($search) {
                     $qq->where('datos_escolares.matricula', 'like', "%{$search}%")
@@ -163,26 +147,17 @@ class MostrarMatricula extends Component
                         ->orWhere('alumnos.apellido_materno', 'like', "%{$search}%");
                 });
             })
-
-            // Ordena por licenciatura.
             ->orderBy('licenciaturas.nombre', 'asc')
-
-            // Dentro de cada licenciatura muestra primero los más recientes.
             ->orderByDesc('inscripciones.id')
-
-            // Pagina los resultados.
             ->paginate(10);
     }
 
+    #[On('documentos-cargados')]
     public function render()
     {
-        // Obtiene los registros paginados.
         $registros = $this->registros;
-
-        // Toma solo los registros de la página actual.
         $coleccion = $registros->getCollection();
 
-        // Calcula datos por licenciatura en la página actual.
         $statsPorLic = $coleccion
             ->groupBy(fn($r) => $r->licenciatura_id ?? 0)
             ->map(function ($items) {
@@ -202,7 +177,6 @@ class MostrarMatricula extends Component
             })
             ->toArray();
 
-        // Total general de los registros filtrados.
         $totalGeneral = $registros->total();
 
         return view('livewire.admin.matricula.mostrar-matricula', [
