@@ -2,7 +2,7 @@
     destroyAlumno(id) {
         Swal.fire({
             title: '¿Estás seguro?',
-            text: `Esta acción no podrá revertirse.`,
+            text: 'Esta acción no podrá revertirse.',
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#2563EB',
@@ -16,7 +16,7 @@
     <div
         class="rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 shadow-sm overflow-hidden">
         <div class="bg-gradient-to-r from-sky-500 via-blue-600 to-indigo-600 px-5 py-4 text-white">
-            <h1 class="text-2xl sm:text-3xl font-black tracking-tight">Matricula</h1>
+            <h1 class="text-2xl sm:text-3xl font-black tracking-tight">Matrícula</h1>
             <p class="text-white/90 text-sm">Gestión de alumnos</p>
         </div>
 
@@ -69,8 +69,7 @@
                         class="w-full rounded-xl border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-3 py-2 text-sm text-neutral-900 dark:text-neutral-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
                         <option value="">--Selecciona un cuatrimestre--</option>
                         @foreach ($cuatrimestres as $c)
-                            <option value="{{ $c->id }}">{{ $c->no_cuatrimestre }}°
-                            </option>
+                            <option value="{{ $c->id }}">{{ $c->no_cuatrimestre }}°</option>
                         @endforeach
                     </select>
                 </div>
@@ -141,7 +140,7 @@
             <div class="relative overflow-hidden rounded-2xl border border-neutral-200 dark:border-neutral-800">
                 {{-- LOADER SOLO PARA LA TABLA --}}
                 <div wire:loading
-                    wire:target="search,  filtrar_licenciatura, filtrar_generacion, filtrar_cuatrimestre, limpiarFiltros, exportarPdf, gotoPage, nextPage, previousPage, eliminarAlumno"
+                    wire:target="search, filtrar_licenciatura, filtrar_generacion, filtrar_cuatrimestre, limpiarFiltros, exportarPdf, gotoPage, nextPage, previousPage, eliminarAlumno"
                     class="absolute inset-0 z-20 grid place-items-center bg-white/60 dark:bg-neutral-900/60 backdrop-blur-sm">
                     <div
                         class="rounded-2xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 shadow-xl px-6 py-5 flex items-center gap-3">
@@ -168,8 +167,7 @@
 
                 <div class="overflow-x-auto bg-white dark:bg-neutral-900">
                     <table class="min-w-full text-sm">
-                        <thead
-                            class="bg-neutral-100 dark:bg-neutral-800/60 text-neutral-700 dark:text-neutral-200 text-white">
+                        <thead class="bg-neutral-100 dark:bg-neutral-800/60 text-neutral-700 dark:text-neutral-200">
                             <tr class="text-left">
                                 <th class="px-4 py-3 font-semibold text-center">#</th>
                                 <th class="px-4 py-3 font-semibold text-center">FOTO</th>
@@ -187,7 +185,9 @@
 
                         <tbody x-data="{
                             openRow: null,
-                            toggle(id) { this.openRow = (this.openRow === id) ? null : id }
+                            toggle(id) {
+                                this.openRow = this.openRow === id ? null : id
+                            }
                         }"
                             class="divide-y divide-neutral-200 dark:divide-neutral-800 text-neutral-800 dark:text-neutral-100 text-center">
 
@@ -223,10 +223,8 @@
                                     $licId = $row->licenciatura_id ?? 0;
                                     $licNombre = $row->licenciatura?->nombre ?? 'Sin licenciatura';
 
-                                    // ID único para el collapse
                                     $rowKey = 'row-' . ($row->id ?? $registros->firstItem() + $i);
 
-                                    // Extra (si tienes alumno->user cargado desde el componente)
                                     $email = $alumno?->user?->email ?? '—';
                                     $username = $alumno?->user?->username ?? '—';
 
@@ -266,7 +264,8 @@
                                                             <div class="leading-tight">
                                                                 <div class="text-xs text-white/85">LICENCIATURA</div>
                                                                 <div class="font-black tracking-tight text-lg">
-                                                                    {{ $licNombre }}</div>
+                                                                    {{ $licNombre }}
+                                                                </div>
                                                             </div>
                                                         </div>
 
@@ -304,7 +303,6 @@
                                     </tr>
                                 @endif
 
-
                                 {{-- FILA PRINCIPAL --}}
                                 <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-800/40">
                                     <td class="px-4 py-3">{{ $registros->firstItem() + $i }}</td>
@@ -337,7 +335,7 @@
 
                                     <td class="px-4 py-3">
                                         <div class="flex justify-end gap-2">
-                                            {{-- BOTÓN DETALLES (COLLAPSE) --}}
+                                            {{-- BOTÓN DETALLES --}}
                                             <button type="button" @click="toggle('{{ $rowKey }}')"
                                                 class="inline-flex h-9 items-center justify-center gap-2 rounded-xl px-3 text-xs font-bold text-white
                                                        bg-gradient-to-r from-sky-500 via-blue-600 to-indigo-600 hover:from-sky-600 hover:via-blue-700 hover:to-indigo-700
@@ -348,7 +346,8 @@
                                                     <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2"
                                                         stroke-linecap="round" stroke-linejoin="round" />
                                                 </svg>
-                                                Detalles
+                                                <span
+                                                    x-text="openRow === '{{ $rowKey }}' ? 'Ocultar' : 'Detalles'"></span>
                                             </button>
 
                                             {{-- Editar --}}
@@ -357,30 +356,27 @@
                                                 variant="primary"
                                                 class="cursor-pointer bg-amber-500 hover:bg-amber-600 text-white">
                                                 <flux:icon.square-pen class="w-3.5 h-3.5" />
-                                                <!-- ícono -->
                                             </flux:button>
 
-
-
+                                            {{-- Eliminar --}}
                                             <flux:button variant="danger"
                                                 class="cursor-pointer bg-rose-600 hover:bg-rose-700 text-white p-1"
-                                                @click="destroyAlumno( {{ $row->alumno->id }})">
+                                                @click="destroyAlumno({{ $row->alumno->id }})">
                                                 <flux:icon.trash-2 class="w-3.5 h-3.5" />
                                             </flux:button>
-
-
                                         </div>
                                     </td>
                                 </tr>
 
-                                {{-- COLLAPSE: fila extra debajo (SIN MODAL) con transición suave --}}
+                                {{-- COLLAPSE --}}
                                 <tr x-cloak x-show="openRow === '{{ $rowKey }}'"
                                     class="bg-neutral-50/60 dark:bg-neutral-800/20">
                                     <td colspan="11" class="px-4 pb-5">
-                                        <div x-transition:enter="transition ease-out duration-3000"
+                                        <div x-show="openRow === '{{ $rowKey }}'"
+                                            x-transition:enter="transition ease-out duration-300"
                                             x-transition:enter-start="opacity-0 translate-y-2"
                                             x-transition:enter-end="opacity-100 translate-y-0"
-                                            x-transition:leave="transition ease-in duration-2000"
+                                            x-transition:leave="transition ease-in duration-200"
                                             x-transition:leave-start="opacity-100 translate-y-0"
                                             x-transition:leave-end="opacity-0 translate-y-2"
                                             class="mt-2 rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 shadow-sm overflow-hidden">
@@ -406,7 +402,8 @@
                                                             <div class="text-xs text-white/85">DETALLES DEL ALUMNO
                                                             </div>
                                                             <div class="font-black tracking-tight text-base">
-                                                                {{ $nombre !== '' ? $nombre : '—' }}</div>
+                                                                {{ $nombre !== '' ? $nombre : '—' }}
+                                                            </div>
                                                         </div>
                                                     </div>
 
@@ -444,10 +441,12 @@
                                                             <div class="min-w-0">
                                                                 <div
                                                                     class="text-xs text-neutral-500 dark:text-neutral-400">
-                                                                    CURP</div>
+                                                                    CURP
+                                                                </div>
                                                                 <div
                                                                     class="font-mono text-xs break-all text-neutral-900 dark:text-neutral-100">
-                                                                    {{ $curp }}</div>
+                                                                    {{ $curp }}
+                                                                </div>
                                                             </div>
                                                         </div>
 
@@ -462,14 +461,16 @@
                                                                 Edad: {{ $edad }}
                                                             </span>
                                                         </div>
+
                                                         <div class="mt-3 flex flex-wrap gap-2">
                                                             <a target="_blank"
                                                                 href="{{ route('admin.pdf.expedienteAlumno', $row->id) }}"
                                                                 class="inline-flex h-9 items-center justify-center gap-2 rounded-xl px-3 text-xs font-bold text-white
-                                                       bg-gradient-to-r from-sky-500 via-blue-600 to-indigo-600 hover:from-sky-600 hover:via-blue-700 hover:to-indigo-700
-                                                       focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                                                       bg-gradient-to-r from-sky-500 via-blue-600 to-indigo-600 hover:from-sky-600 hover:via-blue-700 hover:to-indigo-700
+                                                                       focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                                                                 Ver expediente completo
                                                             </a>
+
                                                             <button type="button"
                                                                 x-on:click="$dispatch('abrir-modal-documentos')"
                                                                 wire:click="$dispatch('abrir-modal-documentos-livewire', { id: {{ $row->id }} })"
@@ -478,7 +479,6 @@
                                                                 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                                                                 Documentación
                                                             </button>
-
                                                         </div>
                                                     </div>
 
@@ -487,7 +487,8 @@
                                                         class="rounded-2xl border border-neutral-200 dark:border-neutral-800 p-4">
                                                         <div
                                                             class="text-xs font-bold text-neutral-500 dark:text-neutral-400">
-                                                            DATOS ESCOLARES</div>
+                                                            DATOS ESCOLARES
+                                                        </div>
 
                                                         <div class="mt-3 space-y-2 text-sm">
                                                             <div class="flex items-center justify-between gap-3">
@@ -522,7 +523,8 @@
                                                         class="rounded-2xl border border-neutral-200 dark:border-neutral-800 p-4">
                                                         <div
                                                             class="text-xs font-bold text-neutral-500 dark:text-neutral-400">
-                                                            CUENTA Y EXTRA</div>
+                                                            CUENTA Y EXTRA
+                                                        </div>
 
                                                         <div class="mt-3 space-y-2 text-sm">
                                                             <div class="flex items-center justify-between gap-3">
@@ -555,9 +557,7 @@
                                                 </div>
 
                                                 <div class="mt-4 flex flex-wrap items-center justify-between gap-3">
-                                                    <div class="text-xs text-neutral-500 dark:text-neutral-400">
-                                                        Aquí muestro datos rápidos sin salir de la tabla.
-                                                    </div>
+
 
                                                     <button type="button" @click="toggle('{{ $rowKey }}')"
                                                         class="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-bold bg-neutral-100 hover:bg-neutral-200 dark:bg-neutral-800 dark:hover:bg-neutral-700 text-neutral-800 dark:text-neutral-100 ring-1 ring-neutral-200 dark:ring-neutral-700">
@@ -569,11 +569,12 @@
                                                         Cerrar
                                                     </button>
                                                 </div>
+
+
                                             </div>
                                         </div>
                                     </td>
                                 </tr>
-
                             @empty
                                 <tr>
                                     <td colspan="11"
@@ -597,6 +598,7 @@
         </div>
     </div>
 
-    <livewire:admin.documentos.cargar-documentos />
-
+    <div class="mt-4">
+        <livewire:admin.documentos.cargar-documentos />
+    </div>
 </div>

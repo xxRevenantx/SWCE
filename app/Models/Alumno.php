@@ -50,4 +50,10 @@ class Alumno extends Model
         return $this->hasMany(Inscripcion::class);
     }
 
+    // Relación con Documentacion
+    public function documentacion()
+    {
+        return $this->hasOne(Documentacion::class);
+    }
+
 }

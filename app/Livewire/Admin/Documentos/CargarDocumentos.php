@@ -3,6 +3,10 @@
 namespace App\Livewire\Admin\Documentos;
 
 use App\Models\Alumno;
+use App\Models\Documentacion;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -21,8 +25,6 @@ class CargarDocumentos extends Component
     public ?string $curp_guardado = null;
     public ?string $acta_nacimiento_guardado = null;
     public ?string $certificado_estudios_guardado = null;
-
-    public bool $cargandoDatos = false;
 
     protected function rules(): array
     {
@@ -43,13 +45,13 @@ class CargarDocumentos extends Component
     ];
 
     #[On('abrir-modal-documentos-livewire')]
-    public function abrirModalDocumentos($id): void
+    public function abrirModalDocumentos($id = null): void
     {
         if (!$id) {
             return;
         }
 
-        $alumno = Alumno::findOrFail($id);
+        $alumno = Alumno::with('documentacion')->findOrFail($id);
 
         $this->resetValidation();
 
@@ -62,15 +64,61 @@ class CargarDocumentos extends Component
         $this->alumno_id = $alumno->id;
         $this->nombreAlumno = trim(
             ($alumno->nombre ?? '') . ' ' .
-                ($alumno->apellido_paterno ?? '') . ' ' .
-                ($alumno->apellido_materno ?? '')
+            ($alumno->apellido_paterno ?? '') . ' ' .
+            ($alumno->apellido_materno ?? '')
         );
 
-        $this->curp_guardado = $alumno->curp_documento;
-        $this->acta_nacimiento_guardado = $alumno->acta_nacimiento_documento;
-        $this->certificado_estudios_guardado = $alumno->certificado_estudios_documento;
+        $this->curp_guardado = $alumno->documentacion->url_curp ?? null;
+        $this->acta_nacimiento_guardado = $alumno->documentacion->url_acta_nacimiento ?? null;
+        $this->certificado_estudios_guardado = $alumno->documentacion->url_certificado_estudios ?? null;
 
         $this->dispatch('documentos-cargados');
+    }
+
+    protected function construirNombreAlumno(Alumno $alumno): string
+    {
+        return trim(
+            ($alumno->nombre ?? '') . ' ' .
+            ($alumno->apellido_paterno ?? '') . ' ' .
+            ($alumno->apellido_materno ?? '')
+        );
+    }
+
+    protected function obtenerFechaNacimientoParaArchivo(Alumno $alumno): string
+    {
+        if (empty($alumno->fecha_nacimiento)) {
+            return 'SIN_FECHA';
+        }
+
+        try {
+            return Carbon::parse($alumno->fecha_nacimiento)->format('Y_m_d');
+        } catch (\Throwable $e) {
+            return 'SIN_FECHA';
+        }
+    }
+
+    protected function generarNombreArchivo(string $prefijo, Alumno $alumno, $archivo): string
+    {
+        $nombreAlumno = $this->construirNombreAlumno($alumno);
+        $fechaNacimiento = $this->obtenerFechaNacimientoParaArchivo($alumno);
+
+        $base = $prefijo . '_' . $nombreAlumno . '_' . $fechaNacimiento;
+        $base = Str::upper(Str::slug($base, '_'));
+        $extension = $archivo->getClientOriginalExtension();
+
+        return $base . '.' . $extension;
+    }
+
+    protected function obtenerDocumentacion(int $alumnoId): Documentacion
+    {
+        return Documentacion::firstOrCreate(
+            ['alumno_id' => $alumnoId],
+            [
+                'url_curp' => null,
+                'url_acta_nacimiento' => null,
+                'url_certificado_estudios' => null,
+            ]
+        );
     }
 
     public function guardarDocumento(string $tipo): void
@@ -81,13 +129,26 @@ class CargarDocumentos extends Component
             return;
         }
 
+        $documentacion = $this->obtenerDocumentacion($alumno->id);
+
         if ($tipo === 'curp') {
             $this->validateOnly('curp_archivo');
 
             if ($this->curp_archivo) {
-                $ruta = $this->curp_archivo->store('documentos/alumnos/curp', 'public');
-                $alumno->curp_documento = $ruta;
-                $alumno->save();
+                if (!empty($documentacion->url_curp) && Storage::disk('public')->exists($documentacion->url_curp)) {
+                    Storage::disk('public')->delete($documentacion->url_curp);
+                }
+
+                $nombreArchivo = $this->generarNombreArchivo('CURP', $alumno, $this->curp_archivo);
+
+                $ruta = $this->curp_archivo->storeAs(
+                    'documentos/alumnos/curp',
+                    $nombreArchivo,
+                    'public'
+                );
+
+                $documentacion->url_curp = $ruta;
+                $documentacion->save();
 
                 $this->curp_guardado = $ruta;
                 $this->curp_archivo = null;
@@ -98,9 +159,20 @@ class CargarDocumentos extends Component
             $this->validateOnly('acta_nacimiento_archivo');
 
             if ($this->acta_nacimiento_archivo) {
-                $ruta = $this->acta_nacimiento_archivo->store('documentos/alumnos/actas', 'public');
-                $alumno->acta_nacimiento_documento = $ruta;
-                $alumno->save();
+                if (!empty($documentacion->url_acta_nacimiento) && Storage::disk('public')->exists($documentacion->url_acta_nacimiento)) {
+                    Storage::disk('public')->delete($documentacion->url_acta_nacimiento);
+                }
+
+                $nombreArchivo = $this->generarNombreArchivo('ACTA_NACIMIENTO', $alumno, $this->acta_nacimiento_archivo);
+
+                $ruta = $this->acta_nacimiento_archivo->storeAs(
+                    'documentos/alumnos/actas',
+                    $nombreArchivo,
+                    'public'
+                );
+
+                $documentacion->url_acta_nacimiento = $ruta;
+                $documentacion->save();
 
                 $this->acta_nacimiento_guardado = $ruta;
                 $this->acta_nacimiento_archivo = null;
@@ -111,9 +183,20 @@ class CargarDocumentos extends Component
             $this->validateOnly('certificado_estudios_archivo');
 
             if ($this->certificado_estudios_archivo) {
-                $ruta = $this->certificado_estudios_archivo->store('documentos/alumnos/certificados', 'public');
-                $alumno->certificado_estudios_documento = $ruta;
-                $alumno->save();
+                if (!empty($documentacion->url_certificado_estudios) && Storage::disk('public')->exists($documentacion->url_certificado_estudios)) {
+                    Storage::disk('public')->delete($documentacion->url_certificado_estudios);
+                }
+
+                $nombreArchivo = $this->generarNombreArchivo('CERTIFICADO_ESTUDIOS', $alumno, $this->certificado_estudios_archivo);
+
+                $ruta = $this->certificado_estudios_archivo->storeAs(
+                    'documentos/alumnos/certificados',
+                    $nombreArchivo,
+                    'public'
+                );
+
+                $documentacion->url_certificado_estudios = $ruta;
+                $documentacion->save();
 
                 $this->certificado_estudios_guardado = $ruta;
                 $this->certificado_estudios_archivo = null;
@@ -129,29 +212,44 @@ class CargarDocumentos extends Component
 
     public function eliminarDocumento(string $tipo): void
     {
-        $alumno = Alumno::find($this->alumno_id);
+        $documentacion = Documentacion::where('alumno_id', $this->alumno_id)->first();
 
-        if (!$alumno) {
+        if (!$documentacion) {
             return;
         }
 
         if ($tipo === 'curp') {
-            $alumno->curp_documento = null;
-            $alumno->save();
+            if (!empty($documentacion->url_curp) && Storage::disk('public')->exists($documentacion->url_curp)) {
+                Storage::disk('public')->delete($documentacion->url_curp);
+            }
+
+            $documentacion->url_curp = null;
+            $documentacion->save();
+
             $this->curp_guardado = null;
             $this->curp_archivo = null;
         }
 
         if ($tipo === 'acta_nacimiento') {
-            $alumno->acta_nacimiento_documento = null;
-            $alumno->save();
+            if (!empty($documentacion->url_acta_nacimiento) && Storage::disk('public')->exists($documentacion->url_acta_nacimiento)) {
+                Storage::disk('public')->delete($documentacion->url_acta_nacimiento);
+            }
+
+            $documentacion->url_acta_nacimiento = null;
+            $documentacion->save();
+
             $this->acta_nacimiento_guardado = null;
             $this->acta_nacimiento_archivo = null;
         }
 
         if ($tipo === 'certificado_estudios') {
-            $alumno->certificado_estudios_documento = null;
-            $alumno->save();
+            if (!empty($documentacion->url_certificado_estudios) && Storage::disk('public')->exists($documentacion->url_certificado_estudios)) {
+                Storage::disk('public')->delete($documentacion->url_certificado_estudios);
+            }
+
+            $documentacion->url_certificado_estudios = null;
+            $documentacion->save();
+
             $this->certificado_estudios_guardado = null;
             $this->certificado_estudios_archivo = null;
         }
@@ -174,7 +272,6 @@ class CargarDocumentos extends Component
             'curp_guardado',
             'acta_nacimiento_guardado',
             'certificado_estudios_guardado',
-            'cargandoDatos',
         ]);
 
         $this->resetValidation();
