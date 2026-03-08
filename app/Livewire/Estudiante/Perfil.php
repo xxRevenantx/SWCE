@@ -2,19 +2,12 @@
 
 namespace App\Livewire\Estudiante;
 
-use App\Models\DatosContactos;
-use App\Models\DatosEscolares;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Storage;
 use Livewire\Component;
-use Livewire\WithFileUploads;
 
 class Perfil extends Component
 {
-    use WithFileUploads;
-
     public ?int $user_id = null;
     public ?int $alumno_id = null;
     public ?int $inscripcion_id = null;
@@ -53,13 +46,8 @@ class Perfil extends Component
     public string $estado = '';
     public string $ciudad = '';
 
-    // Seguridad
-    public string $password = '';
-    public string $password_confirmation = '';
-
     // Foto
     public ?string $foto_actual = null;
-    public $foto_nueva = null;
 
     public function mount(): void
     {
@@ -70,7 +58,7 @@ class Perfil extends Component
     {
         $usuario = Auth::user();
 
-        if (! $usuario) {
+        if (!$usuario) {
             return;
         }
 
@@ -128,7 +116,7 @@ class Perfil extends Component
             )
             ->first();
 
-        if (! $perfil) {
+        if (!$perfil) {
             return;
         }
 
@@ -171,109 +159,6 @@ class Perfil extends Component
         $this->ciudad = $perfil->ciudad ?? '';
     }
 
-    protected function rules(): array
-    {
-        return [
-            'email' => 'required|email|max:255|unique:users,email,' . $this->user_id,
-
-            'celular' => 'nullable|string|max:20',
-            'telefono' => 'nullable|string|max:20',
-            'calle' => 'nullable|string|max:255',
-            'numero_exterior' => 'nullable|string|max:10',
-            'numero_interior' => 'nullable|string|max:10',
-            'colonia' => 'nullable|string|max:255',
-            'municipio' => 'nullable|string|max:255',
-            'codigo_postal' => 'nullable|string|max:10',
-            'bachillerato_procedente' => 'nullable|string|max:255',
-
-            'password' => 'nullable|min:8|same:password_confirmation',
-            'password_confirmation' => 'nullable|min:8',
-
-            'foto_nueva' => 'nullable|image|mimes:jpg,jpeg,png|max:1024',
-        ];
-    }
-
-    protected function messages(): array
-    {
-        return [
-            'email.required' => 'El correo es obligatorio.',
-            'email.email' => 'Ingresa un correo válido.',
-            'email.unique' => 'Ese correo ya está registrado.',
-
-            'password.min' => 'La contraseña debe tener al menos 8 caracteres.',
-            'password.same' => 'La confirmación de contraseña no coincide.',
-
-            'foto_nueva.image' => 'El archivo debe ser una imagen.',
-            'foto_nueva.mimes' => 'La foto debe ser JPG o PNG.',
-            'foto_nueva.max' => 'La foto no debe pesar más de 1 MB.',
-        ];
-    }
-
-    public function guardar(): void
-    {
-        $this->validate();
-
-        $usuario = Auth::user();
-
-        if (! $usuario || ! $this->alumno_id) {
-            return;
-        }
-
-        DB::transaction(function () use ($usuario) {
-            // Actualiza datos del usuario
-            $datosUsuario = [
-                'email' => $this->email,
-            ];
-
-            if (filled($this->password)) {
-                $datosUsuario['password'] = Hash::make($this->password);
-            }
-
-            $usuario->update($datosUsuario);
-
-            // Actualiza o crea datos de contacto
-            DatosContactos::updateOrCreate(
-                ['alumno_id' => $this->alumno_id],
-                [
-                    'celular' => $this->celular ?: null,
-                    'telefono' => $this->telefono ?: null,
-                    'calle' => $this->calle ?: null,
-                    'numero_exterior' => $this->numero_exterior ?: null,
-                    'numero_interior' => $this->numero_interior ?: null,
-                    'colonia' => $this->colonia ?: null,
-                    'municipio' => $this->municipio ?: null,
-                    'codigo_postal' => $this->codigo_postal ?: null,
-                    'bachillerato_procedente' => $this->bachillerato_procedente ?: null,
-                ]
-            );
-
-            // Actualiza foto
-            if ($this->foto_nueva) {
-                $datosEscolares = DatosEscolares::where('alumno_id', $this->alumno_id)->first();
-
-                if ($datosEscolares) {
-                    if ($datosEscolares->foto && Storage::disk('public')->exists($datosEscolares->foto)) {
-                        Storage::disk('public')->delete($datosEscolares->foto);
-                    }
-
-                    $rutaFoto = $this->foto_nueva->store('alumnos/fotos', 'public');
-
-                    $datosEscolares->update([
-                        'foto' => $rutaFoto,
-                    ]);
-
-                    $this->foto_actual = $rutaFoto;
-                }
-            }
-        });
-
-        $this->reset('password', 'password_confirmation', 'foto_nueva');
-
-        session()->flash('success', 'Los cambios se guardaron correctamente.');
-
-        $this->cargarPerfil();
-    }
-
     public function getNombreCompletoProperty(): string
     {
         return trim($this->nombre . ' ' . $this->apellido_paterno . ' ' . $this->apellido_materno);
@@ -281,10 +166,6 @@ class Perfil extends Component
 
     public function getFotoPreviewProperty(): string
     {
-        if ($this->foto_nueva) {
-            return $this->foto_nueva->temporaryUrl();
-        }
-
         if ($this->foto_actual) {
             return asset('storage/' . $this->foto_actual);
         }
