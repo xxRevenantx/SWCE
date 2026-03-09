@@ -53,7 +53,7 @@
             class="rounded-2xl border border-neutral-200/60 dark:border-neutral-700/60 bg-gradient-to-r from-[#E4F6FF] to-[#F2EFFF] dark:from-[#0b1220] dark:to-[#121a2a] shadow-lg p-5">
             <h1 class="text-2xl font-bold text-neutral-900 dark:text-neutral-100">Asignación de Calificaciones</h1>
             <p class="text-sm text-neutral-600 dark:text-neutral-300">
-                Asigna calificaciones para la licenciatura, generación y cuatrimestre.
+                Asigna calificaciones por cuatrimestre para la licenciatura y generación seleccionadas.
             </p>
         </div>
     </div>
@@ -98,6 +98,7 @@
                 </select>
             </div>
 
+            {{-- Limpiar --}}
             <div class="mt-7">
                 <button type="button" wire:click="limpiarFiltros"
                     class="items-center gap-2 rounded-2xl bg-gradient-to-r from-sky-500 to-indigo-600 text-white px-4 py-2 text-sm font-semibold shadow hover:opacity-95">
@@ -141,7 +142,7 @@
         <div class="relative">
             {{-- Overlay de carga --}}
             <div wire:loading.flex
-                wire:target="licenciatura_id,generacion_id,cuatrimestre_id,limpiarFiltros,guardarCalificaciones"
+                wire:target="licenciatura_id,generacion_id,cuatrimestre_id,busqueda,limpiarFiltros,guardarCalificaciones"
                 class="absolute inset-0 z-10 items-center justify-center bg-white/70 dark:bg-neutral-950/60 backdrop-blur-sm">
                 <div
                     class="rounded-2xl bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 shadow-lg px-5 py-4 flex items-center gap-3">
@@ -152,25 +153,53 @@
                 </div>
             </div>
 
+            {{-- Barra superior --}}
+            <div class="border-b border-neutral-200 dark:border-neutral-800 p-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+                    <div>
+                        <label class="text-xs font-medium text-neutral-600 dark:text-neutral-300">
+                            Buscar alumno o matrícula
+                        </label>
+                        <input type="text" wire:model.live.debounce.300ms="busqueda"
+                            placeholder="Escribe nombre o matrícula..."
+                            class="mt-1 w-full rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-950 px-3 py-2 text-sm text-neutral-900 dark:text-neutral-100 focus:outline-none focus:ring-2 focus:ring-sky-300">
+                    </div>
+
+                    <div class="flex justify-start md:justify-end">
+                        <div
+                            class="rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-950/50 px-4 py-3 text-sm">
+                            <div class="font-semibold text-neutral-900 dark:text-neutral-100">
+                                {{ count($inscripciones) }} alumno(s)
+                            </div>
+                            <div class="text-xs text-neutral-500 dark:text-neutral-400">
+                                {{ count($materias) }} materia(s) calificable(s)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="overflow-x-auto">
                 <table class="min-w-full text-sm">
                     <thead class="bg-neutral-50 dark:bg-neutral-950/60">
                         <tr class="text-neutral-600 dark:text-neutral-300">
-                            <th class="px-4 py-3 text-left font-semibold w-12 text-white">#</th>
+                            <th class="px-4 py-3 text-left font-semibold text-white">#</th>
                             <th class="px-4 py-3 text-left font-semibold text-white">MATRÍCULA</th>
                             <th class="px-4 py-3 text-left font-semibold text-white">ALUMNO</th>
 
                             @foreach ($materias as $m)
-                                <th class="px-4 py-2 text-center text-white font-semibold">
-                                    {{ mb_strtoupper($m['materia']) }}
-                                    <div class="text-[11px] font-normal text-neutral-400 dark:text-neutral-500">
+                                <th class="px-4 py-2 text-center font-semibold text-white min-w-[180px]">
+                                    <div class=" dark:text-neutral-100 text-white">
+                                        {{ mb_strtoupper($m['materia']) }}
+                                    </div>
+                                    <div class="text-[11px] font-normal text-neutral-300 dark:text-neutral-400 mt-1">
                                         {{ $m['profesor'] }}
                                     </div>
                                 </th>
                             @endforeach
 
-                            <th class="px-4 py-3 text-center font-semibold text-white">PROMEDIO</th>
-                            <th class="px-4 py-3 text-center font-semibold w-44 text-white">ACCIONES</th>
+                            <th class="px-4 py-3 text-center font-semibold text-white min-w-[110px]">PROMEDIO</th>
+                            <th class="px-4 py-3 text-center font-semibold text-white min-w-[180px]">ACCIONES</th>
                         </tr>
                     </thead>
 
@@ -179,7 +208,9 @@
                             @php($insId = (int) $fila['inscripcion_id'])
 
                             <tr class="hover:bg-neutral-50/70 dark:hover:bg-neutral-950/40">
-                                <td class="px-4 py-3 text-neutral-700 dark:text-neutral-200">{{ $index + 1 }}</td>
+                                <td class="px-4 py-3 text-neutral-700 dark:text-neutral-200">
+                                    {{ $index + 1 }}
+                                </td>
 
                                 <td class="px-4 py-3 font-medium text-neutral-900 dark:text-neutral-100">
                                     {{ $fila['matricula'] }}
@@ -224,10 +255,11 @@
                                             Boleta
                                         </a>
 
+                                        {{-- Enviar --}}
                                         <button type="button"
                                             class="inline-flex items-center gap-2 rounded-xl bg-green-600 hover:bg-green-700 text-white px-4 py-2 text-sm font-semibold"
                                             @click="enviarCalificacion({{ $insId }})">
-                                            <flux:icon.send />
+                                            <flux:icon.send class="w-4 h-4" />
                                             <span>Enviar</span>
                                         </button>
                                     </div>
@@ -326,7 +358,6 @@
                     <h2 id="titulo-modal-pdf-calificaciones" class="text-base sm:text-lg font-semibold">
                         Vista previa del PDF de calificaciones
                     </h2>
-
                 </div>
 
                 <div class="flex items-center gap-2">
