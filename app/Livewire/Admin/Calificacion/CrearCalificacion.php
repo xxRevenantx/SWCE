@@ -295,8 +295,8 @@ class CrearCalificacion extends Component
             $profesor = $a->profesor
                 ? trim(
                     ($a->profesor->nombre ?? '') . ' ' .
-                    ($a->profesor->apellido_paterno ?? '') . ' ' .
-                    ($a->profesor->apellido_materno ?? '')
+                        ($a->profesor->apellido_paterno ?? '') . ' ' .
+                        ($a->profesor->apellido_materno ?? '')
                 )
                 : '—';
 
@@ -527,7 +527,10 @@ class CrearCalificacion extends Component
             return 0.0;
         }
 
-        return round($suma / $cont, 1);
+        $promedio = $suma / $cont;
+
+        // Aquí corto el promedio a un decimal sin redondear.
+        return floor($promedio * 10) / 10;
     }
 
     public function guardarCalificaciones(): void

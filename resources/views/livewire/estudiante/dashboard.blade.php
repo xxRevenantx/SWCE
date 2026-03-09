@@ -25,7 +25,11 @@
 
                     <div class="space-y-1">
                         <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-neutral-900 dark:text-white">
-                            Bienvenido, {{ $nombre_estudiante }}
+                            @if ($sexo_estudiante === 'F')
+                                Bienvenida, {{ $nombre_estudiante }}
+                            @else
+                                Bienvenido, {{ $nombre_estudiante }}
+                            @endif
                         </h1>
 
                     </div>

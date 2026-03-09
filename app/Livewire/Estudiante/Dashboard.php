@@ -14,6 +14,7 @@ class Dashboard extends Component
 {
     // Datos principales del encabezado.
     public string $nombre_estudiante = '';
+    public string $sexo_estudiante = '';
     public string $matricula = 'Sin matrícula';
     public string $licenciatura = 'Sin licenciatura';
     public string $cuatrimestre = 'Sin cuatrimestre';
@@ -22,8 +23,6 @@ class Dashboard extends Component
 
     // Arreglos que llenan el tablero.
     public array $resumen = [];
-    public array $clases_hoy = [];
-    public array $avisos = [];
     public array $documentacion = [];
     public array $calificaciones_recientes = [];
     public array $accesos_rapidos = [];
@@ -77,9 +76,13 @@ class Dashboard extends Component
         $this->alumno_id = $alumno->id;
         $this->nombre_estudiante = trim(
             ($alumno->nombre ?? '') . ' ' .
-            ($alumno->apellido_paterno ?? '') . ' ' .
-            ($alumno->apellido_materno ?? '')
+                ($alumno->apellido_paterno ?? '') . ' ' .
+                ($alumno->apellido_materno ?? '')
         );
+
+        // Sexo del alumno
+        $this->sexo_estudiante = $alumno->sexo;
+
 
         $this->matricula = $alumno->datosEscolares?->matricula ?? 'Sin matrícula';
 
@@ -130,9 +133,14 @@ class Dashboard extends Component
             });
 
             // Aquí se calcula el promedio general solo con materias calificables.
-            $promedio = $calificacionesConValor->count() > 0
-                ? round((float) $calificacionesConValor->avg('calificacion'), 1)
-                : 0;
+            if ($calificacionesConValor->count() > 0) {
+                $promedioReal = (float) $calificacionesConValor->avg('calificacion');
+
+                // Aquí corto el promedio a un decimal sin redondear.
+                $promedio = floor($promedioReal * 10) / 10;
+            } else {
+                $promedio = 0;
+            }
 
             // Aquí se cuentan solo materias calificables del cuatrimestre actual.
             $materiasInscritas = AsignacionMateria::query()
