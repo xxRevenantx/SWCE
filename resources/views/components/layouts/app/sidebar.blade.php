@@ -50,6 +50,9 @@
                     </flux:navlist.item>
                 @endcan
 
+
+                {{-- ESTUDIANTE --}}
+
                 @can('estudiante.dashboard')
                     <flux:navlist.item class="py-4" icon="home" :href="route('estudiante.dashboard')"
                         :current="request()->routeIs('estudiante.dashboard')" wire:navigate>
@@ -60,6 +63,11 @@
                     <flux:navlist.item class="py-4" icon="home" :href="route('estudiante.perfil')"
                         :current="request()->routeIs('estudiante.perfil')" wire:navigate>
                         Mi perfil
+                    </flux:navlist.item>
+
+                    <flux:navlist.item class="py-4" icon="calendar-days" :href="route('estudiante.horario')"
+                        :current="request()->routeIs('estudiante.horario')" wire:navigate>
+                        Mi Horario
                     </flux:navlist.item>
                 @endcan
 
@@ -157,20 +165,6 @@
             </flux:navlist>
         @endcan
 
-        {{-- @can('admin.licenciaturas')
-            <flux:navlist >
-                <flux:navlist.group :heading="__('Licenciaturas')" class="grid ">
-                    <flux:navlist.item icon="book" :href="route('licenciaturas.index')" :current="request()->routeIs('licenciaturas.index')" wire:navigate>{{ __('Licenciaturas') }}</flux:navlist.item>
-                </flux:navlist.group>
-            </flux:navlist>
-            @endcan
-         @can('admin.cuatrimestres')
-            <flux:navlist >
-                <flux:navlist.group :heading="__('Cuatrimestres')" class="grid ">
-                    <flux:navlist.item icon="book" :href="route('cuatrimestres.index')" :current="request()->routeIs('cuatrimestres.index')" wire:navigate>{{ __('Cuatrimestres') }}</flux:navlist.item>
-                </flux:navlist.group>
-            </flux:navlist>
-            @endcan --}}
 
         <flux:spacer />
 

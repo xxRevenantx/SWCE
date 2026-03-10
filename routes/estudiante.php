@@ -11,6 +11,8 @@ Route::middleware(['auth'])->group(function () {
 
     Route::view('perfil', 'estudiante.perfil')->middleware('can:estudiante.perfil')->name('estudiante.perfil'); // estudiante.perfil (URL /estudiante/perfil)
 
+    Route::view('horario', 'estudiante.horario')->middleware('can:estudiante.horario')->name('estudiante.horario'); // estudiante.horario (URL /estudiante/horario)
+
 
     Route::get('perfil/mi-expediente', [EstudiantePDFController::class, 'mi_expediente'])->middleware('can:estudiante.pdf.mi-expediente')->name('estudiante.pdf.mi-expediente');
 

@@ -95,6 +95,9 @@ class RoleSeeder extends Seeder
 
         Permission::create(['name' => 'estudiante.perfil'])->syncRoles([$role3]);
 
+        // Crear el permiso 'estudiante.horario' y asignarlo al rol 'Estudiante'
+        Permission::create(['name' => 'estudiante.horario'])->syncRoles([$role3]);
+
         // Crear el permiso 'estudiante.pdf.mi-expediente' y asignarlo al rol 'Estudiante'
         Permission::create(['name' => 'estudiante.pdf.mi-expediente'])->syncRoles([$role3]);
 
