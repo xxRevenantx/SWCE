@@ -2,13 +2,17 @@
     mostrarModalPdf: false,
     pdfModalUrl: '',
     timeoutPdf: null,
+    cargandoPdf: false,
 
     abrirPdf(url) {
         if (!url || url === '#') return;
 
         clearTimeout(this.timeoutPdf);
+
+        this.cargandoPdf = true;
         this.pdfModalUrl = url;
         this.mostrarModalPdf = true;
+
         document.body.classList.add('overflow-hidden');
     },
 
@@ -18,14 +22,18 @@
 
         clearTimeout(this.timeoutPdf);
 
-        // Espero a que termine la animación antes de limpiar el iframe.
         this.timeoutPdf = setTimeout(() => {
             this.pdfModalUrl = '';
+            this.cargandoPdf = false;
         }, 220);
+    },
+
+    pdfCargado() {
+        this.cargandoPdf = false;
     }
 }" x-on:keydown.escape.window="cerrarPdf()">
 
-    {{-- ENCABEZADO PREMIUM --}}
+    {{-- ENCABEZADO  --}}
     <section
         class="relative overflow-hidden rounded-[32px] border border-white/60 bg-white/80 shadow-[0_20px_60px_-25px_rgba(15,23,42,0.28)] backdrop-blur-xl dark:border-white/5 dark:bg-neutral-900/80">
         <div
@@ -35,7 +43,7 @@
         <div class="absolute -bottom-20 left-0 h-72 w-72 rounded-full bg-sky-400/10 blur-3xl"></div>
         <div class="h-1.5 w-full bg-gradient-to-r from-emerald-500 via-sky-500 to-violet-500"></div>
 
-        <div class="relative p-5 sm:p-6 lg:p-8">
+        <div class="relative p-5 sm:p-6 lg:py-2">
             <div class="flex flex-col gap-6 2xl:flex-row 2xl:items-center 2xl:justify-between">
                 <div class="space-y-4">
                     <div>
@@ -48,7 +56,7 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:min-w-[560px]">
+                <div class="grid grid-cols-1 gap-3 sm:grid-cols-4 xl:min-w-[560px]">
                     <div
                         class="rounded-2xl border border-white/70 bg-white/85 p-4 shadow-sm backdrop-blur dark:border-neutral-800 dark:bg-neutral-900/75">
                         <p
@@ -97,9 +105,9 @@
         </div>
     </section>
 
-    {{-- BUSCADOR PREMIUM --}}
+    {{-- BUSCADOR --}}
     <section
-        class="overflow-hidden rounded-[30px] border border-white/60 bg-white/85 shadow-sm backdrop-blur-xl dark:border-white/5 dark:bg-neutral-900/80">
+        class="overflow-hidden rounded-[30px] border border-white/60 bg-white/85 shadow-sm backdrop-blur-xl dark:border-white/5 dark:bg-neutral-900/80 mt-2">
         <div class="border-b border-neutral-200/70 px-5 py-4 dark:border-neutral-800">
             <div class="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
                 <div>
@@ -150,8 +158,181 @@
         @endif
     </section>
 
-    {{-- CALENDARIO PREMIUM DESKTOP --}}
-    <section class="hidden xl:block">
+    {{-- DISTRIBUCIÓN POR PROFESOR --}}
+
+    <section
+        class="mt-3 overflow-hidden rounded-[30px] border border-white/60 bg-white/85 shadow-sm backdrop-blur-xl dark:border-white/5 dark:bg-neutral-900/80">
+        <div x-data="{ abierto: false }" class="relative">
+
+            {{-- Encabezado del collapse --}}
+            <button type="button" @click="abierto = !abierto"
+                class="flex w-full items-center justify-between gap-4 px-5 py-4 text-left transition hover:bg-neutral-50/70 dark:hover:bg-neutral-800/50">
+                <div class="flex min-w-0 items-center gap-4">
+                    <div
+                        class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500 via-fuchsia-500 to-pink-500 text-white shadow-[0_12px_30px_-12px_rgba(168,85,247,0.65)]">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M18 18.72a9.094 9.094 0 0 0 3.742-.479 3 3 0 0 0-4.682-2.72m.94 3.198v.75c0 .414-.336.75-.75.75H6.75a.75.75 0 0 1-.75-.75v-.75m12 0a5.97 5.97 0 0 0-1.94-4.41M18 18.72a5.97 5.97 0 0 1-1.94-4.41m0 0a5.97 5.97 0 0 0-8.12 0m8.12 0A5.97 5.97 0 0 1 12 16.5a5.97 5.97 0 0 1-4.06-1.59m0 0A5.97 5.97 0 0 0 6 18.72m1.94-3.81a3 3 0 1 0-4.682 2.72A9.094 9.094 0 0 0 6 18.72m6-9.47a3.75 3.75 0 1 0 0-7.5a3.75 3.75 0 0 0 0 7.5Zm6 3a3 3 0 1 0 0-6a3 3 0 0 0 0 6Zm-12 0a3 3 0 1 0 0-6a3 3 0 0 0 0 6Z" />
+                        </svg>
+                    </div>
+
+                    <div class="min-w-0">
+                        <h2 class="text-base font-semibold text-neutral-900 dark:text-white">
+                            Distribución docente
+                        </h2>
+                        <p class="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
+                            Consulta las materias, días y horas asignadas a cada profesor dentro de tu horario.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="flex shrink-0 items-center gap-3">
+                    <div
+                        class="hidden sm:inline-flex items-center rounded-full border border-violet-200 bg-violet-50 px-3 py-1.5 text-xs font-semibold text-violet-700 dark:border-violet-500/20 dark:bg-violet-500/10 dark:text-violet-300">
+                        {{ count($distribucion_profesores) }} profesor(es)
+                    </div>
+
+                    <div
+                        class="flex h-11 w-11 items-center justify-center rounded-2xl border border-neutral-200 bg-white text-neutral-500 shadow-sm transition dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-300">
+                        <svg x-show="!abierto" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                        </svg>
+
+                        <svg x-show="abierto" x-cloak class="h-5 w-5" fill="none" stroke="currentColor"
+                            stroke-width="1.8" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 12h-15" />
+                        </svg>
+                    </div>
+                </div>
+            </button>
+
+            {{-- Contenido del collapse --}}
+            <div x-show="abierto" x-collapse x-cloak
+                class="border-t border-neutral-200/70 bg-neutral-50/70 px-5 py-5 dark:border-neutral-800 dark:bg-neutral-950/30">
+
+                @if (count($distribucion_profesores))
+                    <div class="grid grid-cols-1 gap-5 2xl:grid-cols-2">
+                        @foreach ($distribucion_profesores as $profesorItem)
+                            <article
+                                class="group relative overflow-hidden rounded-[28px] border border-white/70 bg-white/90 shadow-[0_16px_40px_-22px_rgba(15,23,42,0.18)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_20px_45px_-22px_rgba(15,23,42,0.22)] dark:border-white/5 dark:bg-neutral-900/85">
+
+                                {{-- Línea superior --}}
+                                <div class="h-1.5 w-full"
+                                    style="background: linear-gradient(90deg, {{ $profesorItem['color'] }} 0%, color-mix(in srgb, {{ $profesorItem['color'] }} 70%, white 30%) 100%);">
+                                </div>
+
+                                {{-- Decoración --}}
+                                <div class="pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full opacity-15 blur-2xl"
+                                    style="background: {{ $profesorItem['color'] }};">
+                                </div>
+
+                                <div class="relative p-5">
+                                    {{-- Cabecera profesor --}}
+                                    <div class="flex items-start justify-between gap-4">
+                                        <div class="flex min-w-0 items-start gap-4">
+                                            <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-white shadow-sm"
+                                                style="background: linear-gradient(135deg, {{ $profesorItem['color'] }} 0%, color-mix(in srgb, {{ $profesorItem['color'] }} 75%, #0f172a 25%) 100%);">
+                                                <svg class="h-5 w-5" fill="none" stroke="currentColor"
+                                                    stroke-width="1.8" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        d="M15.75 6.75a3.75 3.75 0 1 1-7.5 0a3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                                                </svg>
+                                            </div>
+
+                                            <div class="min-w-0">
+                                                <h3
+                                                    class="text-sm font-bold leading-5 text-neutral-900 dark:text-white">
+                                                    {{ $profesorItem['profesor'] }}
+                                                </h3>
+
+                                                <div class="mt-2 flex flex-wrap items-center gap-2">
+                                                    <span
+                                                        class="inline-flex items-center rounded-full border border-neutral-200 bg-neutral-50 px-2.5 py-1 text-[11px] font-medium text-neutral-600 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-300">
+                                                        {{ count($profesorItem['materias']) }} materia(s)
+                                                    </span>
+
+                                                    <span
+                                                        class="inline-flex items-center rounded-full border border-neutral-200 bg-neutral-50 px-2.5 py-1 text-[11px] font-medium text-neutral-600 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-300">
+                                                        {{ $profesorItem['total_bloques'] }} bloque(s)
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <span class="mt-1 inline-block h-3.5 w-3.5 rounded-full shrink-0"
+                                            style="background: {{ $profesorItem['color'] }};"></span>
+                                    </div>
+
+                                    {{-- Materias --}}
+                                    <div class="mt-5 space-y-4">
+                                        @foreach ($profesorItem['materias'] as $materiaItem)
+                                            <div
+                                                class="rounded-[22px] border border-neutral-200/70 bg-neutral-50/80 p-4 dark:border-neutral-700 dark:bg-neutral-800/60">
+                                                <div class="flex items-start justify-between gap-3">
+                                                    <div class="min-w-0">
+                                                        <p
+                                                            class="text-sm font-semibold text-neutral-900 dark:text-white">
+                                                            {{ $materiaItem['materia'] }}
+                                                        </p>
+                                                        <p
+                                                            class="mt-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-500 dark:text-neutral-400">
+                                                            {{ $materiaItem['clave'] }}
+                                                        </p>
+                                                    </div>
+
+                                                    <span
+                                                        class="inline-flex shrink-0 items-center rounded-full px-2.5 py-1 text-[11px] font-semibold"
+                                                        style="background: color-mix(in srgb, {{ $materiaItem['color'] }} 12%, white 88%); color: {{ $materiaItem['color'] }};">
+                                                        {{ count($materiaItem['bloques']) }} bloque(s)
+                                                    </span>
+                                                </div>
+
+                                                <div class="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                                                    @foreach ($materiaItem['bloques'] as $bloque)
+                                                        <div
+                                                            class="flex items-center justify-between gap-3 rounded-2xl border border-neutral-200/70 bg-white px-3 py-2.5 text-sm shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
+                                                            <div class="flex min-w-0 items-center gap-2">
+                                                                <span class="h-2.5 w-2.5 rounded-full shrink-0"
+                                                                    style="background: {{ $materiaItem['color'] }};"></span>
+                                                                <span
+                                                                    class="truncate font-medium text-neutral-800 dark:text-neutral-200">
+                                                                    {{ $bloque['dia'] }}
+                                                                </span>
+                                                            </div>
+
+                                                            <span
+                                                                class="shrink-0 text-neutral-500 dark:text-neutral-400">
+                                                                {{ $bloque['hora'] }}
+                                                            </span>
+                                                        </div>
+                                                    @endforeach
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            </article>
+                        @endforeach
+                    </div>
+                @else
+                    <div
+                        class="rounded-3xl border border-dashed border-neutral-300 bg-neutral-50 px-6 py-10 text-center dark:border-neutral-700 dark:bg-neutral-800/40">
+                        <h3 class="text-base font-semibold text-neutral-900 dark:text-white">
+                            No hay distribución disponible
+                        </h3>
+                        <p class="mt-2 text-sm text-neutral-500 dark:text-neutral-400">
+                            No se encontraron profesores o bloques para mostrar en este apartado.
+                        </p>
+                    </div>
+                @endif
+            </div>
+        </div>
+    </section>
+
+    {{-- CALENDARIO  DESKTOP --}}
+    <section class="hidden xl:block mt-3">
         <div
             class="rounded-[32px] border border-white/60 bg-white/85 shadow-[0_20px_60px_-28px_rgba(15,23,42,0.30)] backdrop-blur-xl dark:border-white/5 dark:bg-neutral-900/80">
             <div class="grid grid-cols-[380px_minmax(0,1fr)]">
@@ -159,16 +340,11 @@
                 <aside
                     class="border-r border-neutral-200/70 bg-neutral-50/70 dark:border-neutral-800 dark:bg-neutral-950/40">
                     <div class="border-b border-neutral-200/70 p-5 dark:border-neutral-800">
-                        <p
-                            class="text-[11px] font-semibold uppercase tracking-[0.22em] text-neutral-500 dark:text-neutral-400">
-                            Panel lateral
-                        </p>
+
                         <h2 class="mt-2 text-xl font-bold text-neutral-900 dark:text-white">
                             Agenda semanal
                         </h2>
-                        <p class="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
-                            Vista ejecutiva de tus clases.
-                        </p>
+
                     </div>
 
                     <div class="space-y-4 p-5">
@@ -226,7 +402,8 @@
                                 <div
                                     class="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-emerald-400 via-teal-500 to-cyan-500">
                                 </div>
-                                <div class="absolute -top-6 -right-6 h-20 w-20 rounded-full bg-emerald-400/10 blur-2xl">
+                                <div
+                                    class="absolute -top-6 -right-6 h-20 w-20 rounded-full bg-emerald-400/10 blur-2xl">
                                 </div>
 
                                 <div class="flex items-start justify-between gap-4">
@@ -374,7 +551,6 @@
                                 </div>
 
                                 <div class="flex overflow-hidden rounded-2xl bg-white/10 p-1 backdrop-blur">
-
                                     <button type="button"
                                         x-on:click="abrirPdf('{{ $this->filtrosListos ? $this->pdfUrl : '' }}')"
                                         class="{{ $this->clasePdf }}">
@@ -460,17 +636,21 @@
                                                     {{ $esHoy ? 'bg-sky-50/30 dark:bg-sky-500/5' : 'bg-white/60 dark:bg-transparent' }}">
                                                     @if ($celda)
                                                         <div
-                                                            class="group relative z-40 h-full min-h-[170px] overflow-visible rounded-[26px] border border-neutral-200/80 bg-white/92 p-4 shadow-[0_14px_34px_-18px_rgba(15,23,42,0.22)] transition duration-300 hover:z-[200] hover:-translate-y-1 hover:shadow-[0_20px_40px_-18px_rgba(15,23,42,0.28)] dark:border-neutral-700/70 dark:bg-neutral-900/90">
-                                                            <div class="absolute inset-x-0 top-0 h-1.5 rounded-t-[26px]"
-                                                                style="background: linear-gradient(90deg, {{ $celda['color'] }} 0%, color-mix(in srgb, {{ $celda['color'] }} 70%, white 30%) 100%);">
+                                                            class="group relative z-40 h-full min-h-[170px] overflow-hidden rounded-[26px] border border-neutral-200/80 bg-white/92 shadow-[0_14px_34px_-18px_rgba(15,23,42,0.22)] transition duration-300 hover:z-[200] hover:-translate-y-1 hover:shadow-[0_20px_40px_-18px_rgba(15,23,42,0.28)] dark:border-neutral-700/70 dark:bg-neutral-900/90">
+
+                                                            <div
+                                                                class="pointer-events-none absolute inset-x-0 top-0 z-0 overflow-hidden rounded-t-[26px]">
+                                                                <div class="h-1.5 w-full"
+                                                                    style="background: linear-gradient(90deg, {{ $celda['color'] }} 0%, color-mix(in srgb, {{ $celda['color'] }} 70%, white 30%) 100%);">
+                                                                </div>
                                                             </div>
 
-                                                            <div class="absolute -right-6 -top-6 h-20 w-20 rounded-full opacity-20 blur-2xl"
+                                                            <div class="pointer-events-none absolute -right-6 -top-6 z-0 h-20 w-20 rounded-full opacity-20 blur-2xl"
                                                                 style="background: {{ $celda['color'] }};">
                                                             </div>
 
                                                             <div
-                                                                class="relative z-10 flex h-full flex-col justify-between pt-2">
+                                                                class="relative z-10 flex h-full flex-col justify-between p-4 pt-6">
                                                                 <div class="flex items-start justify-between gap-3">
                                                                     <div class="min-w-0">
                                                                         <p
@@ -492,65 +672,8 @@
                                                                             </span>
                                                                         @endif
 
-                                                                        <div class="relative z-[300]">
-                                                                            <div class="flex h-8 w-8 items-center justify-center rounded-xl border border-neutral-200 bg-neutral-50 text-neutral-500 transition group-hover:border-transparent group-hover:text-white dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-300"
-                                                                                style="--tw-bg-opacity:1;"
-                                                                                onmouseover="this.style.background='{{ $celda['color'] }}';"
-                                                                                onmouseout="this.style.background='';">
-                                                                                <svg class="h-4 w-4" fill="none"
-                                                                                    stroke="currentColor"
-                                                                                    stroke-width="1.8"
-                                                                                    viewBox="0 0 24 24">
-                                                                                    <path stroke-linecap="round"
-                                                                                        stroke-linejoin="round"
-                                                                                        d="M15 19.128a9.38 9.38 0 0 0 2.625.372A3.375 3.375 0 0 0 21 16.125V15a4.125 4.125 0 0 0-.825-2.475l-1.05-1.4A4.125 4.125 0 0 1 18.3 8.65V7.875a6.375 6.375 0 1 0-12.75 0v.775a4.125 4.125 0 0 1-.825 2.475l-1.05 1.4A4.125 4.125 0 0 0 3 15v1.125A3.375 3.375 0 0 0 6.375 19.5c.9 0 1.787-.127 2.625-.372m6 0a3 3 0 1 1-6 0m6 0a3 3 0 1 0-6 0" />
-                                                                                </svg>
-                                                                            </div>
 
-                                                                            <div
-                                                                                class="pointer-events-none absolute top-1/2 z-[9999] w-72 -translate-y-1/2 rounded-2xl border border-white/70 bg-white/95 p-4 opacity-0 shadow-[0_22px_60px_-18px_rgba(15,23,42,0.38)] backdrop-blur-xl transition-all duration-300 group-hover:pointer-events-auto group-hover:opacity-100 dark:border-white/10 dark:bg-neutral-900/95 {{ $tooltipIzquierda ? 'right-full mr-4' : 'left-full ml-4' }}">
-                                                                                <div class="relative">
-                                                                                    <div
-                                                                                        class="flex items-start gap-3">
-                                                                                        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl text-white shadow-sm"
-                                                                                            style="background: linear-gradient(135deg, {{ $celda['color'] }} 0%, color-mix(in srgb, {{ $celda['color'] }} 75%, #0f172a 25%) 100%);">
-                                                                                            <svg class="h-5 w-5"
-                                                                                                fill="none"
-                                                                                                stroke="currentColor"
-                                                                                                stroke-width="1.8"
-                                                                                                viewBox="0 0 24 24">
-                                                                                                <path
-                                                                                                    stroke-linecap="round"
-                                                                                                    stroke-linejoin="round"
-                                                                                                    d="M15.75 6.75a3.75 3.75 0 1 1-7.5 0a3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
-                                                                                            </svg>
-                                                                                        </div>
 
-                                                                                        <div class="min-w-0">
-                                                                                            <p
-                                                                                                class="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-500 dark:text-neutral-400">
-                                                                                                Profesor asignado
-                                                                                            </p>
-                                                                                            <p
-                                                                                                class="mt-1 text-sm font-bold leading-5 text-neutral-900 dark:text-white">
-                                                                                                {{ $celda['profesor'] }}
-                                                                                            </p>
-                                                                                            <div
-                                                                                                class="mt-3 flex items-center gap-2 text-xs text-neutral-500 dark:text-neutral-400">
-                                                                                                <span
-                                                                                                    class="inline-block h-2.5 w-2.5 rounded-full"
-                                                                                                    style="background: {{ $celda['color'] }};"></span>
-                                                                                                <span>{{ $celda['hora'] }}</span>
-                                                                                            </div>
-                                                                                        </div>
-                                                                                    </div>
-
-                                                                                    <div
-                                                                                        class="absolute top-1/2 h-3 w-3 -translate-y-1/2 rotate-45 border-white/70 bg-white/95 dark:border-white/10 dark:bg-neutral-900/95 {{ $tooltipIzquierda ? '-right-[6px] border-r border-t' : '-left-[6px] border-b border-l' }}">
-                                                                                    </div>
-                                                                                </div>
-                                                                            </div>
-                                                                        </div>
                                                                     </div>
                                                                 </div>
 
@@ -561,6 +684,10 @@
                                                                             style="background: {{ $celda['color'] }};"></span>
                                                                         {{ $celda['hora'] }}
                                                                     </div>
+
+                                                                    <p class="text-xs text-neutral-400 leading-4 mt-2">
+                                                                        Profesor:
+                                                                        {{ $celda['profesor'] }}</p>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -774,16 +901,20 @@
                                 @endphp
 
                                 <div
-                                    class="group relative z-40 h-full min-h-[170px] overflow-visible rounded-[26px] border border-neutral-200/80 bg-white/92 p-4 shadow-[0_14px_34px_-18px_rgba(15,23,42,0.22)] transition duration-300 hover:z-[200] hover:-translate-y-1 hover:shadow-[0_20px_40px_-18px_rgba(15,23,42,0.28)] dark:border-neutral-700/70 dark:bg-neutral-900/90">
-                                    <div class="absolute inset-x-0 top-0 h-1.5 rounded-t-[26px]"
-                                        style="background: linear-gradient(90deg, {{ $celda['color'] }} 0%, color-mix(in srgb, {{ $celda['color'] }} 70%, white 30%) 100%);">
+                                    class="group relative z-40 h-full min-h-[170px] overflow-visible rounded-[26px] border border-neutral-200/80 bg-white/92 shadow-[0_14px_34px_-18px_rgba(15,23,42,0.22)] transition duration-300 hover:z-[200] hover:-translate-y-1 hover:shadow-[0_20px_40px_-18px_rgba(15,23,42,0.28)] dark:border-neutral-700/70 dark:bg-neutral-900/90">
+
+                                    <div
+                                        class="pointer-events-none absolute inset-x-0 top-0 z-0 overflow-hidden rounded-t-[26px]">
+                                        <div class="h-1.5 w-full"
+                                            style="background: linear-gradient(90deg, {{ $celda['color'] }} 0%, color-mix(in srgb, {{ $celda['color'] }} 70%, white 30%) 100%);">
+                                        </div>
                                     </div>
 
-                                    <div class="absolute -right-6 -top-6 h-20 w-20 rounded-full opacity-20 blur-2xl"
+                                    <div class="pointer-events-none absolute -right-6 -top-6 z-0 h-20 w-20 rounded-full opacity-20 blur-2xl"
                                         style="background: {{ $celda['color'] }};">
                                     </div>
 
-                                    <div class="relative z-10 flex h-full flex-col justify-between pt-2">
+                                    <div class="relative z-10 flex h-full flex-col justify-between p-4 pt-6">
                                         <div class="flex items-start justify-between gap-3">
                                             <div class="min-w-0">
                                                 <p
@@ -807,7 +938,6 @@
 
                                                 <div class="relative z-[300]">
                                                     <div class="flex h-8 w-8 items-center justify-center rounded-xl border border-neutral-200 bg-neutral-50 text-neutral-500 transition group-hover:border-transparent group-hover:text-white dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-300"
-                                                        style="--tw-bg-opacity:1;"
                                                         onmouseover="this.style.background='{{ $celda['color'] }}';"
                                                         onmouseout="this.style.background='';">
                                                         <svg class="h-4 w-4" fill="none" stroke="currentColor"
@@ -910,7 +1040,7 @@
             x-transition:leave="transition ease-in duration-200"
             x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
             x-transition:leave-end="opacity-0 translate-y-6 sm:translate-y-0 sm:scale-95"
-            class="relative w-full max-w-6xl overflow-hidden rounded-2xl bg-white dark:bg-neutral-900 shadow-2xl ring-1 ring-black/10 dark:ring-white/10">
+            class="relative w-full max-w-6xl overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-black/10 dark:bg-neutral-900 dark:ring-white/10">
 
             {{-- Encabezado del modal --}}
             <div
@@ -927,7 +1057,7 @@
 
                 <div class="flex items-center gap-2">
                     <a x-bind:href="pdfModalUrl" target="_blank" rel="noopener"
-                        class="inline-flex items-center rounded-xl bg-sky-500 px-4 py-2 text-sm font-medium text-white hover:bg-sky-600 transition">
+                        class="inline-flex items-center rounded-xl bg-sky-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-600">
                         Abrir en pestaña
                     </a>
 
@@ -940,10 +1070,32 @@
             </div>
 
             {{-- Cuerpo del modal --}}
-            <div class="p-4 sm:p-5 bg-neutral-100 dark:bg-neutral-950">
+            <div class="bg-neutral-100 p-4 sm:p-5 dark:bg-neutral-950">
                 <div
-                    class="overflow-hidden rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900">
-                    <iframe x-bind:src="pdfModalUrl" class="h-[75vh] w-full bg-white dark:bg-neutral-900">
+                    class="relative overflow-hidden rounded-2xl border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900">
+
+                    {{-- Loader --}}
+                    <div x-show="cargandoPdf" x-transition.opacity
+                        class="absolute inset-0 z-20 flex flex-col items-center justify-center bg-white/85 backdrop-blur-sm dark:bg-neutral-900/85">
+                        <div class="flex flex-col items-center justify-center gap-4 px-6 text-center">
+                            <div
+                                class="h-14 w-14 animate-spin rounded-full border-4 border-sky-200 border-t-sky-500 dark:border-sky-900/50 dark:border-t-sky-400">
+                            </div>
+
+                            <div>
+                                <p class="text-sm font-semibold text-neutral-900 dark:text-white">
+                                    Cargando vista previa...
+                                </p>
+                                <p class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
+                                    Espera un momento mientras se muestra el PDF.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Iframe --}}
+                    <iframe x-bind:src="pdfModalUrl" x-on:load="pdfCargado()"
+                        class="h-[75vh] w-full bg-white dark:bg-neutral-900">
                     </iframe>
                 </div>
             </div>

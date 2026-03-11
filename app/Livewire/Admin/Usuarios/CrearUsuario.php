@@ -44,48 +44,48 @@ class CrearUsuario extends Component
         return str_pad((string) random_int(0, 999), 3, '0', STR_PAD_LEFT);
     }
 
-  private function sugerirUsernameDesdeEmail(string $email): string
-{
-    // 1) Local-part del email
-    $local = strtolower(trim((string) \Illuminate\Support\Str::before($email, '@')));
+    private function sugerirUsernameDesdeEmail(string $email): string
+    {
+        // 1) Local-part del email
+        $local = strtolower(trim((string) \Illuminate\Support\Str::before($email, '@')));
 
-    // 2) Quita puntos y guiones explícitamente
-    $local = str_replace(['.', '-'], '', $local);
+        // 2) Quita puntos y guiones explícitamente
+        $local = str_replace(['.', '-'], '', $local);
 
-    // 3) Deja solo letras, números y guion_bajo (sin puntos ni guiones)
-    $base = preg_replace('/[^a-z0-9]+/i', '', $local) ?: 'user';
+        // 3) Deja solo letras, números y guion_bajo (sin puntos ni guiones)
+        $base = preg_replace('/[^a-z0-9]+/i', '', $local) ?: 'user';
 
-    $maxLen    = 15;
-    $suffixLen = 3;
+        $maxLen    = 15;
+        $suffixLen = 3;
 
-    // 4) Recorta base para dejar espacio al sufijo de 3 dígitos
-    $roomForBase = max(1, $maxLen - $suffixLen);
-    $base = substr($base, 0, $roomForBase);
-    if ($base === '') {
-        $base = substr('user', 0, $roomForBase);
-    }
-
-    // 5) Intenta con sufijos aleatorios primero
-    for ($try = 0; $try < 200; $try++) {
-        $candidate = $base . $this->sufijoTresDigitos();
-        if (!\App\Models\User::where('username', $candidate)->exists()) {
-            return $candidate;
+        // 4) Recorta base para dejar espacio al sufijo de 3 dígitos
+        $roomForBase = max(1, $maxLen - $suffixLen);
+        $base = substr($base, 0, $roomForBase);
+        if ($base === '') {
+            $base = substr('user', 0, $roomForBase);
         }
-    }
 
-    // 6) Fallback determinista (000–999)
-    for ($i = 0; $i <= 999; $i++) {
-        $suffix = str_pad((string) $i, 3, '0', STR_PAD_LEFT);
-        $candidate = $base . $suffix;
-        if (!\App\Models\User::where('username', $candidate)->exists()) {
-            return $candidate;
+        // 5) Intenta con sufijos aleatorios primero
+        for ($try = 0; $try < 200; $try++) {
+            $candidate = $base . $this->sufijoTresDigitos();
+            if (!\App\Models\User::where('username', $candidate)->exists()) {
+                return $candidate;
+            }
         }
-    }
 
-    // 7) Último recurso
-    $mini = substr($base, 0, max(1, $roomForBase - 1));
-    return $mini . strtolower(\Illuminate\Support\Str::random(1)) . $this->sufijoTresDigitos();
-}
+        // 6) Fallback determinista (000–999)
+        for ($i = 0; $i <= 999; $i++) {
+            $suffix = str_pad((string) $i, 3, '0', STR_PAD_LEFT);
+            $candidate = $base . $suffix;
+            if (!\App\Models\User::where('username', $candidate)->exists()) {
+                return $candidate;
+            }
+        }
+
+        // 7) Último recurso
+        $mini = substr($base, 0, max(1, $roomForBase - 1));
+        return $mini . strtolower(\Illuminate\Support\Str::random(1)) . $this->sufijoTresDigitos();
+    }
     /** Validación “en vivo”; además, reaccionamos a cambios específicos */
     public function updated($field): void
     {
@@ -114,7 +114,7 @@ class CrearUsuario extends Component
         $user = User::create([
             'username' => trim($this->username),
             'email'    => trim($this->email),
-            'password' => bcrypt('12345678'),
+            'password' => bcrypt('password'),
             'status'   => 'true',
             'photo'    => null,
         ]);

@@ -26,7 +26,7 @@ class UserFactory extends Factory
             ->toString();
 
         return [
-            'username' => $this->faker->unique()->lexify($baseUsername . '##'),
+            'username' => $this->faker->unique()->lexify($baseUsername),
             'email' => $this->faker->unique()->safeEmail(),
             'email_verified_at' => now(),
             'password' => Hash::make('password'),
@@ -36,6 +36,7 @@ class UserFactory extends Factory
             'photo' => null,
             'status' => true,
             'order' => 1,
+            'change_password' => false
         ];
     }
 

@@ -30,6 +30,9 @@ class Horario extends Component
     public array $horas = [];
     public array $horario = [];
 
+    // Distribución agrupada por profesor.
+    public array $distribucion_profesores = [];
+
     // Datos de resumen.
     public int $total_materias = 0;
     public int $total_bloques = 0;
@@ -126,7 +129,7 @@ class Horario extends Component
             $registros = $registros->filter(function ($registro) use ($busqueda) {
                 $materia = $registro->asignacionMateria?->materia;
                 $profesor = $registro->asignacionMateria?->profesor;
-                $dia = strtoupper($registro->dia->dia ?? '');
+                $dia = mb_strtoupper($registro->dia->dia ?? '', 'UTF-8');
 
                 $nombreProfesor = trim(
                     ($profesor->nombre ?? '') . ' ' .
@@ -169,9 +172,12 @@ class Horario extends Component
             }
         }
 
+        // Se reinicia la distribución por profesor.
+        $this->distribucion_profesores = [];
+
         // Se asigna cada bloque a su día y hora.
         foreach ($registros as $registro) {
-            $nombreDia = strtoupper($registro->dia->dia ?? '');
+            $nombreDia = mb_strtoupper($registro->dia->dia ?? '', 'UTF-8');
 
             if (!in_array($nombreDia, $this->dias, true)) {
                 continue;
@@ -190,14 +196,79 @@ class Horario extends Component
                 );
             }
 
+            $colorProfesor = $profesor->color ?? '#2563eb';
+
             $this->horario[$registro->hora][$nombreDia] = [
                 'hora' => $registro->hora,
                 'materia' => $materia->nombre ?? 'Sin materia',
                 'clave' => $materia->clave ?? 'Sin clave',
                 'profesor' => $nombreProfesor,
-                'color' => $profesor->color ?? '#2563eb',
+                'color' => $colorProfesor,
             ];
+
+            // Se guarda la distribución por profesor.
+            $indiceProfesor = $profesor?->id ?? 'sin-profesor';
+
+            if (!isset($this->distribucion_profesores[$indiceProfesor])) {
+                $this->distribucion_profesores[$indiceProfesor] = [
+                    'profesor' => $nombreProfesor,
+                    'color' => $colorProfesor,
+                    'total_bloques' => 0,
+                    'materias' => [],
+                ];
+            }
+
+            $indiceMateria = $materia?->id ?? ('materia-' . md5(($materia->nombre ?? 'sin-materia') . $indiceProfesor));
+
+            if (!isset($this->distribucion_profesores[$indiceProfesor]['materias'][$indiceMateria])) {
+                $this->distribucion_profesores[$indiceProfesor]['materias'][$indiceMateria] = [
+                    'materia' => $materia->nombre ?? 'Sin materia',
+                    'clave' => $materia->clave ?? 'Sin clave',
+                    'color' => $colorProfesor,
+                    'bloques' => [],
+                ];
+            }
+
+            $this->distribucion_profesores[$indiceProfesor]['materias'][$indiceMateria]['bloques'][] = [
+                'dia' => $this->formatearDia($nombreDia),
+                'hora' => $registro->hora,
+            ];
+
+            $this->distribucion_profesores[$indiceProfesor]['total_bloques']++;
         }
+
+        // Se ordenan los bloques y materias de cada profesor.
+        foreach ($this->distribucion_profesores as &$profesorDistribucion) {
+            foreach ($profesorDistribucion['materias'] as &$materiaDistribucion) {
+                usort($materiaDistribucion['bloques'], function ($a, $b) {
+                    $ordenDias = [
+                        'Lunes' => 1,
+                        'Martes' => 2,
+                        'Miércoles' => 3,
+                        'Jueves' => 4,
+                        'Viernes' => 5,
+                    ];
+
+                    $diaA = $ordenDias[$a['dia']] ?? 99;
+                    $diaB = $ordenDias[$b['dia']] ?? 99;
+
+                    if ($diaA === $diaB) {
+                        return $this->obtenerMinutosInicio($a['hora']) <=> $this->obtenerMinutosInicio($b['hora']);
+                    }
+
+                    return $diaA <=> $diaB;
+                });
+            }
+
+            uasort($profesorDistribucion['materias'], function ($a, $b) {
+                return strcmp($a['materia'], $b['materia']);
+            });
+        }
+        unset($profesorDistribucion, $materiaDistribucion);
+
+        uasort($this->distribucion_profesores, function ($a, $b) {
+            return strcmp($a['profesor'], $b['profesor']);
+        });
 
         // Se calcula el día actual.
         $this->dia_actual = $this->obtenerDiaActual();
@@ -212,7 +283,7 @@ class Horario extends Component
             ->count();
 
         $this->materias_hoy = $registros
-            ->filter(fn($item) => strtoupper($item->dia->dia ?? '') === $this->dia_actual)
+            ->filter(fn($item) => mb_strtoupper($item->dia->dia ?? '', 'UTF-8') === $this->dia_actual)
             ->count();
     }
 
@@ -247,6 +318,7 @@ class Horario extends Component
         // Reinicia la estructura del horario y sus totales.
         $this->horas = [];
         $this->horario = [];
+        $this->distribucion_profesores = [];
         $this->total_materias = 0;
         $this->total_bloques = 0;
         $this->materias_hoy = 0;
@@ -255,7 +327,7 @@ class Horario extends Component
     public function obtenerDiaActual(): string
     {
         // Obtiene el día actual en el mismo formato del horario.
-        $diaHoy = strtoupper(now()->locale('es')->dayName);
+        $diaHoy = mb_strtoupper(now()->locale('es')->dayName, 'UTF-8');
 
         return match ($diaHoy) {
             'LUNES' => 'LUNES',
@@ -333,7 +405,6 @@ class Horario extends Component
 
     public function getPdfUrlProperty(): string
     {
-
         if (!$this->filtrosListos) {
             return '#';
         }

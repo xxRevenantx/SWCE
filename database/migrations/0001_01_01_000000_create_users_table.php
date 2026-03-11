@@ -18,8 +18,9 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->string('photo')->nullable();
-            $table->enum('status', ["true","false"])->nullable()->default("true");
+            $table->enum('status', ["true", "false"])->nullable()->default("true");
             $table->integer('order')->nullable()->default(1);
+            $table->boolean('change_password')->default(false)->after('password');
             $table->rememberToken();
             $table->timestamps();
         });

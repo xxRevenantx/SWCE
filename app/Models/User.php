@@ -29,8 +29,11 @@ class User extends Authenticatable
         'photo',
         'status',
         'order',
+        'change_password'
 
     ];
+
+
 
     /**
      * The attributes that should be hidden for serialization.
@@ -54,6 +57,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'change_password' => 'boolean',
         ];
     }
 
@@ -78,5 +82,4 @@ class User extends Authenticatable
     {
         return $this->hasOne(Alumno::class);
     }
-
 }
