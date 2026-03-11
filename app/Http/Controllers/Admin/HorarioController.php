@@ -9,7 +9,7 @@ use App\Http\Requests\UpdateHorarioRequest;
 class HorarioController extends Controller
 {
 
-    public function index()
+    public function horarios()
     {
         return view('admin.horario.index');
     }

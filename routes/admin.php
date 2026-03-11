@@ -1,12 +1,13 @@
 <?php
 
+use App\Http\Controllers\Admin\CalificacionController;
 use App\Http\Controllers\Admin\HorarioController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\LicenciaturaController;
 use App\Http\Controllers\Admin\MateriaController;
 use App\Http\Controllers\Admin\PDFController;
 use App\Http\Controllers\Admin\ProfesorController;
-use App\Http\Controllers\CalificacionController;
+
 use App\Http\Controllers\CuatrimestreController;
 use App\Http\Controllers\GeneracionController;
 use App\Http\Controllers\InscripcionController;
@@ -21,27 +22,30 @@ Route::middleware(['auth'])->group(function () {
 
     Route::view('panel-administrador', 'admin.dashboard')->middleware('can:admin.dashboard')->name('admin.dashboard'); // admin.dashboard (URL /admin/dashboard)
     // Rutas del Admin
-    Route::resource('usuarios', UserController::class)->middleware('can:admin.usuarios')->names('usuarios');
-    Route::resource('licenciaturas', LicenciaturaController::class)->middleware('can:admin.licenciaturas')->names('licenciaturas');
-    Route::resource('cuatrimestres', CuatrimestreController::class)->middleware('can:admin.cuatrimestres')->names('cuatrimestres');
+    Route::get('usuarios', [UserController::class])->middleware('can:admin.usuarios')->name('admin.usuarios');
+    Route::get('licenciaturas', [LicenciaturaController::class])->middleware('can:admin.licenciaturas')->name('admin.licenciaturas');
+    Route::get('cuatrimestres', [CuatrimestreController::class])->middleware('can:admin.cuatrimestres')->name('admin.cuatrimestres');
 
     // GENERACIONES
-    Route::get('generaciones', [GeneracionController::class, 'generaciones'])->middleware('can:admin.generaciones')->name('generaciones');
-    Route::get('asignacion_generaciones', [GeneracionController::class, 'asignacion'])->middleware('can:admin.asignacion_generaciones')->name('asignacion_generaciones');
+    Route::get('generaciones', [GeneracionController::class, 'generaciones'])->middleware('can:admin.generaciones')->name('admin.generaciones');
+    Route::get('asignacion_generaciones', [GeneracionController::class, 'asignacion'])->middleware('can:admin.asignacion_generaciones')->name('admin.asignacion_generaciones');
+
+    // PROFESORES
+
+    Route::get('profesores', [ProfesorController::class, 'profesores'])->middleware('can:admin.profesores')->name('admin.profesores');
 
 
-    Route::resource('profesores', ProfesorController::class)->middleware('can:admin.profesores')->names('profesores');
     //MATERIA
-    Route::get('materias', [MateriaController::class, 'materia'])->middleware('can:admin.materias')->name('materias');
+    Route::get('materias', [MateriaController::class, 'materia'])->middleware('can:admin.materias')->name('admin.materias');
 
-    Route::get('asignacion_materias', [MateriaController::class, 'asignacion'])->middleware('can:admin.asignacion_materias')->name('asignacion_materias');
+    Route::get('asignacion_materias', [MateriaController::class, 'asignacion'])->middleware('can:admin.asignacion_materias')->name('admin.asignacion_materias');
 
 
     //HORARIO
-    Route::resource('horarios', HorarioController::class)->middleware('can:admin.horarios')->names('horarios');
+    Route::get('horarios', [HorarioController::class, 'horarios'])->middleware('can:admin.horarios')->name('admin.horarios');
 
     // CALIFICACIONES
-    Route::resource('calificaciones', CalificacionController::class)->middleware('can:admin.calificaciones')->names('calificaciones');
+    Route::get('calificaciones', [CalificacionController::class, 'calificaciones'])->middleware('can:admin.calificaciones')->name('admin.calificaciones');
 
 
     //Inscripción

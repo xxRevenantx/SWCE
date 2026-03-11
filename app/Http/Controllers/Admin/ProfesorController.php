@@ -10,8 +10,9 @@ use App\Http\Requests\UpdateProfesorRequest;
 class ProfesorController extends Controller
 {
 
-    public function index()
+    public function profesores()
     {
+
         return view('admin.profesor.index');
     }
 

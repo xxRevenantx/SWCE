@@ -11,7 +11,7 @@ use App\Http\Requests\UpdateDashboardEstudianteRequest;
 class DashboardEstudianteController extends Controller
 {
 
-    public function index()
+    public function dashboard_estudiante()
     {
         return view('estudiante.dashboard');
     }

@@ -1,4 +1,30 @@
-<div class="space-y-6">
+<div x-data="{
+    mostrarModalPdf: false,
+    pdfModalUrl: '',
+    timeoutPdf: null,
+
+    abrirPdf(url) {
+        if (!url || url === '#') return;
+
+        clearTimeout(this.timeoutPdf);
+        this.pdfModalUrl = url;
+        this.mostrarModalPdf = true;
+        document.body.classList.add('overflow-hidden');
+    },
+
+    cerrarPdf() {
+        this.mostrarModalPdf = false;
+        document.body.classList.remove('overflow-hidden');
+
+        clearTimeout(this.timeoutPdf);
+
+        // Espero a que termine la animación antes de limpiar el iframe.
+        this.timeoutPdf = setTimeout(() => {
+            this.pdfModalUrl = '';
+        }, 220);
+    }
+}" x-on:keydown.escape.window="cerrarPdf()">
+
     {{-- ENCABEZADO PREMIUM --}}
     <section
         class="relative overflow-hidden rounded-[32px] border border-white/60 bg-white/80 shadow-[0_20px_60px_-25px_rgba(15,23,42,0.28)] backdrop-blur-xl dark:border-white/5 dark:bg-neutral-900/80">
@@ -348,17 +374,11 @@
                                 </div>
 
                                 <div class="flex overflow-hidden rounded-2xl bg-white/10 p-1 backdrop-blur">
+
                                     <button type="button"
-                                        class="rounded-xl px-4 py-2 text-sm font-medium text-white/80 transition hover:bg-white/10">
-                                        Mes
-                                    </button>
-                                    <button type="button"
-                                        class="rounded-xl bg-white/15 px-4 py-2 text-sm font-semibold text-white shadow-sm">
-                                        Semana
-                                    </button>
-                                    <button type="button"
-                                        class="rounded-xl px-4 py-2 text-sm font-medium text-white/80 transition hover:bg-white/10">
-                                        Día
+                                        x-on:click="abrirPdf('{{ $this->filtrosListos ? $this->pdfUrl : '' }}')"
+                                        class="{{ $this->clasePdf }}">
+                                        Ver horario en PDF
                                     </button>
                                 </div>
                             </div>
@@ -432,20 +452,19 @@
                                                 @php
                                                     $celda = $horario[$hora][$dia] ?? null;
                                                     $esHoy = $dia === $dia_actual;
+                                                    $tooltipIzquierda = in_array($dia, ['JUEVES', 'VIERNES'], true);
                                                 @endphp
 
                                                 <td
                                                     class="relative overflow-visible border-b border-neutral-200 px-3 py-3 align-top transition dark:border-neutral-800 hover:z-[150]
-                                                                 {{ $esHoy ? 'bg-sky-50/30 dark:bg-sky-500/5' : 'bg-white/60 dark:bg-transparent' }}">
+                                                    {{ $esHoy ? 'bg-sky-50/30 dark:bg-sky-500/5' : 'bg-white/60 dark:bg-transparent' }}">
                                                     @if ($celda)
                                                         <div
                                                             class="group relative z-40 h-full min-h-[170px] overflow-visible rounded-[26px] border border-neutral-200/80 bg-white/92 p-4 shadow-[0_14px_34px_-18px_rgba(15,23,42,0.22)] transition duration-300 hover:z-[200] hover:-translate-y-1 hover:shadow-[0_20px_40px_-18px_rgba(15,23,42,0.28)] dark:border-neutral-700/70 dark:bg-neutral-900/90">
-                                                            {{-- Acento superior en tonos suaves --}}
                                                             <div class="absolute inset-x-0 top-0 h-1.5 rounded-t-[26px]"
                                                                 style="background: linear-gradient(90deg, {{ $celda['color'] }} 0%, color-mix(in srgb, {{ $celda['color'] }} 70%, white 30%) 100%);">
                                                             </div>
 
-                                                            {{-- Glow sutil --}}
                                                             <div class="absolute -right-6 -top-6 h-20 w-20 rounded-full opacity-20 blur-2xl"
                                                                 style="background: {{ $celda['color'] }};">
                                                             </div>
@@ -473,8 +492,7 @@
                                                                             </span>
                                                                         @endif
 
-                                                                        {{-- Botón / indicador tooltip --}}
-                                                                        <div class="relative">
+                                                                        <div class="relative z-[300]">
                                                                             <div class="flex h-8 w-8 items-center justify-center rounded-xl border border-neutral-200 bg-neutral-50 text-neutral-500 transition group-hover:border-transparent group-hover:text-white dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-300"
                                                                                 style="--tw-bg-opacity:1;"
                                                                                 onmouseover="this.style.background='{{ $celda['color'] }}';"
@@ -489,7 +507,6 @@
                                                                                 </svg>
                                                                             </div>
 
-                                                                            {{-- Tooltip profesor --}}
                                                                             <div
                                                                                 class="pointer-events-none absolute top-1/2 z-[9999] w-72 -translate-y-1/2 rounded-2xl border border-white/70 bg-white/95 p-4 opacity-0 shadow-[0_22px_60px_-18px_rgba(15,23,42,0.38)] backdrop-blur-xl transition-all duration-300 group-hover:pointer-events-auto group-hover:opacity-100 dark:border-white/10 dark:bg-neutral-900/95 {{ $tooltipIzquierda ? 'right-full mr-4' : 'left-full ml-4' }}">
                                                                                 <div class="relative">
@@ -747,9 +764,15 @@
                         @foreach ($horas as $hora)
                             @php
                                 $celda = $horario[$hora][$dia] ?? null;
+                                $esHoy = $dia === $dia_actual;
+                                $tooltipIzquierda = true;
                             @endphp
 
                             @if ($celda)
+                                @php
+                                    $hayRegistros = true;
+                                @endphp
+
                                 <div
                                     class="group relative z-40 h-full min-h-[170px] overflow-visible rounded-[26px] border border-neutral-200/80 bg-white/92 p-4 shadow-[0_14px_34px_-18px_rgba(15,23,42,0.22)] transition duration-300 hover:z-[200] hover:-translate-y-1 hover:shadow-[0_20px_40px_-18px_rgba(15,23,42,0.28)] dark:border-neutral-700/70 dark:bg-neutral-900/90">
                                     <div class="absolute inset-x-0 top-0 h-1.5 rounded-t-[26px]"
@@ -795,7 +818,7 @@
                                                     </div>
 
                                                     <div
-                                                        class="pointer-events-none absolute top-1/2 z-[9999] w-72 -translate-y-1/2 rounded-2xl border border-white/70 bg-white/95 p-4 opacity-0 shadow-[0_22px_60px_-18px_rgba(15,23,42,0.38)] backdrop-blur-xl transition-all duration-300 group-hover:pointer-events-auto group-hover:opacity-100 dark:border-white/10 dark:bg-neutral-900/95 {{ $tooltipIzquierda ? 'right-full mr-4' : 'left-full ml-4' }}">
+                                                        class="pointer-events-none absolute top-1/2 right-full z-[9999] mr-4 w-72 -translate-y-1/2 rounded-2xl border border-white/70 bg-white/95 p-4 opacity-0 shadow-[0_22px_60px_-18px_rgba(15,23,42,0.38)] backdrop-blur-xl transition-all duration-300 group-hover:pointer-events-auto group-hover:opacity-100 dark:border-white/10 dark:bg-neutral-900/95">
                                                         <div class="relative">
                                                             <div class="flex items-start gap-3">
                                                                 <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl text-white shadow-sm"
@@ -829,7 +852,7 @@
                                                             </div>
 
                                                             <div
-                                                                class="absolute top-1/2 h-3 w-3 -translate-y-1/2 rotate-45 border-white/70 bg-white/95 dark:border-white/10 dark:bg-neutral-900/95 {{ $tooltipIzquierda ? '-right-[6px] border-r border-t' : '-left-[6px] border-b border-l' }}">
+                                                                class="absolute top-1/2 -right-[6px] h-3 w-3 -translate-y-1/2 rotate-45 border-r border-t border-white/70 bg-white/95 dark:border-white/10 dark:bg-neutral-900/95">
                                                             </div>
                                                         </div>
                                                     </div>
@@ -871,4 +894,59 @@
             </div>
         @endif
     </section>
+
+    {{-- MODAL PDF --}}
+    <div x-cloak x-show="mostrarModalPdf" x-transition.opacity.duration.200ms
+        class="fixed inset-0 z-[999] flex items-center justify-center p-4 sm:p-6" aria-labelledby="titulo-modal-pdf"
+        aria-modal="true" role="dialog">
+
+        {{-- Fondo --}}
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" x-on:click="cerrarPdf()"></div>
+
+        {{-- Ventana --}}
+        <div x-show="mostrarModalPdf" x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0 translate-y-6 sm:translate-y-0 sm:scale-95"
+            x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+            x-transition:leave="transition ease-in duration-200"
+            x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+            x-transition:leave-end="opacity-0 translate-y-6 sm:translate-y-0 sm:scale-95"
+            class="relative w-full max-w-6xl overflow-hidden rounded-2xl bg-white dark:bg-neutral-900 shadow-2xl ring-1 ring-black/10 dark:ring-white/10">
+
+            {{-- Encabezado del modal --}}
+            <div
+                class="flex items-center justify-between gap-3 border-b border-neutral-200 px-5 py-4 dark:border-neutral-800">
+                <div>
+                    <h2 id="titulo-modal-pdf"
+                        class="text-base sm:text-lg font-semibold text-neutral-900 dark:text-white">
+                        Horario en PDF
+                    </h2>
+                    <p class="text-sm text-neutral-500 dark:text-neutral-400">
+                        Vista previa del horario del estudiante.
+                    </p>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <a x-bind:href="pdfModalUrl" target="_blank" rel="noopener"
+                        class="inline-flex items-center rounded-xl bg-sky-500 px-4 py-2 text-sm font-medium text-white hover:bg-sky-600 transition">
+                        Abrir en pestaña
+                    </a>
+
+                    <button type="button" x-on:click="cerrarPdf()"
+                        class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-neutral-200 bg-white text-neutral-500 transition hover:text-rose-500 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-300"
+                        aria-label="Cerrar modal">
+                        ✕
+                    </button>
+                </div>
+            </div>
+
+            {{-- Cuerpo del modal --}}
+            <div class="p-4 sm:p-5 bg-neutral-100 dark:bg-neutral-950">
+                <div
+                    class="overflow-hidden rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900">
+                    <iframe x-bind:src="pdfModalUrl" class="h-[75vh] w-full bg-white dark:bg-neutral-900">
+                    </iframe>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

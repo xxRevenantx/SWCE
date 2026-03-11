@@ -69,6 +69,10 @@
                         :current="request()->routeIs('estudiante.horario')" wire:navigate>
                         Mi Horario
                     </flux:navlist.item>
+                    <flux:navlist.item class="py-4" icon="calendar-days" :href="route('estudiante.calificaciones')"
+                        :current="request()->routeIs('estudiante.calificaciones')" wire:navigate>
+                        Mis Calificaciones
+                    </flux:navlist.item>
                 @endcan
 
 
@@ -77,21 +81,24 @@
         </flux:navlist>
 
         <!-- Administración -->
+
         @can('admin.administracion')
             <flux:navlist class="text-[15px] sm:text-base">
                 <flux:navlist.group :heading="__('Administración')" class="grid gap-y-4 sm:gap-y-3">
-                    <flux:navlist.item class="py-4" icon="users" :href="route('usuarios.index')"
-                        :current="request()->routeIs('usuarios.index')" wire:navigate>
+
+
+                    <flux:navlist.item class="py-4" icon="users" :href="route('admin.usuarios')"
+                        :current="request()->routeIs('admin.usuarios')" wire:navigate>
                         {{ __('Usuarios') }}
                     </flux:navlist.item>
 
-                    <flux:navlist.item class="py-4" icon="graduation-cap" :href="route('licenciaturas.index')"
-                        :current="request()->routeIs('licenciaturas.index')" wire:navigate>
+                    <flux:navlist.item class="py-4" icon="graduation-cap" :href="route('admin.licenciaturas')"
+                        :current="request()->routeIs('admin.licenciaturas')" wire:navigate>
                         {{ __('Licenciaturas') }}
                     </flux:navlist.item>
 
-                    <flux:navlist.item class="py-4" icon="layout-dashboard" :href="route('cuatrimestres.index')"
-                        :current="request()->routeIs('cuatrimestres.index')" wire:navigate>
+                    <flux:navlist.item class="py-4" icon="layout-dashboard" :href="route('admin.cuatrimestres')"
+                        :current="request()->routeIs('admin.cuatrimestres')" wire:navigate>
                         {{ __('Cuatrimestres') }}
                     </flux:navlist.item>
 
@@ -99,12 +106,13 @@
                     <flux:navlist class="w-64">
 
                         <flux:navlist.group icon="user-plus" heading="Generaciones" expandable>
-                            <flux:navlist.item class="py-4" icon="users-round" :href="route('generaciones')"
-                                :current="request()->routeIs('generaciones')" wire:navigate>
+                            <flux:navlist.item class="py-4" icon="users-round" :href="route('admin.generaciones')"
+                                :current="request()->routeIs('admin.generaciones')" wire:navigate>
                                 {{ __('Generaciones') }}
                             </flux:navlist.item>
-                            <flux:navlist.item class="py-4" icon="users-round" :href="route('asignacion_generaciones')"
-                                :current="request()->routeIs('asignacion_generaciones')" wire:navigate>
+                            <flux:navlist.item class="py-4" icon="users-round"
+                                :href="route('admin.asignacion_generaciones')"
+                                :current="request()->routeIs('admin.asignacion_generaciones')" wire:navigate>
                                 {{ __('Asignaciones') }}
                             </flux:navlist.item>
                         </flux:navlist.group>
@@ -130,21 +138,21 @@
 
 
 
-                    <flux:navlist.item class="py-4" icon="teachers" :href="route('profesores.index')"
-                        :current="request()->routeIs('profesores.index')" wire:navigate>
+                    <flux:navlist.item class="py-4" icon="teachers" :href="route('admin.profesores')"
+                        :current="request()->routeIs('admin.profesores')" wire:navigate>
                         {{ __('Profesores') }}
                     </flux:navlist.item>
 
                     <flux:navlist class="w-64">
 
                         <flux:navlist.group icon="user-plus" heading="Materias" expandable>
-                            <flux:navlist.item class="py-4" icon="book" :href="route('materias')"
-                                :current="request()->routeIs('materias')" wire:navigate>
+                            <flux:navlist.item class="py-4" icon="book" :href="route('admin.materias')"
+                                :current="request()->routeIs('admin.materias')" wire:navigate>
                                 {{ __('Materias') }}
                             </flux:navlist.item>
 
-                            <flux:navlist.item class="py-4" icon="book-plus" :href="route('asignacion_materias')"
-                                :current="request()->routeIs('asignacion_materias')" wire:navigate>
+                            <flux:navlist.item class="py-4" icon="book-plus" :href="route('admin.asignacion_materias')"
+                                :current="request()->routeIs('admin.asignacion_materias')" wire:navigate>
                                 {{ __('Asignaciones') }}
                             </flux:navlist.item>
                         </flux:navlist.group>
@@ -152,13 +160,13 @@
 
 
 
-                    <flux:navlist.item class="py-4" icon="calendar-days" :href="route('horarios.index')"
-                        :current="request()->routeIs('horarios.index')" wire:navigate>
+                    <flux:navlist.item class="py-4" icon="calendar-days" :href="route('admin.horarios')"
+                        :current="request()->routeIs('admin.horarios')" wire:navigate>
                         {{ __('Horarios') }}
                     </flux:navlist.item>
 
-                    <flux:navlist.item class="py-4" icon="book-check" :href="route('calificaciones.index')"
-                        :current="request()->routeIs('calificaciones.index')" wire:navigate>
+                    <flux:navlist.item class="py-4" icon="book-check" :href="route('admin.calificaciones')"
+                        :current="request()->routeIs('admin.calificaciones')" wire:navigate>
                         {{ __('Calificaciones') }}
                     </flux:navlist.item>
                 </flux:navlist.group>
