@@ -78,12 +78,17 @@ class RoleSeeder extends Seeder
         // Permisos para 'pdf.horario' y asignación al rol 'Admin'
         Permission::create(['name' => 'admin.pdf.horario'])->syncRoles([$role1]);
 
+        // Crear el permiso 'admin.calificaciones' y asignarlo al rol 'Admin'
+        Permission::create(['name' => 'admin.pdf.calificaciones'])->syncRoles([$role1]);
+
+
+
 
         // Crear el permiso 'profesor.dashboard' y asignarlo al rol 'Profesor'
         Permission::create(['name' => 'profesor.dashboard'])->syncRoles([$role2]);
 
-        // Crear el permiso 'admin.calificaciones' y asignarlo al rol 'Admin'
-        Permission::create(['name' => 'admin.pdf.calificaciones'])->syncRoles([$role1]);
+
+
 
 
 
@@ -104,12 +109,7 @@ class RoleSeeder extends Seeder
         // Permisos para 'pdf.horario' y asignación al rol 'Estudiante'
         Permission::create(['name' => 'estudiante.pdf.horario'])->syncRoles([$role3]);
 
-
-
         // Crear el permiso 'estudiante.pdf.mi-expediente' y asignarlo al rol 'Estudiante'
         Permission::create(['name' => 'estudiante.pdf.mi-expediente'])->syncRoles([$role3]);
-
-
-
     }
 }

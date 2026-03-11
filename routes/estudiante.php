@@ -21,7 +21,5 @@ Route::middleware(['auth'])->group(function () {
     Route::get('mi-perfil/mi-expediente', [EstudiantePDFController::class, 'mi_expediente'])->middleware('can:estudiante.pdf.mi-expediente')->name('estudiante.pdf.mi-expediente');
 
 
-    Route::get('mi-horario/pdf', [EstudiantePDFController::class, 'mi_horario'])->middleware('can:estudiante.pdf.horario')->name('estudiante.pdf.horario');
-
-
+    Route::get('mi-horario/ver-horario', [EstudiantePDFController::class, 'mi_horario'])->middleware('can:estudiante.pdf.horario')->name('estudiante.pdf.horario');
 });

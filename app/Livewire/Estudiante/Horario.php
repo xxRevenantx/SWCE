@@ -73,8 +73,8 @@ class Horario extends Component
         // Se forma el nombre completo del estudiante.
         $this->nombre_estudiante = trim(
             ($alumno->nombre ?? '') . ' ' .
-            ($alumno->apellido_paterno ?? '') . ' ' .
-            ($alumno->apellido_materno ?? '')
+                ($alumno->apellido_paterno ?? '') . ' ' .
+                ($alumno->apellido_materno ?? '')
         );
 
         // Se obtiene la matrícula.
@@ -130,8 +130,8 @@ class Horario extends Component
 
                 $nombreProfesor = trim(
                     ($profesor->nombre ?? '') . ' ' .
-                    ($profesor->apellido_paterno ?? '') . ' ' .
-                    ($profesor->apellido_materno ?? '')
+                        ($profesor->apellido_paterno ?? '') . ' ' .
+                        ($profesor->apellido_materno ?? '')
                 );
 
                 $texto = mb_strtolower(implode(' ', array_filter([
@@ -185,8 +185,8 @@ class Horario extends Component
             if ($profesor) {
                 $nombreProfesor = trim(
                     ($profesor->nombre ?? '') . ' ' .
-                    ($profesor->apellido_paterno ?? '') . ' ' .
-                    ($profesor->apellido_materno ?? '')
+                        ($profesor->apellido_paterno ?? '') . ' ' .
+                        ($profesor->apellido_materno ?? '')
                 );
             }
 
