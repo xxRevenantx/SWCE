@@ -43,7 +43,7 @@ class DatabaseSeeder extends Seeder
 
         // 4) Admin por default al final (como lo traías)
         $email = env('DEFAULT_ADMIN_EMAIL', 'admin@swce.com');
-        $password = env('DEFAULT_ADMIN_PASSWORD', 'swce#2026');
+        $password = env('DEFAULT_ADMIN_PASSWORD', 'Swce#2026');
 
         $user = \App\Models\User::updateOrCreate(
             ['email' => $email],
