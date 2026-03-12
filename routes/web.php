@@ -26,14 +26,14 @@ Route::middleware(['auth'])->group(function () {
     // Ruta al dashboard (panel de control)
     Route::get('dashboard', DashboardRouter::class)->name('dashboard');
 
-    Route::redirect('settings', 'settings/profile');
+    Route::redirect('ajustes', 'settings/profile');
 
-    Route::get('settings/profile', Profile::class)->name('settings.profile');
-    Route::get('settings/password', Password::class)->name('settings.password');
-    Route::get('settings/appearance', Appearance::class)->name('settings.appearance');
+    Route::get('ajustes/profile', Profile::class)->name('settings.profile');
+    Route::get('ajustes/password', Password::class)->name('settings.password');
+    Route::get('ajustes/appearance', Appearance::class)->name('settings.appearance');
 
 
-    Route::get('settings/two-factor', TwoFactor::class)
+    Route::get('ajustes/two-factor', TwoFactor::class)
         ->middleware(
             when(
                 Features::canManageTwoFactorAuthentication()

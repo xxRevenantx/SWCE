@@ -18,6 +18,8 @@ class EditarUsuario extends Component
     public $username;
     public $email;
     public $status;
+
+    public $change_password;
     public $rol;
 
     public $rol_name;
@@ -55,23 +57,23 @@ class EditarUsuario extends Component
     {
         $this->validate([
             'username' => 'required|string|max:15|unique:users,username,' . $this->userId,
-            'email'    => 'required|email|max:50|unique:users,email,' . $this->userId,
-            'status'   => 'required|boolean',
-            'rol'      => 'required',
+            'email' => 'required|email|max:50|unique:users,email,' . $this->userId,
+            'status' => 'required|boolean',
+            'rol' => 'required',
 
         ], [
             'username.required' => 'El nombre de usuario es obligatorio.',
-            'username.unique'   => 'El nombre de usuario ya está en uso.',
-            'email.required'    => 'El correo electrónico es obligatorio.',
-            'email.email'       => 'El correo electrónico no es válido.',
-            'email.unique'      => 'El correo electrónico ya está en uso.',
-            'rol.required'      => 'Debes seleccionar al menos un rol.',
+            'username.unique' => 'El nombre de usuario ya está en uso.',
+            'email.required' => 'El correo electrónico es obligatorio.',
+            'email.email' => 'El correo electrónico no es válido.',
+            'email.unique' => 'El correo electrónico ya está en uso.',
+            'rol.required' => 'Debes seleccionar al menos un rol.',
         ]);
 
         // Noo permitir asignar Admin sin tenerlo
         $adminRoleId = \Spatie\Permission\Models\Role::where('name', 'Admin')->value('id');
         $this->username = trim($this->username);
-        $this->email    = trim($this->email);
+        $this->email = trim($this->email);
         if (in_array($adminRoleId, $this->rol) && !auth()->user()->hasRole('Admin')) {
             abort(403, 'No autorizado a asignar el rol Admin');
         }
@@ -84,8 +86,8 @@ class EditarUsuario extends Component
         // Update + roles
         $this->usuario->update([
             'username' => $this->username,
-            'email'    => $this->email,
-            'status'   => $this->status,
+            'email' => $this->email,
+            'status' => $this->status,
         ]);
         $this->usuario->roles()->sync($this->rol);
 
@@ -101,7 +103,7 @@ class EditarUsuario extends Component
 
         $this->dispatch('swal', [
             'title' => '¡Usuario actualizado correctamente!',
-            'icon'  => 'success',
+            'icon' => 'success',
             'position' => 'top-end',
         ]);
 

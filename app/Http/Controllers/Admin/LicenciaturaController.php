@@ -10,7 +10,7 @@ use App\Http\Requests\UpdateLicenciaturaRequest;
 class LicenciaturaController extends Controller
 {
 
-    public function index()
+    public function licencenciaturas()
     {
         return view('admin.licenciatura.index');
     }

@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -20,7 +19,7 @@ return new class extends Migration
             $table->string('photo')->nullable();
             $table->enum('status', ["true", "false"])->nullable()->default("true");
             $table->integer('order')->nullable()->default(1);
-            $table->boolean('change_password')->default(false)->after('password');
+            $table->boolean('change_password')->default(false);
             $table->rememberToken();
             $table->timestamps();
         });

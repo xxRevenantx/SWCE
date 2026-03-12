@@ -50,35 +50,40 @@
                     </flux:navlist.item>
                 @endcan
 
-
-                {{-- ESTUDIANTE --}}
-
-                @can('estudiante.dashboard')
-                    <flux:navlist.item class="py-4" icon="home" :href="route('estudiante.dashboard')"
-                        :current="request()->routeIs('estudiante.dashboard')" wire:navigate>
-                        Mi Tablero
-                    </flux:navlist.item>
-
-
-                    <flux:navlist.item class="py-4" icon="home" :href="route('estudiante.perfil')"
-                        :current="request()->routeIs('estudiante.perfil')" wire:navigate>
-                        Mi perfil
-                    </flux:navlist.item>
-
-                    <flux:navlist.item class="py-4" icon="calendar-days" :href="route('estudiante.horario')"
-                        :current="request()->routeIs('estudiante.horario')" wire:navigate>
-                        Mi Horario
-                    </flux:navlist.item>
-                    <flux:navlist.item class="py-4" icon="calendar-days" :href="route('estudiante.calificaciones')"
-                        :current="request()->routeIs('estudiante.calificaciones')" wire:navigate>
-                        Mis Calificaciones
-                    </flux:navlist.item>
-                @endcan
-
-
-
             </flux:navlist.group>
+
         </flux:navlist>
+
+
+
+        {{-- ESTUDIANTE --}}
+        <flux:navlist variant="outline" class="text-[15px] sm:text-base space-y-3">
+            @can('estudiante.dashboard')
+                <flux:navlist.item class="py-4" icon="home" :href="route('estudiante.dashboard')"
+                    :current="request()->routeIs('estudiante.dashboard')" wire:navigate>
+                    Mi Tablero
+                </flux:navlist.item>
+
+
+                <flux:navlist.item class="py-4" icon="home" :href="route('estudiante.perfil')"
+                    :current="request()->routeIs('estudiante.perfil')" wire:navigate>
+                    Mi perfil
+                </flux:navlist.item>
+
+                <flux:navlist.item class="py-4" icon="calendar-days" :href="route('estudiante.horario')"
+                    :current="request()->routeIs('estudiante.horario')" wire:navigate>
+                    Mi Horario
+                </flux:navlist.item>
+                <flux:navlist.item class="py-4" icon="calendar-days" :href="route('estudiante.calificaciones')"
+                    :current="request()->routeIs('estudiante.calificaciones')" wire:navigate>
+                    Mis Calificaciones
+                </flux:navlist.item>
+            @endcan
+
+        </flux:navlist>
+
+
+
 
         <!-- Administración -->
 

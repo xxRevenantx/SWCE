@@ -22,9 +22,9 @@ Route::middleware(['auth'])->group(function () {
 
     Route::view('panel-administrador', 'admin.dashboard')->middleware('can:admin.dashboard')->name('admin.dashboard'); // admin.dashboard (URL /admin/dashboard)
     // Rutas del Admin
-    Route::get('usuarios', [UserController::class])->middleware('can:admin.usuarios')->name('admin.usuarios');
-    Route::get('licenciaturas', [LicenciaturaController::class])->middleware('can:admin.licenciaturas')->name('admin.licenciaturas');
-    Route::get('cuatrimestres', [CuatrimestreController::class])->middleware('can:admin.cuatrimestres')->name('admin.cuatrimestres');
+    Route::get('usuarios', [UserController::class, 'usuarios'])->middleware('can:admin.usuarios')->name('admin.usuarios');
+    Route::get('licenciaturas', [LicenciaturaController::class, 'licencenciaturas'])->middleware('can:admin.licenciaturas')->name('admin.licenciaturas');
+    Route::get('cuatrimestres', [CuatrimestreController::class, 'cuatrimestres'])->middleware('can:admin.cuatrimestres')->name('admin.cuatrimestres');
 
     // GENERACIONES
     Route::get('generaciones', [GeneracionController::class, 'generaciones'])->middleware('can:admin.generaciones')->name('admin.generaciones');
