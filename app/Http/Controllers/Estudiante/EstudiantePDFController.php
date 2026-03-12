@@ -55,7 +55,19 @@ class EstudiantePDFController extends Controller
 
         $pdf = Pdf::loadView('admin.pdf.horarioPDF', $data)->setPaper('letter', 'portrait');
         return $pdf->stream("HORARIO_" . mb_strtoupper($data['licenciatura']->nombre) . "_" . mb_strtoupper($data['generacion']->generacion) . "_" . mb_strtoupper($data['cuatrimestre']->no_cuatrimestre) . "°_CUATRIMESTRE.pdf");
+    }
+
+    public function mi_boleta()
+    {
+        $id = auth()->user()->alumno->id;
+
+        $alumno = \App\Models\Inscripcion::findOrFail($id);
+
+        dd($alumno);
 
 
+        if (!$alumno) {
+            abort(404);
+        }
     }
 }
