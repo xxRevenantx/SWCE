@@ -34,7 +34,7 @@ class Login extends Component
             $this->validate([
                 'email' => 'required|string|email',
                 'password' => 'required|string',
-                'cf_turnstile_response' => ['required', 'turnstile'], // ✅ LARAGEAR
+                'cf_turnstile_response' => ['required', 'turnstile'],
             ], [
                 'cf_turnstile_response.required' => 'Por favor, verifica que no eres un robot.',
                 'cf_turnstile_response.turnstile' => 'La verificación de seguridad falló. Intenta de nuevo.',
