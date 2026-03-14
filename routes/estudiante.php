@@ -18,7 +18,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('mis-calificaciones', [CalificacionesController::class, 'mis_calificaciones'])->middleware('can:estudiante.calificaciones')->name('estudiante.calificaciones'); // estudiante.calificaciones (URL /estudiante/calificaciones)
 
     // Boleta de calificaciones
-    Route::get('mis-calificaciones/mi-boleta', [EstudiantePDFController::class, 'mi_boleta'])->middleware('can:estudiante.pdf.mi-boleta')->name('estudiante.pdf.mi-boleta');
+    Route::get('mis-calificaciones/mi-boleta/{cuatrimestre}', [EstudiantePDFController::class, 'mi_boleta'])->middleware('can:estudiante.pdf.mi-boleta')->name('estudiante.pdf.mi-boleta');
 
 
     Route::get('mi-perfil/mi-expediente', [EstudiantePDFController::class, 'mi_expediente'])->middleware('can:estudiante.pdf.mi-expediente')->name('estudiante.pdf.mi-expediente');

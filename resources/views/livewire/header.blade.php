@@ -45,7 +45,7 @@
                             </button>
 
                             <!-- Panel de notificación -->
-                            <div x-show="open" @click.outside="open = false" x-transition
+                            <div x-cloak x-show="open" @click.outside="open = false" x-transition
                                 class="absolute right-0 top-full z-[9999] mt-3 w-80 overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-2xl dark:border-neutral-700 dark:bg-neutral-800">
 
                                 <div
@@ -94,7 +94,7 @@
                             </button>
 
                             <!-- Panel de notificación -->
-                            <div x-show="open" @click.outside="open = false" x-transition
+                            <div x-cloak x-show="open" @click.outside="open = false" x-transition
                                 class="absolute right-0 top-full z-[9999] mt-3 w-80 overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-2xl dark:border-neutral-700 dark:bg-neutral-800">
 
                                 <div

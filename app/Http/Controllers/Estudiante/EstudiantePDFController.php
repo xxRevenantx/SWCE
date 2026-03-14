@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Estudiante;
 use App\Http\Controllers\Controller;
 use App\Models\Cuatrimestre;
 use App\Models\Generacion;
+use App\Models\Inscripcion;
 use App\Models\Licenciatura;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Container\Attributes\Auth;
@@ -57,17 +58,77 @@ class EstudiantePDFController extends Controller
         return $pdf->stream("HORARIO_" . mb_strtoupper($data['licenciatura']->nombre) . "_" . mb_strtoupper($data['generacion']->generacion) . "_" . mb_strtoupper($data['cuatrimestre']->no_cuatrimestre) . "°_CUATRIMESTRE.pdf");
     }
 
-    public function mi_boleta()
+    public function mi_boleta($cuatrimestre)
     {
-        $id = auth()->user()->alumno->id;
+        $inscripcionId = auth()->user()->alumno->id;
 
-        $alumno = \App\Models\Inscripcion::findOrFail($id);
+        $inscripcion = \App\Models\Inscripcion::with(['alumno', 'licenciatura', 'generacion'])
+            ->findOrFail($inscripcionId);
 
-        dd($alumno);
+        /*
+        |------------------------------------------------------------
+        | Obtener los cuatrimestres que este alumno sí tiene calificados
+        |------------------------------------------------------------
+        */
+        $cuatrimestresValidos = \App\Models\Calificacion::query()
+            ->join('asignacion_materias', 'calificaciones.asignacion_materia_id', '=', 'asignacion_materias.id')
+            ->where('calificaciones.inscripcion_id', $inscripcionId)
+            ->pluck('asignacion_materias.cuatrimestre_id')
+            ->unique()
+            ->values();
 
+        /*
+        |------------------------------------------------------------
+        | Validar que el cuatrimestre de la URL esté permitido
+        |------------------------------------------------------------
+        */
+        if (!$cuatrimestresValidos->contains((int) $cuatrimestre)) {
+            abort(404);
+            // O redirigir con mensaje, más abajo te dejo esa versión
+        }
 
-        if (!$alumno) {
+        $cuatrimestreModelo = \App\Models\Cuatrimestre::findOrFail($cuatrimestre);
+
+        $calificaciones = \App\Models\Calificacion::query()
+            ->join('asignacion_materias', 'calificaciones.asignacion_materia_id', '=', 'asignacion_materias.id')
+            ->join('materias', 'materias.id', '=', 'asignacion_materias.materia_id')
+            ->where('calificaciones.inscripcion_id', $inscripcionId)
+            ->where('asignacion_materias.cuatrimestre_id', $cuatrimestre)
+            ->orderByRaw("COALESCE(materias.clave, '') ASC")
+            ->select(
+                'calificaciones.*',
+                'materias.nombre as materia_nombre',
+                'materias.clave as materia_clave',
+                'materias.creditos',
+                'materias.calificable'
+            )
+            ->get();
+
+        if ($calificaciones->isEmpty()) {
             abort(404);
         }
+
+        $nombreAlumno = trim(
+            ($inscripcion->alumno->nombre ?? '') . '_' .
+            ($inscripcion->alumno->apellido_paterno ?? '') . '_' .
+            ($inscripcion->alumno->apellido_materno ?? '')
+        );
+
+        $data = [
+            'calificaciones' => $calificaciones,
+            'cuatrimestre' => $cuatrimestreModelo,
+            'licenciatura' => $inscripcion->licenciatura,
+            'generacion' => $inscripcion->generacion,
+            'alumno' => $inscripcion,
+        ];
+
+        $pdf = Pdf::loadView('admin.pdf.boletaCalificacionPDF', $data)
+            ->setPaper('letter', 'portrait');
+
+        return $pdf->stream(
+            "BOLETA_CALIFICACIONES_" .
+            $nombreAlumno . "_" .
+            $cuatrimestreModelo->no_cuatrimestre . "°_CUATRIMESTRE.pdf"
+        );
     }
 }

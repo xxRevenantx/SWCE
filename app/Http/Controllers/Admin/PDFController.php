@@ -86,17 +86,19 @@ class PDFController extends Controller
     }
 
     // BOLETA DE CALIFICACIONES
-    public function boletaCalificacion($id)
+    public function boletaCalificacion($id, $cuatrimestre_id)
     {
         $calificaciones = \App\Models\Calificacion::query()
-            ->where('inscripcion_id', $id)
-            ->join('asignacion_materias', 'asignacion_materias.id', '=', 'calificaciones.asignacion_materia_id')
+            ->join('asignacion_materias', 'calificaciones.asignacion_materia_id', '=', 'asignacion_materias.id')
             ->join('materias', 'materias.id', '=', 'asignacion_materias.materia_id')
-            ->orderByRaw("COALESCE(materias.clave,'') ASC")
+            ->where('calificaciones.inscripcion_id', $id)
+            ->where('asignacion_materias.cuatrimestre_id', $cuatrimestre_id)
+            ->orderByRaw("COALESCE(materias.clave, '') ASC")
             ->select('calificaciones.*')
             ->get();
 
-        $cuatrimestre = Inscripcion::where('id', $id)->with('cuatrimestre')->first()->cuatrimestre;
+        $cuatrimestre = Cuatrimestre::where('id', $cuatrimestre_id)->first();
+
 
         $licenciatura = Inscripcion::where('id', $id)->with('licenciatura')->first()->licenciatura;
 
@@ -106,12 +108,10 @@ class PDFController extends Controller
         $alumno = Inscripcion::where('id', $id)->with('alumno')->first();
 
 
-
-
         $nombreAlumno = trim(
             ($alumno->alumno->nombre ?? '') . '_' .
-                ($alumno->alumno->apellido_paterno ?? '') . '_' .
-                ($alumno->alumno->apellido_materno ?? '')
+            ($alumno->alumno->apellido_paterno ?? '') . '_' .
+            ($alumno->alumno->apellido_materno ?? '')
         );
 
 
@@ -158,8 +158,8 @@ class PDFController extends Controller
                     'matricula' => $r->matricula,
                     'nombre_completo' => trim(
                         ($r->apellido_paterno ?? '') . ' ' .
-                            ($r->apellido_materno ?? '') . ' ' .
-                            ($r->nombre ?? '')
+                        ($r->apellido_materno ?? '') . ' ' .
+                        ($r->nombre ?? '')
                     ),
                 ];
             });

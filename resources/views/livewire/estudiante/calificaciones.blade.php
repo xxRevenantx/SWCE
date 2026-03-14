@@ -1,15 +1,84 @@
 <div x-data="{
     mostrarModalBoleta: false,
-    urlBoleta: '{{ route('estudiante.pdf.mi-boleta') }}',
-    abrirBoleta() {
+    urlBoleta: '',
+    abrirBoleta(url) {
+        this.urlBoleta = url;
         this.mostrarModalBoleta = true;
         document.body.classList.add('overflow-hidden');
     },
     cerrarBoleta() {
         this.mostrarModalBoleta = false;
+        this.urlBoleta = '';
         document.body.classList.remove('overflow-hidden');
     }
 }" @keydown.escape.window="cerrarBoleta()" class="space-y-6">
+    {{-- MODAL PRO | BOLETA --}}
+    <div x-cloak x-show="mostrarModalBoleta" x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+        x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0" class="fixed inset-0 z-[999] flex items-center justify-center p-4 sm:p-6">
+        {{-- Overlay --}}
+        <div class="absolute inset-0 bg-slate-950/60 backdrop-blur-sm" @click="cerrarBoleta()"></div>
+
+        {{-- Panel --}}
+        <div x-show="mostrarModalBoleta" x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0 translate-y-6 sm:translate-y-0 sm:scale-95 blur-sm"
+            x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100 blur-0"
+            x-transition:leave="transition ease-in duration-200"
+            x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100 blur-0"
+            x-transition:leave-end="opacity-0 translate-y-6 sm:translate-y-0 sm:scale-95 blur-sm" @click.stop
+            role="dialog" aria-modal="true"
+            class="relative z-10 flex w-full max-w-7xl flex-col overflow-hidden rounded-3xl border border-white/10 bg-white shadow-2xl ring-1 ring-black/5 dark:bg-neutral-950 dark:ring-white/10">
+
+            {{-- Barra superior --}}
+            <div
+                class="flex items-center justify-between bg-gradient-to-r from-sky-500 via-blue-600 to-indigo-600 px-5 py-4 text-white sm:px-6">
+                <div>
+                    <h3 class="text-base font-bold sm:text-lg">
+                        Vista previa de boleta
+                    </h3>
+                    <p class="text-xs text-white/80 sm:text-sm">
+                        Consulta tu boleta en PDF sin salir del sistema.
+                    </p>
+                </div>
+
+                <button type="button" @click="cerrarBoleta()"
+                    class="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-white/10 text-white transition hover:bg-white/20 focus:outline-none focus:ring-4 focus:ring-white/20">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            {{-- Contenido --}}
+            <div class="max-h-[85vh] overflow-hidden bg-neutral-100 dark:bg-neutral-900">
+                <template x-if="urlBoleta">
+                    <iframe :src="urlBoleta" class="h-[78vh] w-full bg-white" frameborder="0"></iframe>
+                </template>
+            </div>
+
+            {{-- Footer --}}
+            <div
+                class="flex flex-col gap-3 border-t border-neutral-200 bg-white px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6 dark:border-neutral-800 dark:bg-neutral-950">
+                <p class="text-xs text-neutral-500 dark:text-neutral-400">
+                    Si el PDF tarda un poco, espera unos segundos mientras carga la vista previa.
+                </p>
+
+                <div class="flex items-center justify-end gap-3">
+                    <a :href="urlBoleta" target="_blank"
+                        class="inline-flex items-center justify-center rounded-2xl border border-neutral-200 px-4 py-2.5 text-sm font-semibold text-neutral-700 transition hover:bg-neutral-50 focus:outline-none focus:ring-4 focus:ring-sky-500/10 dark:border-neutral-700 dark:text-neutral-200 dark:hover:bg-neutral-800">
+                        Abrir en pestaña nueva
+                    </a>
+
+                    <button type="button" @click="cerrarBoleta()"
+                        class="inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-sky-500 via-blue-600 to-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-[0_10px_30px_-12px_rgba(37,99,235,0.80)] transition hover:shadow-[0_18px_40px_-18px_rgba(37,99,235,0.85)] focus:outline-none focus:ring-4 focus:ring-sky-500/20">
+                        Cerrar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     {{-- ENCABEZADO --}}
     <section
         class="relative overflow-hidden rounded-[32px] border border-white/60 bg-white/80 shadow-[0_20px_60px_-25px_rgba(15,23,42,0.28)] backdrop-blur-xl dark:border-white/5 dark:bg-neutral-900/80">
@@ -29,11 +98,10 @@
 
                     <div class="space-y-2">
                         <h1 class="text-2xl font-black tracking-tight text-neutral-900 sm:text-3xl dark:text-white">
-                            Calificaciones por cuatrimestre
+                            Calificaciones
                         </h1>
                         <p class="max-w-2xl text-sm leading-6 text-neutral-600 dark:text-neutral-300">
-                            Aquí puedes consultar todas tus materias calificables organizadas por cuatrimestre, con su
-                            promedio y estado académico.
+                            Consulta tus materias, estados académicos y calificaciones organizadas por cuatrimestre.
                         </p>
                     </div>
 
@@ -94,7 +162,7 @@
                             </div>
 
                             <p class="mt-3 text-sm text-white/80">
-                                Calculado con base en el promedio de cada cuatrimestre con calificaciones.
+                                Calculado con base en el promedio de cada cuatrimestre con calificaciones registradas.
                             </p>
 
                             <div class="mt-5 h-3 w-full overflow-hidden rounded-full bg-white/20">
@@ -104,7 +172,7 @@
                             </div>
 
                             <p class="mt-2 text-xs text-white/75">
-                                Promedio general
+                                Rendimiento académico general
                             </p>
                         </div>
                     </div>
@@ -180,7 +248,8 @@
                         </svg>
                     </div>
 
-                    <input id="buscar" type="text" wire:model.live.debounce.300ms="buscar" placeholder="Buscar..."
+                    <input id="buscar" type="text" wire:model.live.debounce.300ms="buscar"
+                        placeholder="Buscar..."
                         class="h-12 w-full rounded-2xl border border-neutral-200 bg-neutral-50 pl-11 pr-4 text-sm text-neutral-800 outline-none transition focus:border-sky-500 focus:bg-white focus:ring-4 focus:ring-sky-500/10 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-100 dark:focus:border-sky-500 dark:focus:bg-neutral-900">
                 </div>
             </div>
@@ -190,11 +259,14 @@
     {{-- BLOQUES POR CUATRIMESTRE --}}
     <section class="space-y-5">
         @forelse ($cuatrimestresPaginados as $cuatrimestre)
+
+
+
             <div x-data="{ abierto: {{ $loop->first ? 'true' : 'false' }} }"
                 class="overflow-hidden rounded-3xl border border-neutral-200/70 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
-                <button type="button" @click="abierto = !abierto"
-                    class="flex w-full items-center justify-between gap-4 px-5 py-5 text-left sm:px-6">
-                    <div class="space-y-3">
+
+                <div class="flex items-start justify-between gap-4 px-5 py-5 sm:px-6">
+                    <div class="min-w-0 flex-1 space-y-3">
                         <div class="flex flex-wrap items-center gap-2">
                             <span
                                 class="inline-flex items-center rounded-full bg-sky-100 px-3 py-1 text-xs font-bold text-sky-700 dark:bg-sky-500/10 dark:text-sky-300">
@@ -205,16 +277,6 @@
                                 class="inline-flex items-center rounded-full bg-neutral-100 px-3 py-1 text-xs font-semibold text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300">
                                 {{ $cuatrimestre['generacion'] }}
                             </span>
-
-                            <button type="button" @click.stop="abrirBoleta()"
-                                class="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-sky-500 via-blue-600 to-indigo-600 px-3.5 py-1.5 text-xs font-semibold text-white shadow-[0_10px_24px_-12px_rgba(37,99,235,0.8)] transition hover:scale-[1.02] hover:shadow-[0_16px_34px_-16px_rgba(37,99,235,0.85)] focus:outline-none focus:ring-4 focus:ring-sky-500/20">
-                                <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="1.8"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M19.5 14.25v-8.25a2.25 2.25 0 0 0-2.25-2.25h-10.5A2.25 2.25 0 0 0 4.5 6v12a2.25 2.25 0 0 0 2.25 2.25h5.25m7.5-6 0 0m0 0-3-3m3 3-3 3m3-3H9" />
-                                </svg>
-                                Boleta
-                            </button>
                         </div>
 
                         <div>
@@ -223,7 +285,7 @@
                             </h3>
                         </div>
 
-                        <div class="grid gap-3 sm:grid-cols-4">
+                        <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
                             <div class="rounded-2xl bg-neutral-50 px-4 py-3 dark:bg-neutral-800/70">
                                 <p class="text-xs text-neutral-500 dark:text-neutral-400">Promedio</p>
                                 <p class="mt-1 text-lg font-black text-sky-600 dark:text-sky-400">
@@ -251,21 +313,40 @@
                                     {{ $cuatrimestre['pendientes'] }}
                                 </p>
                             </div>
+
+                            <div
+                                class="rounded-2xl border border-sky-200/70 bg-gradient-to-br from-sky-50 to-blue-50 px-4 py-3 dark:border-sky-500/20 dark:from-sky-500/10 dark:to-indigo-500/10">
+                                <p class="text-xs text-neutral-500 dark:text-neutral-400">Boleta</p>
+
+                                <button type="button"
+                                    @click.stop="abrirBoleta('{{ route('estudiante.pdf.mi-boleta', ['cuatrimestre' => $cuatrimestre['no_cuatrimestre']]) }}')"
+                                    class="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-sky-500 via-blue-600 to-indigo-600 px-3 py-2.5 text-sm font-semibold text-white shadow-[0_10px_30px_-12px_rgba(37,99,235,0.80)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_40px_-18px_rgba(37,99,235,0.85)] focus:outline-none focus:ring-4 focus:ring-sky-500/20">
+                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M19.5 14.25v-8.25A2.25 2.25 0 0 0 17.25 3.75H6.75A2.25 2.25 0 0 0 4.5 6v12a2.25 2.25 0 0 0 2.25 2.25h5.25m7.5-6-3-3m3 3-3 3m3-3H9" />
+                                    </svg>
+                                    Ver boleta
+                                </button>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="shrink-0 text-neutral-400">
-                        <svg x-show="!abierto" x-cloak class="h-6 w-6" fill="none" stroke="currentColor"
-                            stroke-width="1.8" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="m19 9-7 7-7-7" />
-                        </svg>
+                    <div class="shrink-0">
+                        <button type="button" @click="abierto = !abierto"
+                            class="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-neutral-200 bg-white text-neutral-500 transition hover:bg-neutral-50 hover:text-neutral-700 focus:outline-none focus:ring-4 focus:ring-sky-500/10 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700 dark:hover:text-white">
+                            <svg x-show="!abierto" x-cloak class="h-6 w-6" fill="none" stroke="currentColor"
+                                stroke-width="1.8" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="m19 9-7 7-7-7" />
+                            </svg>
 
-                        <svg x-show="abierto" x-cloak class="h-6 w-6" fill="none" stroke="currentColor"
-                            stroke-width="1.8" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="m5 15 7-7 7 7" />
-                        </svg>
+                            <svg x-show="abierto" x-cloak class="h-6 w-6" fill="none" stroke="currentColor"
+                                stroke-width="1.8" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="m5 15 7-7 7 7" />
+                            </svg>
+                        </button>
                     </div>
-                </button>
+                </div>
 
                 <div x-show="abierto" x-cloak x-transition.opacity.duration.200ms
                     class="border-t border-neutral-200/70 dark:border-neutral-800">
@@ -275,23 +356,29 @@
                                 <thead class="bg-neutral-50/80 dark:bg-neutral-800/60">
                                     <tr>
                                         <th
-                                            class="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
-                                            Materia</th>
+                                            class="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-white dark:text-white">
+                                            Materia
+                                        </th>
                                         <th
-                                            class="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
-                                            Profesor</th>
+                                            class="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-white dark:text-white">
+                                            Profesor
+                                        </th>
                                         <th
-                                            class="px-4 py-4 text-center text-xs font-bold uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
-                                            Créditos</th>
+                                            class="px-4 py-4 text-center text-xs font-bold uppercase tracking-wider text-white dark:text-white">
+                                            Créditos
+                                        </th>
                                         <th
-                                            class="px-4 py-4 text-center text-xs font-bold uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
-                                            Calificación</th>
+                                            class="px-4 py-4 text-center text-xs font-bold uppercase tracking-wider text-white dark:text-white">
+                                            Calificación
+                                        </th>
                                         <th
-                                            class="px-6 py-4 text-center text-xs font-bold uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
-                                            Fecha captura</th>
+                                            class="px-6 py-4 text-center text-xs font-bold uppercase tracking-wider text-white dark:text-white">
+                                            Fecha captura
+                                        </th>
                                         <th
-                                            class="px-6 py-4 text-center text-xs font-bold uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
-                                            Estado</th>
+                                            class="px-6 py-4 text-center text-xs font-bold uppercase tracking-wider text-white dark:text-white">
+                                            Estado
+                                        </th>
                                     </tr>
                                 </thead>
 
@@ -509,61 +596,4 @@
             {{ $cuatrimestresPaginados->links() }}
         </section>
     @endif
-
-    {{-- MODAL PRO BOLETA --}}
-    <div x-cloak x-show="mostrarModalBoleta" x-transition.opacity.duration.200ms
-        class="fixed inset-0 z-[90] flex items-center justify-center bg-neutral-950/70 p-4 backdrop-blur-sm"
-        @click.self="cerrarBoleta()">
-        <div x-show="mostrarModalBoleta" x-transition:enter="transform transition ease-out duration-300"
-            x-transition:enter-start="opacity-0 translate-y-6 sm:translate-y-0 sm:scale-95 blur-sm"
-            x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100 blur-0"
-            x-transition:leave="transform transition ease-in duration-200"
-            x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100 blur-0"
-            x-transition:leave-end="opacity-0 translate-y-6 sm:translate-y-0 sm:scale-95 blur-sm"
-            class="relative w-full max-w-6xl overflow-hidden rounded-[28px] border border-white/10 bg-white shadow-2xl ring-1 ring-black/5 dark:bg-neutral-950"
-            role="dialog" aria-modal="true">
-            {{-- Barra superior --}}
-            <div
-                class="flex items-center justify-between gap-4 bg-gradient-to-r from-sky-500 via-blue-600 to-indigo-600 px-5 py-4 text-white sm:px-6">
-                <div class="min-w-0">
-                    <h3 class="truncate text-base font-bold sm:text-lg">
-                        Vista previa de boleta
-                    </h3>
-                    <p class="mt-0.5 text-xs text-white/80 sm:text-sm">
-                        Documento generado del estudiante
-                    </p>
-                </div>
-
-                <div class="flex items-center gap-2">
-                    <a :href="urlBoleta" target="_blank"
-                        class="inline-flex items-center gap-2 rounded-xl bg-white/15 px-3 py-2 text-xs font-semibold text-white transition hover:bg-white/20 focus:outline-none focus:ring-4 focus:ring-white/20">
-                        <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8"
-                            viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-7.5 0L21 3m0 0v5.25M21 3h-5.25" />
-                        </svg>
-                        Abrir aparte
-                    </a>
-
-                    <button type="button" @click="cerrarBoleta()"
-                        class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white/15 text-white transition hover:bg-white/20 focus:outline-none focus:ring-4 focus:ring-white/20"
-                        aria-label="Cerrar modal">
-                        <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8"
-                            viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                </div>
-            </div>
-
-            {{-- Contenido del PDF --}}
-            <div class="bg-neutral-100 p-3 dark:bg-neutral-900 sm:p-4">
-                <div
-                    class="overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-inner dark:border-neutral-800 dark:bg-neutral-950">
-                    <iframe :src="urlBoleta" class="h-[72vh] w-full bg-white"
-                        title="Vista previa de boleta"></iframe>
-                </div>
-            </div>
-        </div>
-    </div>
 </div>
