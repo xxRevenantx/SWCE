@@ -87,8 +87,27 @@ class RoleSeeder extends Seeder
         // Crear el permiso 'profesor.dashboard' y asignarlo al rol 'Profesor'
         Permission::create(['name' => 'profesor.dashboard'])->syncRoles([$role2]);
 
+        // Crear el permiso 'profesor.perfil' y asignarlo al rol 'Profesor'
 
+        Permission::create(['name' => 'profesor.perfil'])->syncRoles([$role2]);
 
+        // Crear el permiso 'profesor.horario' y asignarlo al rol 'Profesor'
+        Permission::create(['name' => 'profesor.horario'])->syncRoles([$role2]);
+
+        // Crear el permiso 'profesor.calificaciones' y asignarlo al rol 'Profesor'
+        Permission::create(['name' => 'profesor.calificaciones'])->syncRoles([$role2]);
+
+        // Crear el permiso 'profesor.pdf.horario' y asignarlo al rol 'Profesor'
+        Permission::create(['name' => 'profesor.pdf.horario'])->syncRoles([$role2]);
+
+        // Crear el permiso 'profesor.pdf.lista_alumnos' y asignarlo al rol 'Profesor'
+        Permission::create(['name' => 'profesor.pdf.lista_alumnos'])->syncRoles([$role2]);
+
+        // Crear el permiso 'profesor.documentos' y asignarlo al rol 'Profesor'
+        Permission::create(['name' => 'profesor.documentos'])->syncRoles([$role2]);
+
+        // Crear el permiso 'profesor.pdf.calificaciones' y asignarlo al rol 'Profesor'
+        Permission::create(['name' => 'profesor.pdf.calificaciones'])->syncRoles([$role2]);
 
 
 

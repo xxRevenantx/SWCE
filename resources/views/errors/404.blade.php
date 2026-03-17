@@ -5,6 +5,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" href="{{ asset('imagenes_publicas/logo-letra.png') }}" type="image/png">
     <title>404 | SWCE - Página no encontrada</title>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])

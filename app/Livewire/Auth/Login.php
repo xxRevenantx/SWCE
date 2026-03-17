@@ -28,18 +28,33 @@ class Login extends Component
     // Token de Turnstile
     public ?string $cf_turnstile_response = null;
 
+    /**
+     * Indica si Turnstile debe validarse y mostrarse.
+     */
+    public function getUsaTurnstileProperty(): bool
+    {
+        return !app()->environment(['local', 'testing']);
+    }
+
     public function login(): void
     {
         try {
-            $this->validate([
+            $reglas = [
                 'email' => 'required|string|email',
                 'password' => 'required|string',
-                'cf_turnstile_response' => ['required', 'turnstile'],
-            ], [
-                'cf_turnstile_response.required' => 'Por favor, verifica que no eres un robot.',
-                'cf_turnstile_response.turnstile' => 'La verificación de seguridad falló. Intenta de nuevo.',
+            ];
 
-            ]);
+            $mensajes = [];
+
+            // Solo se valida Turnstile fuera de local/testing
+            if ($this->usaTurnstile) {
+                $reglas['cf_turnstile_response'] = ['required', 'turnstile'];
+
+                $mensajes['cf_turnstile_response.required'] = 'Por favor, verifica que no eres un robot.';
+                $mensajes['cf_turnstile_response.turnstile'] = 'La verificación de seguridad falló. Intenta de nuevo.';
+            }
+
+            $this->validate($reglas, $mensajes);
 
             $this->ensureIsNotRateLimited();
 
@@ -61,11 +76,13 @@ class Login extends Component
             Session::regenerate();
 
             $this->redirectIntended(default: route('dashboard', absolute: false), navigate: true);
-
         } catch (ValidationException $e) {
-            // resetear captcha
-            $this->reset('cf_turnstile_response');
-            $this->dispatch('turnstile-reset');
+            // Solo se resetea Turnstile si está activo
+            if ($this->usaTurnstile) {
+                $this->reset('cf_turnstile_response');
+                $this->dispatch('turnstile-reset');
+            }
+
             throw $e;
         }
     }
