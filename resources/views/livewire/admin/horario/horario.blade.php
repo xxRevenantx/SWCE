@@ -8,7 +8,6 @@
     }
 }" x-on:keydown.escape.window="cerrarPdf()">
     <section class="w-full">
-        {{-- Encabezado --}}
         <div class="sticky top-0 z-10">
             <div
                 class="rounded-2xl border border-neutral-200/60 dark:border-neutral-700/60 bg-gradient-to-r from-[#E4F6FF] to-[#F2EFFF] dark:from-[#0b1220] dark:to-[#121a2a] shadow-lg p-5">
@@ -19,11 +18,9 @@
             </div>
         </div>
 
-        {{-- Filtros --}}
         <div
             class="mt-6 rounded-2xl border bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-700 shadow-sm p-5">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                {{-- Licenciatura --}}
                 <flux:select wire:model.live="licenciatura_id" placeholder="Selecciona una licenciatura...">
                     <flux:select.option value="0">--Selecciona una licenciatura--</flux:select.option>
                     @foreach ($licenciaturas as $lic)
@@ -31,7 +28,6 @@
                     @endforeach
                 </flux:select>
 
-                {{-- Generación --}}
                 <flux:select wire:model.live="generacion_id" placeholder="Selecciona una generación..."
                     :disabled="!$licenciatura_id">
                     <flux:select.option value="0">--Selecciona una generación--</flux:select.option>
@@ -40,7 +36,6 @@
                     @endforeach
                 </flux:select>
 
-                {{-- Cuatrimestre --}}
                 <flux:select wire:model.live="cuatrimestre_id" placeholder="Selecciona un cuatrimestre..."
                     :disabled="!$licenciatura_id || !$generacion_id">
                     <flux:select.option value="0">--Selecciona un cuatrimestre--</flux:select.option>
@@ -51,7 +46,6 @@
                     @endforeach
                 </flux:select>
 
-                {{-- Botón para limpiar --}}
                 <flux:button type="button" class="btn-azul" wire:click="limpiarFiltros">
                     Limpiar filtros
                 </flux:button>
@@ -62,7 +56,6 @@
                 $materiasPorId = collect($materias)->keyBy('id');
             @endphp
 
-            {{-- Mensaje de ayuda --}}
             <div class="mt-4 text-sm text-neutral-600 dark:text-neutral-300">
                 @if (!$filtrosListos)
                     Selecciona licenciatura, generación y cuatrimestre para poder asignar materias.
@@ -72,9 +65,8 @@
             </div>
         </div>
 
-        {{-- Botón PDF --}}
         <div class="mt-4">
-            <button type="button" :disabled="!$filtrosListos"
+            <button type="button" :disabled="!@js($filtrosListos)"
                 x-on:click="
                     pdfModalUrl = '{{ $this->filtrosListos ? $this->pdfUrl : '' }}';
                     if (!pdfModalUrl) return;
@@ -86,11 +78,8 @@
             </button>
         </div>
 
-        {{-- Tabla del horario --}}
         <div
             class="mt-2 rounded-2xl border bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-700 shadow-sm overflow-hidden relative">
-
-            {{-- Loader de la tabla --}}
             <div wire:loading.flex wire:target="licenciatura_id,generacion_id,cuatrimestre_id,limpiarFiltros"
                 class="absolute inset-0 z-20 items-center justify-center bg-white/70 dark:bg-neutral-900/70 backdrop-blur-sm">
 
@@ -133,9 +122,7 @@
                                 class="border-t border-neutral-200 dark:border-neutral-700 {{ $esReceso ? 'bg-amber-50/60 dark:bg-amber-500/10' : '' }}">
                                 <td
                                     class="px-4 py-3 font-semibold text-neutral-700 dark:text-neutral-200 whitespace-nowrap">
-                                    <div class="flex items-center justify-between gap-2">
-                                        <span>{{ $hora }}</span>
-                                    </div>
+                                    <span>{{ $hora }}</span>
                                 </td>
 
                                 @foreach ($dias as $dia)
@@ -159,20 +146,16 @@
                                     @endphp
 
                                     <td class="px-4 py-2 align-top">
-                                        {{-- Receso --}}
                                         @if ($esReceso)
                                             <div
                                                 class="h-[44px] rounded-xl border border-dashed border-amber-300/80 dark:border-amber-400/30 bg-amber-50 dark:bg-amber-500/10 flex items-center justify-center text-amber-900 dark:text-amber-200 text-xs font-semibold">
                                                 RECESO
                                             </div>
-                                            <div class="mt-2 text-[11px] text-neutral-400 text-center">
-                                                —
-                                            </div>
+                                            <div class="mt-2 text-[11px] text-neutral-400 text-center">—</div>
                                         @else
-                                            {{-- Select normal --}}
                                             <select
                                                 class="w-full rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-3 py-2 text-sm text-neutral-800 dark:text-neutral-100 shadow-sm focus:outline-none focus:ring-2 focus:ring-sky-400/40 disabled:opacity-60"
-                                                @disabled(!$filtrosListos)
+                                                :disabled="!$filtrosListos"
                                                 wire:change="actualizarHorario({{ $dia->id }}, '{{ $hora }}', $event.target.value)">
                                                 <option value="0" @selected($seleccion === '0')>--Selecciona una
                                                     opción--</option>
@@ -181,9 +164,21 @@
                                                     @php
                                                         $nombreMateria = $asig->materia->nombre ?? 'Materia';
                                                         $claveMateria = $asig->materia->clave ?? null;
+                                                        $nombreProfesorOpcion = trim(
+                                                            ($asig->profesor->nombre ?? '') .
+                                                                ' ' .
+                                                                ($asig->profesor->apellido_paterno ?? '') .
+                                                                ' ' .
+                                                                ($asig->profesor->apellido_materno ?? ''),
+                                                        );
+
                                                         $textoMateria = $claveMateria
                                                             ? $nombreMateria . ' (' . $claveMateria . ')'
                                                             : $nombreMateria;
+
+                                                        if ($nombreProfesorOpcion !== '') {
+                                                            $textoMateria .= ' - ' . $nombreProfesorOpcion;
+                                                        }
                                                     @endphp
 
                                                     <option value="{{ $asig->id }}" @selected($seleccion === (string) $asig->id)>
@@ -213,14 +208,11 @@
         </div>
     </section>
 
-    {{-- Modal PDF --}}
     <div x-cloak x-show="mostrarModalPdf" x-transition.opacity.duration.200ms
         class="fixed inset-0 z-[999] flex items-center justify-center p-4 sm:p-6" aria-labelledby="titulo-modal-pdf"
         aria-modal="true" role="dialog">
-        {{-- Fondo --}}
         <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" x-on:click="cerrarPdf()"></div>
 
-        {{-- Ventana --}}
         <div x-show="mostrarModalPdf" x-transition:enter="transition ease-out duration-300"
             x-transition:enter-start="opacity-0 translate-y-6 sm:translate-y-0 sm:scale-95 blur-sm"
             x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100 blur-0"
@@ -228,14 +220,13 @@
             x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100 blur-0"
             x-transition:leave-end="opacity-0 translate-y-6 sm:translate-y-0 sm:scale-95 blur-sm"
             class="relative w-full max-w-6xl overflow-hidden rounded-2xl bg-white dark:bg-neutral-900 shadow-2xl ring-1 ring-black/10 dark:ring-white/10">
-            {{-- Encabezado del modal --}}
+
             <div
                 class="flex items-center justify-between gap-3 bg-gradient-to-r from-sky-500 via-blue-600 to-indigo-600 px-5 py-4 text-white">
                 <div>
                     <h2 id="titulo-modal-pdf" class="text-base sm:text-lg font-semibold">
                         Vista previa del horario en PDF
                     </h2>
-
                 </div>
 
                 <div class="flex items-center gap-2">
@@ -252,7 +243,6 @@
                 </div>
             </div>
 
-            {{-- Cuerpo del modal --}}
             <div class="p-4 sm:p-5 bg-neutral-100 dark:bg-neutral-950">
                 <div
                     class="overflow-hidden rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900">

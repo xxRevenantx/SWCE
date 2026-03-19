@@ -7,8 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class Horario extends Model
 {
-    /** @use HasFactory<\Database\Factories\HorarioFactory> */
     use HasFactory;
+
+    protected $table = 'horarios';
 
     protected $fillable = [
         'hora',
@@ -43,11 +44,6 @@ class Horario extends Model
 
     public function asignacionMateria()
     {
-        return $this->belongsTo(AsignacionMateria::class);
+        return $this->belongsTo(AsignacionMateria::class, 'asignacion_materia_id');
     }
-
-
-
-
-
 }

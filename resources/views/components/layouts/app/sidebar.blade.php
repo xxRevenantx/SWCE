@@ -39,13 +39,28 @@
                         Dashboard
                     </flux:navlist.item>
                 @endcan
+            </flux:navlist.group>
+
+        </flux:navlist>
+
+
+
+        <!-- Plataforma Profesor -->
+
+        <flux:navlist variant="outline" class="text-[15px] sm:text-base">
+            <flux:navlist.group :heading="__('Plataforma')" class="grid gap-y-2.5 sm:gap-y-3">
 
                 @can('profesor.dashboard')
                     <flux:navlist.item class="py-4" icon="home" :href="route('profesor.dashboard')"
                         :current="request()->routeIs('profesor.dashboard')" wire:navigate>
                         Panel del Profesor
                     </flux:navlist.item>
-                    <flux:navlist.item class="py-4" icon="home" wire:navigate>
+                    <flux:navlist.item class="py-4" icon="user" wire:navigate :href="route('profesor.perfil')"
+                        :current="request()->routeIs('profesor.perfil')">
+                        Perfil
+                    </flux:navlist.item>
+                    <flux:navlist.item class="py-4" icon="calendar-days" wire:navigate :href="route('profesor.horario')"
+                        :current="request()->routeIs('profesor.horario')">
                         Mi horario
                     </flux:navlist.item>
                 @endcan
@@ -65,7 +80,7 @@
                 </flux:navlist.item>
 
 
-                <flux:navlist.item class="py-4" icon="home" :href="route('estudiante.perfil')"
+                <flux:navlist.item class="py-4" icon="user" :href="route('estudiante.perfil')"
                     :current="request()->routeIs('estudiante.perfil')" wire:navigate>
                     Mi perfil
                 </flux:navlist.item>
