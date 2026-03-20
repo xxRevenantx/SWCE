@@ -17,6 +17,7 @@ class Calificacion extends Model
         'inscripcion_id',
         'asignacion_materia_id',
         'calificacion',
+        'fecha_captura'
     ];
 
     public function inscripcion()
@@ -28,8 +29,4 @@ class Calificacion extends Model
     {
         return $this->belongsTo(AsignacionMateria::class);
     }
-
-
-
-
 }
