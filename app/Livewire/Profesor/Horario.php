@@ -31,14 +31,19 @@ class Horario extends Component
 
     public function mount(): void
     {
+        // Buscar el profesor relacionado al usuario autenticado
         $this->profesor = Profesor::where('user_id', Auth::id())->first();
         $this->profesor_id = $this->profesor?->id;
 
+        // Cargar los días
         $this->dias = Dia::orderBy('id')->get();
+
+        // Inicializar colecciones vacías
         $this->licenciaturas = collect();
         $this->cuatrimestres = collect();
         $this->generaciones = collect();
 
+        // Cargar datos del horario
         $this->cargarFiltros();
         $this->cargarHorasDisponibles();
         $this->inicializarMatriz();
@@ -72,6 +77,7 @@ class Horario extends Component
 
     public function baseConsulta()
     {
+        // Consulta base del horario del profesor
         return DB::table('horarios')
             ->join('asignacion_materias', 'horarios.asignacion_materia_id', '=', 'asignacion_materias.id')
             ->leftJoin('materias', 'asignacion_materias.materia_id', '=', 'materias.id')
@@ -79,7 +85,6 @@ class Horario extends Component
             ->leftJoin('cuatrimestres', 'horarios.cuatrimestre_id', '=', 'cuatrimestres.id')
             ->leftJoin('generaciones', 'horarios.generacion_id', '=', 'generaciones.id')
             ->leftJoin('dias', 'horarios.dia_id', '=', 'dias.id')
-            ->leftJoin('profesores', 'asignacion_materias.profesor_id', '=', 'profesores.id')
             ->where('asignacion_materias.profesor_id', $this->profesor_id);
     }
 
@@ -101,7 +106,7 @@ class Horario extends Component
             ->values();
 
         $this->licenciaturas = Licenciatura::whereIn('id', $idsLicenciaturas)
-            ->orderBy('nombre')
+            ->orderBy('id')
             ->get();
 
         $consultaCuatrimestres = $this->baseConsulta();
@@ -162,15 +167,16 @@ class Horario extends Component
             $consulta->where('horarios.generacion_id', $this->generacion_id);
         }
 
+        // Ordenar por la hora inicial, no por texto
         $this->horasDisponibles = $consulta
             ->select('horarios.hora')
             ->distinct()
             ->orderByRaw("
-            STR_TO_DATE(
-                TRIM(SUBSTRING_INDEX(horarios.hora, '-', 1)),
-                '%h:%i%p'
-            ) asc
-        ")
+                STR_TO_DATE(
+                    TRIM(SUBSTRING_INDEX(horarios.hora, '-', 1)),
+                    '%h:%i%p'
+                ) asc
+            ")
             ->pluck('horarios.hora')
             ->filter()
             ->values()
@@ -186,6 +192,39 @@ class Horario extends Component
                 $this->matrizHorario[$hora][$dia->id] = null;
             }
         }
+    }
+
+    public function obtenerColorLicenciatura(?int $licenciaturaId): string
+    {
+        // Color fijo para cada licenciatura
+        return match ($licenciaturaId) {
+            1 => '#16a34a', // Nutrición
+            2 => '#2563eb', // Administración Empresarial
+            4 => '#b91c1c', // Criminalística, Criminología y Técnicas Periciales
+            5 => '#7c3aed', // Ciencias de la Educación
+            6 => '#ea580c', // Cultura Física y Deportes
+            default => '#334155', // Color por defecto
+        };
+    }
+
+    public function obtenerColorTexto(string $colorHex): string
+    {
+        // Quitar el símbolo #
+        $colorHex = ltrim($colorHex, '#');
+
+        // Si el color no es válido, regresar blanco
+        if (strlen($colorHex) !== 6) {
+            return '#ffffff';
+        }
+
+        $rojo = hexdec(substr($colorHex, 0, 2));
+        $verde = hexdec(substr($colorHex, 2, 2));
+        $azul = hexdec(substr($colorHex, 4, 2));
+
+        // Calcular si el fondo es claro u oscuro
+        $luminosidad = (($rojo * 299) + ($verde * 587) + ($azul * 114)) / 1000;
+
+        return $luminosidad > 155 ? '#000000' : '#ffffff';
     }
 
     public function cargarHorario(): void
@@ -207,8 +246,7 @@ class Horario extends Component
                 'materias.nombre as materia',
                 'licenciaturas.nombre as licenciatura',
                 'cuatrimestres.nombre_cuatrimestre as cuatrimestre',
-                'generaciones.generacion as generacion',
-                'profesores.color as color_profesor'
+                'generaciones.generacion as generacion'
             );
 
         if ($this->licenciatura_id) {
@@ -225,11 +263,11 @@ class Horario extends Component
 
         $horarios = $consulta
             ->orderByRaw("
-            STR_TO_DATE(
-                TRIM(SUBSTRING_INDEX(horarios.hora, '-', 1)),
-                '%h:%i%p'
-            ) asc
-        ")
+                STR_TO_DATE(
+                    TRIM(SUBSTRING_INDEX(horarios.hora, '-', 1)),
+                    '%h:%i%p'
+                ) asc
+            ")
             ->orderBy('horarios.dia_id')
             ->get();
 
@@ -245,32 +283,17 @@ class Horario extends Component
                 continue;
             }
 
+            $colorLicenciatura = $this->obtenerColorLicenciatura($horario->licenciatura_id);
+
             $this->matrizHorario[$hora][$diaId] = [
                 'materia' => $horario->materia ?? 'Sin materia',
                 'licenciatura' => $horario->licenciatura ?? 'Sin licenciatura',
                 'cuatrimestre' => $horario->cuatrimestre ?? 'Sin cuatrimestre',
                 'generacion' => $horario->generacion ?? 'Sin generación',
                 'hora' => $horario->hora ?? '',
-                'color' => $horario->color_profesor ?: '#2563eb',
+                'color' => $colorLicenciatura,
             ];
         }
-    }
-
-    public function obtenerColorTexto(string $colorHex): string
-    {
-        $colorHex = ltrim($colorHex, '#');
-
-        if (strlen($colorHex) !== 6) {
-            return '#ffffff';
-        }
-
-        $rojo = hexdec(substr($colorHex, 0, 2));
-        $verde = hexdec(substr($colorHex, 2, 2));
-        $azul = hexdec(substr($colorHex, 4, 2));
-
-        $luminosidad = (($rojo * 299) + ($verde * 587) + ($azul * 114)) / 1000;
-
-        return $luminosidad > 155 ? '#000000' : '#ffffff';
     }
 
     public function render()

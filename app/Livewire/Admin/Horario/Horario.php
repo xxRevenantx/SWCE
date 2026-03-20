@@ -34,7 +34,7 @@ class Horario extends Component
     public function mount(): void
     {
         $this->licenciaturas = Licenciatura::query()
-            ->orderBy('nombre')
+            ->orderBy('id')
             ->get();
 
         $this->horasDisponibles = [
@@ -299,8 +299,8 @@ class Horario extends Component
         if ($conflictoProfesor) {
             $nombreProfesor = trim(
                 ($asignacion->profesor->nombre ?? '') . ' ' .
-                    ($asignacion->profesor->apellido_paterno ?? '') . ' ' .
-                    ($asignacion->profesor->apellido_materno ?? '')
+                ($asignacion->profesor->apellido_paterno ?? '') . ' ' .
+                ($asignacion->profesor->apellido_materno ?? '')
             );
 
             $this->dispatch('swal', [

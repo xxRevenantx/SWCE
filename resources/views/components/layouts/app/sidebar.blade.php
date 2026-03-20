@@ -63,6 +63,11 @@
                         :current="request()->routeIs('profesor.horario')">
                         Mi horario
                     </flux:navlist.item>
+
+                    <flux:navlist.item class="py-4" icon="book-check" wire:navigate
+                        :href="route('profesor.calificaciones')" :current="request()->routeIs('profesor.calificaciones')">
+                        Calificaciones
+                    </flux:navlist.item>
                 @endcan
 
             </flux:navlist.group>

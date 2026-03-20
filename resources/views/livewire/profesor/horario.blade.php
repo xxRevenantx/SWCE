@@ -15,7 +15,7 @@
             @if ($profesor)
                 <div
                     class="rounded-xl bg-blue-50 px-4 py-2 text-sm font-medium text-blue-700 dark:bg-blue-500/10 dark:text-blue-300">
-                    {{ $profesor->nombre_completo }}
+                    {{ $profesor->nombre }} {{ $profesor->apellido_paterno }} {{ $profesor->apellido_materno }}
                 </div>
             @endif
         </div>
@@ -30,8 +30,11 @@
                 <select id="licenciatura_id" wire:model.live="licenciatura_id"
                     class="w-full rounded-xl border border-neutral-300 bg-white px-4 py-3 text-sm text-neutral-900 shadow-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white">
                     <option value="">Todas las licenciaturas</option>
+
                     @foreach ($licenciaturas as $licenciatura)
-                        <option value="{{ $licenciatura->id }}">{{ $licenciatura->nombre }}</option>
+                        <option value="{{ $licenciatura->id }}">
+                            {{ $licenciatura->nombre }}
+                        </option>
                     @endforeach
                 </select>
             </div>
@@ -45,8 +48,11 @@
                 <select id="cuatrimestre_id" wire:model.live="cuatrimestre_id"
                     class="w-full rounded-xl border border-neutral-300 bg-white px-4 py-3 text-sm text-neutral-900 shadow-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white">
                     <option value="">Todos los cuatrimestres</option>
+
                     @foreach ($cuatrimestres as $cuatrimestre)
-                        <option value="{{ $cuatrimestre->id }}">{{ $cuatrimestre->nombre_cuatrimestre }}</option>
+                        <option value="{{ $cuatrimestre->id }}">
+                            {{ $cuatrimestre->nombre_cuatrimestre }}
+                        </option>
                     @endforeach
                 </select>
             </div>
@@ -60,8 +66,11 @@
                 <select id="generacion_id" wire:model.live="generacion_id"
                     class="w-full rounded-xl border border-neutral-300 bg-white px-4 py-3 text-sm text-neutral-900 shadow-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white">
                     <option value="">Todas las generaciones</option>
+
                     @foreach ($generaciones as $generacion)
-                        <option value="{{ $generacion->id }}">{{ $generacion->generacion }}</option>
+                        <option value="{{ $generacion->id }}">
+                            {{ $generacion->generacion }}
+                        </option>
                     @endforeach
                 </select>
             </div>
@@ -69,7 +78,31 @@
     </div>
 
     <div
-        class="overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
+        class="relative overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
+        {{-- Loader del horario --}}
+        <div wire:loading.flex wire:target="licenciatura_id,cuatrimestre_id,generacion_id"
+            class="absolute inset-0 z-30 hidden items-center justify-center bg-white/80 backdrop-blur-sm dark:bg-neutral-900/80">
+            <div
+                class="flex flex-col items-center gap-4 rounded-2xl border border-blue-100 bg-white px-8 py-6 shadow-2xl dark:border-neutral-700 dark:bg-neutral-800">
+                <div class="relative flex h-16 w-16 items-center justify-center">
+                    <div class="absolute h-16 w-16 rounded-full border-4 border-blue-100 dark:border-neutral-700"></div>
+                    <div
+                        class="absolute h-16 w-16 animate-spin rounded-full border-4 border-transparent border-t-blue-600 border-r-cyan-500">
+                    </div>
+                    <div class="h-6 w-6 animate-pulse rounded-full bg-blue-600"></div>
+                </div>
+
+                <div class="text-center">
+                    <p class="text-sm font-semibold text-neutral-800 dark:text-white">
+                        Cargando horario
+                    </p>
+                    <p class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
+                        Actualizando materias, días y horarios...
+                    </p>
+                </div>
+            </div>
+        </div>
+
         <div class="overflow-x-auto">
             <table class="min-w-full border-separate border-spacing-0">
                 <thead>
@@ -105,21 +138,22 @@
                                     class="min-w-[240px] border-b border-r border-neutral-200 p-3 align-top dark:border-neutral-700">
                                     @if ($celda)
                                         @php
-                                            $colorFondo = $celda['color'] ?? '#2563eb';
+                                            $colorFondo = $celda['color'] ?? '#334155';
                                             $colorTexto = $this->obtenerColorTexto($colorFondo);
                                         @endphp
 
-                                        <div class="rounded-2xl p-4 shadow-sm ring-1 ring-black/5"
+                                        <div class="rounded-2xl p-4 shadow-sm ring-1 ring-black/5 transition hover:scale-[1.01]"
                                             style="background-color: {{ $colorFondo }}; color: {{ $colorTexto }};">
-                                            <div class="text-sm font-bold leading-tight">
-                                                {{ $celda['materia'] }}
-                                            </div>
-
-                                            <div class="mt-2 text-xs font-medium opacity-90">
+                                            <div
+                                                class="inline-flex rounded-full bg-white/20 px-2 py-1 text-[11px] font-semibold">
                                                 {{ $celda['licenciatura'] }}
                                             </div>
 
-                                            <div class="mt-1 text-xs opacity-90">
+                                            <div class="mt-3 text-sm font-bold leading-tight">
+                                                {{ $celda['materia'] }}
+                                            </div>
+
+                                            <div class="mt-2 text-xs opacity-90">
                                                 {{ $celda['cuatrimestre'] }}
                                             </div>
 

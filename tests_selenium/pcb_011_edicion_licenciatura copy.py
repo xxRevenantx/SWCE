@@ -223,10 +223,7 @@ def limpiar_y_escribir(driver, elemento, valor):
 
 
 def llenar_formulario_edicion(driver):
-    """
-    Lleno el formulario de edición con base en el orden real del modal.
-    No escribo en slug porque es readonly.
-    """
+
     esperar_loader_modal(driver)
 
     inputs = obtener_inputs_modal(driver)
