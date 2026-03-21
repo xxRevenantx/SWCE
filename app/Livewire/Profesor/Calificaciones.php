@@ -20,16 +20,16 @@ class Calificaciones extends Component
 
     // Filtros
     public string $buscar = '';
-    public ?int $licenciatura_id = null;
-    public ?int $cuatrimestre_id = null;
-    public ?int $materia_id = null;
-    public ?int $generacion_id = null;
+    public ?string $licenciatura_id = null;
+    public ?string $cuatrimestre_id = null;
+    public ?string $materia_id = null;
+    public ?string $generacion_id = null;
 
     // Catálogos
-    public $licenciaturas = [];
-    public $cuatrimestres = [];
-    public $materias = [];
-    public $generaciones = [];
+    public array $licenciaturas = [];
+    public array $cuatrimestres = [];
+    public array $materias = [];
+    public array $generaciones = [];
 
     // Profesor autenticado
     public ?object $profesor = null;
@@ -58,25 +58,21 @@ class Calificaciones extends Component
         return [
             'inscripcion_id' => ['required', 'integer'],
             'asignacion_materia_id' => ['required', 'integer'],
-            'calificacion' => ['required', 'numeric', 'min:0', 'max:10'],
-            'fecha_captura' => ['required', 'date'],
+            'calificacion' => ['required', 'integer', 'min:0', 'max:10'],
         ];
     }
 
     protected $messages = [
         'calificacion.required' => 'La calificación es obligatoria.',
-        'calificacion.numeric' => 'La calificación debe ser numérica.',
+        'calificacion.integer' => 'La calificación debe ser un número entero.',
         'calificacion.min' => 'La calificación no puede ser menor a 0.',
         'calificacion.max' => 'La calificación no puede ser mayor a 10.',
-        'fecha_captura.required' => 'La fecha de captura es obligatoria.',
-        'fecha_captura.date' => 'La fecha de captura no es válida.',
     ];
 
     public function mount(): void
     {
-        // Buscar el profesor relacionado al usuario autenticado
+        // Se obtiene el profesor relacionado al usuario autenticado
         $this->profesor = Profesor::where('user_id', Auth::id())->first();
-
         $this->profesor_id = $this->profesor?->id;
 
         $this->cargarFiltros();
@@ -118,9 +114,6 @@ class Calificaciones extends Component
 
     public function consultaBase()
     {
-        // Esta consulta arma todas las materias del profesor con los alumnos inscritos
-        // de la misma licenciatura y cuatrimestre. Si ya existe calificación la trae,
-        // y si no existe también muestra el registro para poder capturarla.
         return Inscripcion::query()
             ->join('alumnos', 'inscripciones.alumno_id', '=', 'alumnos.id')
             ->join('asignacion_materias', function ($join) {
@@ -143,10 +136,10 @@ class Calificaciones extends Component
     public function cargarFiltros(): void
     {
         if (!$this->profesor_id) {
-            $this->licenciaturas = collect();
-            $this->cuatrimestres = collect();
-            $this->materias = collect();
-            $this->generaciones = collect();
+            $this->licenciaturas = [];
+            $this->cuatrimestres = [];
+            $this->materias = [];
+            $this->generaciones = [];
             return;
         }
 
@@ -160,12 +153,20 @@ class Calificaciones extends Component
 
         $this->licenciaturas = Licenciatura::whereIn('id', $idsLicenciaturas)
             ->orderBy('nombre')
-            ->get();
+            ->get(['id', 'nombre'])
+            ->map(function ($licenciatura) {
+                return [
+                    'id' => $licenciatura->id,
+                    'nombre' => $licenciatura->nombre,
+                ];
+            })
+            ->values()
+            ->toArray();
 
         $consultaCuatrimestres = $this->consultaBase();
 
         if ($this->licenciatura_id) {
-            $consultaCuatrimestres->where('inscripciones.licenciatura_id', $this->licenciatura_id);
+            $consultaCuatrimestres->where('inscripciones.licenciatura_id', (int) $this->licenciatura_id);
         }
 
         $idsCuatrimestres = $consultaCuatrimestres
@@ -176,39 +177,63 @@ class Calificaciones extends Component
 
         $this->cuatrimestres = Cuatrimestre::whereIn('id', $idsCuatrimestres)
             ->orderBy('no_cuatrimestre')
-            ->get();
+            ->get(['id', 'nombre_cuatrimestre'])
+            ->map(function ($cuatrimestre) {
+                return [
+                    'id' => $cuatrimestre->id,
+                    'nombre_cuatrimestre' => $cuatrimestre->nombre_cuatrimestre,
+                ];
+            })
+            ->values()
+            ->toArray();
 
         $consultaMaterias = $this->consultaBase();
 
         if ($this->licenciatura_id) {
-            $consultaMaterias->where('inscripciones.licenciatura_id', $this->licenciatura_id);
+            $consultaMaterias->where('inscripciones.licenciatura_id', (int) $this->licenciatura_id);
         }
 
         if ($this->cuatrimestre_id) {
-            $consultaMaterias->where('inscripciones.cuatrimestre_id', $this->cuatrimestre_id);
+            $consultaMaterias->where('inscripciones.cuatrimestre_id', (int) $this->cuatrimestre_id);
         }
 
         $this->materias = $consultaMaterias
             ->select('materias.id', 'materias.nombre')
             ->distinct()
             ->orderBy('materias.nombre')
-            ->get();
+            ->get()
+            ->map(function ($materia) {
+                return [
+                    'id' => $materia->id,
+                    'nombre' => $materia->nombre,
+                ];
+            })
+            ->values()
+            ->toArray();
 
         $consultaGeneraciones = $this->consultaBase();
 
         if ($this->licenciatura_id) {
-            $consultaGeneraciones->where('inscripciones.licenciatura_id', $this->licenciatura_id);
+            $consultaGeneraciones->where('inscripciones.licenciatura_id', (int) $this->licenciatura_id);
         }
 
         if ($this->cuatrimestre_id) {
-            $consultaGeneraciones->where('inscripciones.cuatrimestre_id', $this->cuatrimestre_id);
+            $consultaGeneraciones->where('inscripciones.cuatrimestre_id', (int) $this->cuatrimestre_id);
         }
 
         $this->generaciones = $consultaGeneraciones
             ->select('generaciones.id', 'generaciones.generacion')
             ->distinct()
             ->orderBy('generaciones.generacion')
-            ->get();
+            ->get()
+            ->map(function ($generacion) {
+                return [
+                    'id' => $generacion->id,
+                    'generacion' => $generacion->generacion,
+                ];
+            })
+            ->values()
+            ->toArray();
     }
 
     public function abrirModal(
@@ -238,9 +263,12 @@ class Calificaciones extends Component
         $this->generacion = $generacion;
 
         $this->calificacion = $calificacionActual ?? '';
-        $this->fecha_captura = $fechaCaptura ?: now()->format('Y-m-d');
+        $this->fecha_captura = $fechaCaptura ?: '';
 
         $this->mostrarModal = true;
+
+        // Se avisa al front que el modal ya cargó los datos
+        $this->dispatch('calificacion-cargada');
     }
 
     public function cerrarModal(): void
@@ -268,14 +296,20 @@ class Calificaciones extends Component
     {
         $this->validate();
 
-        // Validar que la materia realmente pertenezca al profesor autenticado
+        $this->calificacion = (int) $this->calificacion;
+
+        // Se valida que la materia pertenezca al profesor autenticado
         $materiaDelProfesor = DB::table('asignacion_materias')
             ->where('id', $this->asignacion_materia_id)
             ->where('profesor_id', $this->profesor_id)
             ->exists();
 
         if (!$materiaDelProfesor) {
-            $this->addError('calificacion', 'No se puede guardar esta calificación.');
+            $this->dispatch('notificacion', [
+                'tipo' => 'error',
+                'mensaje' => 'No se puede guardar esta calificación.',
+                'position' => 'top-end',
+            ]);
             return;
         }
 
@@ -286,16 +320,19 @@ class Calificaciones extends Component
             ],
             [
                 'calificacion' => $this->calificacion,
-                'fecha_captura' => $this->fecha_captura,
+                'fecha_captura' => now()->toDateString(),
             ]
         );
 
         $this->dispatch('notificacion', [
             'tipo' => 'success',
             'mensaje' => 'La calificación se guardó correctamente.',
+            'position' => 'top-end',
         ]);
 
         $this->cerrarModal();
+
+        $this->dispatch('cerrar-modal-calificacion');
     }
 
     public function aplicarColorCalificacion($calificacion): string
@@ -339,19 +376,19 @@ class Calificaciones extends Component
         $consulta = $this->consultaBase();
 
         if ($this->licenciatura_id) {
-            $consulta->where('inscripciones.licenciatura_id', $this->licenciatura_id);
+            $consulta->where('inscripciones.licenciatura_id', (int) $this->licenciatura_id);
         }
 
         if ($this->cuatrimestre_id) {
-            $consulta->where('inscripciones.cuatrimestre_id', $this->cuatrimestre_id);
+            $consulta->where('inscripciones.cuatrimestre_id', (int) $this->cuatrimestre_id);
         }
 
         if ($this->materia_id) {
-            $consulta->where('materias.id', $this->materia_id);
+            $consulta->where('materias.id', (int) $this->materia_id);
         }
 
         if ($this->generacion_id) {
-            $consulta->where('inscripciones.generacion_id', $this->generacion_id);
+            $consulta->where('inscripciones.generacion_id', (int) $this->generacion_id);
         }
 
         if ($this->buscar !== '') {
@@ -368,8 +405,13 @@ class Calificaciones extends Component
 
         $total_registros = (clone $resumen)->count();
 
-        $promedio_general = (clone $resumen)->whereNotNull('calificaciones.calificacion')->avg('calificaciones.calificacion');
-        $promedio_general = $promedio_general ? number_format((float) $promedio_general, 2) : '0.00';
+        $promedio_general = (clone $resumen)
+            ->whereNotNull('calificaciones.calificacion')
+            ->avg('calificaciones.calificacion');
+
+        $promedio_general = $promedio_general
+            ? number_format((float) $promedio_general, 2)
+            : '0.00';
 
         $capturadas = (clone $resumen)->whereNotNull('calificaciones.calificacion')->count();
         $pendientes = (clone $resumen)->whereNull('calificaciones.calificacion')->count();

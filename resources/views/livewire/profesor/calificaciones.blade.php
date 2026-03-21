@@ -1,4 +1,4 @@
-<div x-data="{ show: @entangle('mostrarModal') }" class="space-y-6">
+<div class="space-y-6">
     {{-- Encabezado --}}
     <div
         class="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
@@ -105,7 +105,7 @@
                     <option value="">Todas</option>
 
                     @foreach ($licenciaturas as $licenciaturaItem)
-                        <option value="{{ $licenciaturaItem->id }}">{{ $licenciaturaItem->nombre }}</option>
+                        <option value="{{ $licenciaturaItem['id'] }}">{{ $licenciaturaItem['nombre'] }}</option>
                     @endforeach
                 </select>
             </div>
@@ -122,7 +122,7 @@
                     <option value="">Todos</option>
 
                     @foreach ($cuatrimestres as $cuatrimestreItem)
-                        <option value="{{ $cuatrimestreItem->id }}">{{ $cuatrimestreItem->nombre_cuatrimestre }}
+                        <option value="{{ $cuatrimestreItem['id'] }}">{{ $cuatrimestreItem['nombre_cuatrimestre'] }}
                         </option>
                     @endforeach
                 </select>
@@ -140,7 +140,7 @@
                     <option value="">Todas</option>
 
                     @foreach ($generaciones as $generacionItem)
-                        <option value="{{ $generacionItem->id }}">{{ $generacionItem->generacion }}</option>
+                        <option value="{{ $generacionItem['id'] }}">{{ $generacionItem['generacion'] }}</option>
                     @endforeach
                 </select>
             </div>
@@ -158,7 +158,7 @@
                     <option value="">Todas las materias</option>
 
                     @foreach ($materias as $materiaItem)
-                        <option value="{{ $materiaItem->id }}">{{ $materiaItem->nombre }}</option>
+                        <option value="{{ $materiaItem['id'] }}">{{ $materiaItem['nombre'] }}</option>
                     @endforeach
                 </select>
             </div>
@@ -226,6 +226,7 @@
 
                 <tbody>
                     @forelse ($registros as $item)
+                        {{-- {{ $item }} --}}
                         <tr class="transition hover:bg-neutral-50 dark:hover:bg-neutral-800/40">
                             <td
                                 class="border-b border-r border-neutral-200 px-4 py-4 align-top dark:border-neutral-700">
@@ -267,24 +268,32 @@
 
                             <td
                                 class="border-b border-r border-neutral-200 px-4 py-4 text-sm text-neutral-700 dark:border-neutral-700 dark:text-neutral-300">
-                                {{ $item->fecha_captura ?: 'Sin fecha' }}
+                                @if ($item->fecha_captura)
+                                    <span class="text-xs text-neutral-500 dark:text-neutral-400">
+                                        {{ \Carbon\Carbon::parse($item->fecha_captura)->format('d/m/Y') }}
+                                    </span>
+                                @else
+                                    <span class="text-xs text-neutral-400 italic dark:text-neutral-500">Sin
+                                        fecha</span>
+                                @endif
                             </td>
 
                             <td class="border-b border-neutral-200 px-4 py-4 text-center dark:border-neutral-700">
                                 <button type="button"
-                                    wire:click="abrirModal(
-                                        {{ $item->calificacion_id ? $item->calificacion_id : 'null' }},
-                                        {{ $item->inscripcion_id }},
-                                        {{ $item->asignacion_materia_id }},
-                                        '{{ addslashes($item->alumno_nombre . ' ' . $item->alumno_apellido_paterno . ' ' . $item->alumno_apellido_materno) }}',
-                                        '{{ addslashes($item->matricula ?: '') }}',
-                                        '{{ addslashes($item->materia) }}',
-                                        '{{ addslashes($item->licenciatura) }}',
-                                        '{{ addslashes($item->cuatrimestre) }}',
-                                        '{{ addslashes($item->generacion) }}',
-                                        {{ $item->calificacion !== null ? $item->calificacion : 'null' }},
-                                        '{{ $item->fecha_captura ?: '' }}'
-                                    )"
+                                    @click="$dispatch('abrir-modal-calificacion');
+                                            $wire.abrirModal(
+                                                {{ $item->calificacion_id ? $item->calificacion_id : 'null' }},
+                                                {{ $item->inscripcion_id }},
+                                                {{ $item->asignacion_materia_id }},
+                                                '{{ addslashes($item->alumno_nombre . ' ' . $item->alumno_apellido_paterno . ' ' . $item->alumno_apellido_materno) }}',
+                                                '{{ addslashes($item->matricula ?: '') }}',
+                                                '{{ addslashes($item->materia) }}',
+                                                '{{ addslashes($item->licenciatura) }}',
+                                                '{{ addslashes($item->cuatrimestre) }}',
+                                                '{{ addslashes($item->generacion) }}',
+                                                {{ $item->calificacion !== null ? $item->calificacion : 'null' }},
+                                                '{{ $item->fecha_captura ?: '' }}'
+                                            )"
                                     class="inline-flex items-center rounded-xl px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:scale-[1.02] {{ $item->calificacion === null ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-indigo-600 hover:bg-indigo-700' }}">
                                     {{ $this->textoBoton($item->calificacion) }}
                                 </button>
@@ -317,122 +326,117 @@
     </div>
 
     {{-- Modal editar / capturar --}}
-    <div x-cloak x-show="show" x-trap.noscroll="show" @keydown.escape.window="show = false; $wire.cerrarModal()"
-        class="fixed inset-0 z-50">
+    <div x-data="{ show: false, loading: false }" x-cloak x-trap.noscroll="show" x-show="show"
+        @abrir-modal-calificacion.window="show = true; loading = true" @calificacion-cargada.window="loading = false"
+        @cerrar-modal-calificacion.window="
+            show = false;
+            loading = false;
+            $wire.cerrarModal()
+        "
+        @keydown.escape.window="show = false; loading = false; $wire.cerrarModal()"
+        class="fixed inset-0 z-50 flex items-center justify-center" aria-live="polite">
         {{-- Overlay --}}
-        <div x-show="show" x-transition.opacity.duration.200ms
-            class="absolute inset-0 bg-neutral-900/70 backdrop-blur-sm" @click="show = false; $wire.cerrarModal()">
-        </div>
+        <div class="absolute inset-0 bg-neutral-900/70 backdrop-blur-sm" x-show="show"
+            x-transition.opacity.duration.200ms @click.self="show = false; loading = false; $wire.cerrarModal()"></div>
 
-        {{-- Panel --}}
-        <div class="relative flex min-h-screen items-center justify-center p-4 sm:p-6">
-            <div x-show="show" x-transition:enter="transform ease-out duration-300"
-                x-transition:enter-start="opacity-0 translate-y-6 sm:translate-y-0 sm:scale-95 blur-sm"
-                x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100 blur-0"
-                x-transition:leave="transform ease-in duration-200"
-                x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100 blur-0"
-                x-transition:leave-end="opacity-0 translate-y-6 sm:translate-y-0 sm:scale-95 blur-sm"
-                class="relative w-full max-w-3xl overflow-hidden rounded-2xl border border-white/10 bg-white shadow-2xl ring-1 ring-black/5 dark:bg-neutral-900"
-                role="dialog" aria-modal="true">
-                {{-- Barra superior --}}
-                <div class="bg-gradient-to-r from-sky-500 via-blue-600 to-indigo-600 px-6 py-4 text-white">
-                    <div class="flex items-start justify-between gap-4">
-                        <div>
-                            <h3 class="text-lg font-bold">
-                                {{ $calificacion_id ? 'Editar calificación' : 'Capturar calificación' }}
-                            </h3>
-                            <p class="mt-1 text-sm text-white/90">
-                                Registra la calificación del alumno seleccionado.
-                            </p>
-                        </div>
+        {{-- Modal --}}
+        <div class="relative w-[92vw] sm:w-[88vw] md:w-[70vw] max-w-3xl mx-4 sm:mx-6 overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-black/5 dark:bg-neutral-900 dark:ring-white/10"
+            role="dialog" aria-modal="true" aria-labelledby="titulo-modal-calificacion" x-show="show"
+            x-transition:enter="transform ease-out duration-300"
+            x-transition:enter-start="opacity-0 translate-y-6 sm:translate-y-0 sm:scale-95 blur-sm"
+            x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100 blur-0"
+            x-transition:leave="transform ease-in duration-200"
+            x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100 blur-0"
+            x-transition:leave-end="opacity-0 translate-y-6 sm:translate-y-0 sm:scale-95 blur-sm" wire:ignore.self>
+            <div class="h-1.5 w-full bg-gradient-to-r from-sky-500 via-blue-600 to-indigo-600"></div>
 
-                        <button type="button" @click="show = false; $wire.cerrarModal()"
-                            class="rounded-xl bg-white/10 px-3 py-2 text-sm font-semibold text-white transition hover:bg-white/20">
-                            ✕
-                        </button>
-                    </div>
+            <div class="flex items-start justify-between gap-3 px-5 pb-3 pt-4 sm:px-6">
+                <div class="min-w-0">
+                    <h2 id="titulo-modal-calificacion"
+                        class="text-xl font-bold text-neutral-900 dark:text-white sm:text-2xl">
+                        {{ $calificacion_id ? 'Editar calificación' : 'Capturar calificación' }}
+                    </h2>
+                    <p class="text-sm text-neutral-600 dark:text-neutral-400">
+                        Registra la calificación del alumno seleccionado.
+                    </p>
                 </div>
 
-                <div class="max-h-[75vh] overflow-y-auto p-6">
-                    <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-                        <div
-                            class="rounded-2xl border border-neutral-200 bg-neutral-50 p-4 dark:border-neutral-700 dark:bg-neutral-800/60">
-                            <p
-                                class="text-xs font-semibold uppercase tracking-[0.18em] text-neutral-500 dark:text-neutral-400">
-                                Alumno
-                            </p>
-                            <p class="mt-2 text-sm font-bold text-neutral-900 dark:text-white">
-                                {{ $alumno }}
-                            </p>
-                            <p class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
-                                {{ $matricula }}
-                            </p>
-                        </div>
+                <button @click="show = false; loading = false; $wire.cerrarModal()" type="button"
+                    class="inline-flex h-9 w-9 items-center justify-center rounded-full text-zinc-500 hover:bg-zinc-100 hover:text-zinc-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:text-zinc-400 dark:hover:bg-neutral-800 dark:hover:text-zinc-200"
+                    aria-label="Cerrar">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
 
-                        <div
-                            class="rounded-2xl border border-neutral-200 bg-neutral-50 p-4 dark:border-neutral-700 dark:bg-neutral-800/60">
-                            <p
-                                class="text-xs font-semibold uppercase tracking-[0.18em] text-neutral-500 dark:text-neutral-400">
-                                Materia
-                            </p>
-                            <p class="mt-2 text-sm font-bold text-neutral-900 dark:text-white">
-                                {{ $materia }}
-                            </p>
-                            <p class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
-                                {{ $licenciatura }} · {{ $cuatrimestre }} · {{ $generacion }}
-                            </p>
-                        </div>
-                    </div>
-
-                    <div class="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
-                        <div>
-                            <label for="calificacion_modal"
-                                class="mb-2 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
-                                Calificación
-                            </label>
-
-                            <input id="calificacion_modal" type="number" step="0.01" min="0"
-                                max="10" wire:model.live="calificacion"
-                                class="w-full rounded-2xl border border-neutral-300 bg-white px-4 py-3 text-sm text-neutral-900 shadow-sm outline-none transition focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white dark:focus:ring-indigo-500/20"
-                                placeholder="Ejemplo: 9.50">
-
-                            @error('calificacion')
-                                <p class="mt-2 text-sm text-rose-600">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        <div>
-                            <label for="fecha_captura_modal"
-                                class="mb-2 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
-                                Fecha de captura
-                            </label>
-
-                            <input id="fecha_captura_modal" type="date" wire:model.live="fecha_captura"
-                                class="w-full rounded-2xl border border-neutral-300 bg-white px-4 py-3 text-sm text-neutral-900 shadow-sm outline-none transition focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white dark:focus:ring-indigo-500/20">
-
-                            @error('fecha_captura')
-                                <p class="mt-2 text-sm text-rose-600">{{ $message }}</p>
-                            @enderror
-                        </div>
+            <div class="max-h-[75vh] overflow-y-auto px-5 pb-5 sm:px-6">
+                <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <div
+                        class="rounded-2xl border border-neutral-200 bg-neutral-50 p-4 dark:border-neutral-700 dark:bg-neutral-800/60">
+                        <p
+                            class="text-xs font-semibold uppercase tracking-[0.18em] text-neutral-500 dark:text-neutral-400">
+                            Alumno
+                        </p>
+                        <p class="mt-2 text-sm font-bold text-neutral-900 dark:text-white">
+                            {{ $alumno }}
+                        </p>
+                        <p class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
+                            {{ $matricula }}
+                        </p>
                     </div>
 
                     <div
-                        class="mt-6 rounded-2xl border border-dashed border-neutral-300 bg-neutral-50 p-4 text-sm text-neutral-600 dark:border-neutral-700 dark:bg-neutral-800/50 dark:text-neutral-300">
-                        La calificación se guarda para la combinación exacta de alumno y materia asignada. Si ya existe,
-                        se actualiza; si no existe, se crea.
+                        class="rounded-2xl border border-neutral-200 bg-neutral-50 p-4 dark:border-neutral-700 dark:bg-neutral-800/60">
+                        <p
+                            class="text-xs font-semibold uppercase tracking-[0.18em] text-neutral-500 dark:text-neutral-400">
+                            Materia
+                        </p>
+                        <p class="mt-2 text-sm font-bold text-neutral-900 dark:text-white">
+                            {{ $materia }}
+                        </p>
+                        <p class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
+                            {{ $licenciatura }} · {{ $cuatrimestre }} · {{ $generacion }}
+                        </p>
                     </div>
                 </div>
 
+                <div class="mt-6 grid grid-cols-1 gap-4 md:grid-cols-1">
+                    <div>
+                        <label for="calificacion_modal"
+                            class="mb-2 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                            Calificación
+                        </label>
+
+                        <input id="calificacion_modal" type="number" step="1" min="0" max="10"
+                            wire:model.live="calificacion"
+                            class="w-full rounded-2xl border border-neutral-300 bg-white px-4 py-3 text-sm text-neutral-900 shadow-sm outline-none transition focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white dark:focus:ring-indigo-500/20"
+                            placeholder="Ejemplo: 9">
+
+                        @error('calificacion')
+                            <p class="mt-2 text-sm text-rose-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                </div>
+
                 <div
-                    class="flex items-center justify-end gap-3 border-t border-neutral-200 px-6 py-4 dark:border-neutral-700">
-                    <button type="button" @click="show = false; $wire.cerrarModal()"
-                        class="rounded-xl border border-neutral-300 px-4 py-2 text-sm font-semibold text-neutral-700 transition hover:bg-neutral-50 dark:border-neutral-700 dark:text-neutral-200 dark:hover:bg-neutral-800">
+                    class="mt-6 rounded-2xl border border-dashed border-neutral-300 bg-neutral-50 p-4 text-sm text-neutral-600 dark:border-neutral-700 dark:bg-neutral-800/50 dark:text-neutral-300">
+                    La calificación se guarda para la combinación exacta de alumno y materia asignada. Si ya existe,
+                    se actualiza; si no existe, se crea.
+                </div>
+
+                <div class="mt-6 flex flex-col justify-end gap-2 pt-1 sm:flex-row">
+                    <button type="button"
+                        class="w-full rounded-xl border border-neutral-300 px-4 py-2 text-sm font-semibold text-neutral-700 transition hover:bg-neutral-50 dark:border-neutral-700 dark:text-neutral-200 dark:hover:bg-neutral-800 sm:w-auto"
+                        @click="show = false; loading = false; $wire.cerrarModal()">
                         Cancelar
                     </button>
 
                     <button type="button" wire:click="guardarCalificacion" wire:loading.attr="disabled"
                         wire:target="guardarCalificacion"
-                        class="rounded-xl bg-gradient-to-r from-sky-500 via-blue-600 to-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-70">
+                        class="w-full rounded-xl bg-gradient-to-r from-sky-500 via-blue-600 to-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-70 sm:w-auto">
                         <span wire:loading.remove wire:target="guardarCalificacion">
                             Guardar calificación
                         </span>
@@ -443,14 +447,43 @@
                     </button>
                 </div>
             </div>
+
+            {{-- Loader interno --}}
+            <div x-show="loading"
+                class="absolute inset-0 z-20 flex items-center justify-center rounded-2xl bg-white/70 backdrop-blur dark:bg-neutral-900/70">
+                <div
+                    class="flex items-center gap-3 rounded-xl bg-white px-4 py-3 shadow ring-1 ring-neutral-200 dark:bg-neutral-900 dark:ring-neutral-800">
+                    <svg class="h-5 w-5 animate-spin text-blue-600 dark:text-blue-400" viewBox="0 0 24 24"
+                        fill="none" aria-hidden="true">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                            stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+                    </svg>
+                    <span class="text-sm text-neutral-800 dark:text-neutral-200">Cargando…</span>
+                </div>
+            </div>
         </div>
     </div>
 
-    {{-- Alerta simple --}}
+    {{-- SweetAlert2 --}}
     <script>
         window.addEventListener('notificacion', event => {
             const data = event.detail[0] ?? event.detail;
-            alert(data.mensaje);
+
+            Swal.fire({
+                toast: true,
+                position: data.position ?? 'top-end',
+                icon: data.tipo ?? 'success',
+                title: data.mensaje ?? 'Operación realizada correctamente.',
+                showConfirmButton: false,
+                timer: 2500,
+                timerProgressBar: true,
+                background: document.documentElement.classList.contains('dark') ? '#171717' : '#ffffff',
+                color: document.documentElement.classList.contains('dark') ? '#ffffff' : '#171717',
+                customClass: {
+                    popup: 'rounded-2xl shadow-2xl border border-neutral-200 dark:border-neutral-700'
+                }
+            });
         });
     </script>
 </div>
