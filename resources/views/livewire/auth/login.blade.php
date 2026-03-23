@@ -2,32 +2,32 @@
     <x-auth-header :title="__('Inicia sesión en tu cuenta')" :description="__('Ingresa tu email para iniciar sesión en tu panel')" />
 
     {{-- Turnstile solo en producción u otros entornos distintos de local/testing --}}
-    @if ($this->usaTurnstile)
-        <div class="mt-4" wire:ignore>
-            <div class="cf-turnstile" data-sitekey="{{ env('TURNSTILE_SITE_KEY') }}" data-callback="onTurnstileSuccess">
-            </div>
+    {{-- @if ($this->usaTurnstile) --}}
+    <div class="mt-4" wire:ignore>
+        <div class="cf-turnstile" data-sitekey="{{ env('TURNSTILE_SITE_KEY') }}" data-callback="onTurnstileSuccess">
         </div>
+    </div>
 
-        @error('cf_turnstile_response')
-            <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-        @enderror
+    @error('cf_turnstile_response')
+        <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+    @enderror
 
-        <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 
-        <script>
-            function onTurnstileSuccess(token) {
-                @this.set('cf_turnstile_response', token);
-            }
+    <script>
+        function onTurnstileSuccess(token) {
+            @this.set('cf_turnstile_response', token);
+        }
 
-            document.addEventListener('livewire:init', () => {
-                Livewire.on('turnstile-reset', () => {
-                    if (window.turnstile) {
-                        turnstile.reset();
-                    }
-                });
+        document.addEventListener('livewire:init', () => {
+            Livewire.on('turnstile-reset', () => {
+                if (window.turnstile) {
+                    turnstile.reset();
+                }
             });
-        </script>
-    @endif
+        });
+    </script>
+    {{-- @endif --}}
 
     <!-- Session Status -->
     <x-auth-session-status class="text-center" :status="session('status')" />
