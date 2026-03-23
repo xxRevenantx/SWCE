@@ -46,13 +46,12 @@ class Login extends Component
 
             $mensajes = [];
 
-            // Solo se valida Turnstile fuera de local/testing
-            if ($this->usaTurnstile) {
-                $reglas['cf_turnstile_response'] = ['required', 'turnstile'];
 
-                $mensajes['cf_turnstile_response.required'] = 'Por favor, verifica que no eres un robot.';
-                $mensajes['cf_turnstile_response.turnstile'] = 'La verificación de seguridad falló. Intenta de nuevo.';
-            }
+            $reglas['cf_turnstile_response'] = ['required', 'turnstile'];
+
+            $mensajes['cf_turnstile_response.required'] = 'Por favor, verifica que no eres un robot.';
+            $mensajes['cf_turnstile_response.turnstile'] = 'La verificación de seguridad falló. Intenta de nuevo.';
+
 
             $this->validate($reglas, $mensajes);
 
