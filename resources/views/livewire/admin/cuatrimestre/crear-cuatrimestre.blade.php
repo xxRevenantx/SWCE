@@ -62,7 +62,7 @@
                             </div>
                         </flux:field>
 
-                        <!-- Acciones abajo de los inputs -->
+
                         <div
                             class="mt-6 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2">
                             <flux:button variant="primary" type="button" class="cancelar-btn" @click="open=false">
