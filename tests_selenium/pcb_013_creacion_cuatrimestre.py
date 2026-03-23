@@ -83,62 +83,83 @@ def obtener_texto_pagina(driver):
         return ""
 
 
+def formulario_visible(driver):
+    try:
+        elementos = driver.find_elements(
+            By.XPATH,
+            "//input[contains(@placeholder, 'No. de cuatrimestre')] | "
+            "//label[contains(., 'No. de Cuatrimestre')]"
+        )
+        for elemento in elementos:
+            if elemento.is_displayed():
+                return True
+        return False
+    except Exception:
+        return False
+
+
 def limpiar_formulario(driver):
     print("Recargando página para limpiar formulario...")
     driver.refresh()
     time.sleep(3)
-    abrir_collapse_nuevo_cuatrimestre(driver)
 
 
-def abrir_collapse_nuevo_cuatrimestre(driver):
-    print("Abriendo collapse 'Nuevo cuatrimestre'...")
-
-    span_texto = esperar(driver, 8).until(
-        EC.presence_of_element_located(
-            (By.XPATH, "//*[contains(text(), 'Nuevo cuatrimestre')]")
-        )
-    )
-
-    boton = span_texto.find_element(By.XPATH, "./ancestor::button[1]")
-    driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", boton)
-    time.sleep(1)
-    driver.execute_script("arguments[0].click();", boton)
-    time.sleep(2)
-
-    esperar(driver, 8).until(
-        EC.presence_of_element_located(
-            (By.XPATH, "//label[contains(., 'No. de Cuatrimestre')]")
-        )
-    )
-
-    print("Collapse abierto correctamente.")
+def abrir_panel_nuevo_cuatrimestre(driver):
     """
-    Abre el collapse 'Nuevo cuatrimestre' antes de capturar los campos.
+    Abre el panel o collapse de alta de cuatrimestre.
     """
-    print("Abriendo collapse 'Nuevo cuatrimestre'...")
+    print("Abriendo panel 'Nuevo cuatrimestre'...")
 
-    xpaths_boton = [
-        "//button[.//span[contains(., 'Nuevo cuatrimestre')]]",
-        "//button[contains(., 'Nuevo cuatrimestre')]",
-        "//*[self::button or @role='button'][.//*[contains(., 'Nuevo cuatrimestre')] or contains(., 'Nuevo cuatrimestre')]",
+    if formulario_visible(driver):
+        print("El formulario ya está visible.")
+        return
+
+    xpaths_texto = [
+        "//*[contains(normalize-space(.), 'Nuevo cuatrimestre')]",
+        "//span[contains(normalize-space(.), 'Nuevo cuatrimestre')]",
     ]
 
     boton = None
 
-    for xpath in xpaths_boton:
+    for xpath in xpaths_texto:
         try:
             elementos = driver.find_elements(By.XPATH, xpath)
             for elemento in elementos:
-                if elemento.is_displayed():
-                    boton = elemento
-                    break
+                if not elemento.is_displayed():
+                    continue
+
+                try:
+                    candidato = elemento.find_element(By.XPATH, "./ancestor::button[1]")
+                    if candidato.is_displayed():
+                        boton = candidato
+                        break
+                except Exception:
+                    pass
             if boton:
                 break
         except Exception:
             continue
 
     if not boton:
-        raise Exception("No se encontró el botón 'Nuevo cuatrimestre'.")
+        # Fallback
+        xpaths_boton = [
+            "//button[contains(., 'Nuevo cuatrimestre')]",
+            "//button[.//span[contains(., 'Nuevo cuatrimestre')]]",
+        ]
+        for xpath in xpaths_boton:
+            try:
+                elementos = driver.find_elements(By.XPATH, xpath)
+                for elemento in elementos:
+                    if elemento.is_displayed():
+                        boton = elemento
+                        break
+                if boton:
+                    break
+            except Exception:
+                continue
+
+    if not boton:
+        raise NoSuchElementException("No se encontró el botón 'Nuevo cuatrimestre'.")
 
     driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", boton)
     time.sleep(1)
@@ -148,132 +169,144 @@ def abrir_collapse_nuevo_cuatrimestre(driver):
     except Exception:
         driver.execute_script("arguments[0].click();", boton)
 
-    time.sleep(1.5)
+    time.sleep(2)
 
-    # Si no abrió, volver a intentar con JS
-    labels = driver.find_elements(By.XPATH, "//label[contains(., 'No. de Cuatrimestre')]")
-    if not labels:
-        print("Primer intento no abrió el collapse, reintentando con JavaScript...")
+    if not formulario_visible(driver):
+        print("Primer intento no abrió el panel, reintentando con JavaScript...")
         driver.execute_script("arguments[0].click();", boton)
-        time.sleep(1.5)
+        time.sleep(2)
 
-    esperar(driver, 8).until(
-        EC.presence_of_element_located(
-            (By.XPATH, "//label[contains(., 'No. de Cuatrimestre')]")
-        )
-    )
+    esperar(driver, 8).until(lambda d: formulario_visible(d))
+    print("Panel de cuatrimestre abierto correctamente.")
 
-    print("Collapse abierto correctamente.")
 
 def obtener_input_no_cuatrimestre(driver):
     xpaths = [
-        "//label[contains(., 'No. de Cuatrimestre')]/following::input[1]",
         "//input[contains(@placeholder, 'No. de cuatrimestre')]",
+        "//label[contains(., 'No. de Cuatrimestre')]/following::input[1]",
         "//input[contains(@wire:model, 'no_cuatrimestre')]",
-        "//input[contains(@wire:model.live, 'no_cuatrimestre')]",
         "//input[contains(@name, 'no_cuatrimestre') or contains(@id, 'no_cuatrimestre')]",
         "//input[@type='number']",
     ]
 
     for xpath in xpaths:
         try:
-            return esperar(driver, 3).until(
-                EC.presence_of_element_located((By.XPATH, xpath))
-            )
+            elementos = driver.find_elements(By.XPATH, xpath)
+            for elemento in elementos:
+                if elemento.is_displayed() and elemento.is_enabled():
+                    return elemento
         except Exception:
             continue
 
-    raise NoSuchElementException("No se encontró el input de No. de Cuatrimestre.")
+    raise NoSuchElementException("No se encontró el input de no_cuatrimestre.")
 
 
 def obtener_input_nombre_cuatrimestre(driver):
     xpaths = [
+        "//input[contains(@placeholder, 'Ej. Primer cuatrimestre')]",
         "//label[contains(., 'Nombre Cuatrimestre')]/following::input[1]",
         "//label[contains(., 'Nombre del cuatrimestre')]/following::input[1]",
-        "//input[contains(@placeholder, 'Ej. Primer cuatrimestre')]",
         "//input[contains(@wire:model, 'nombre_cuatrimestre')]",
-        "//input[contains(@wire:model.live, 'nombre_cuatrimestre')]",
         "//input[contains(@name, 'nombre_cuatrimestre') or contains(@id, 'nombre_cuatrimestre')]",
+        "//input[@type='text']",
     ]
 
     for xpath in xpaths:
         try:
-            return esperar(driver, 3).until(
-                EC.presence_of_element_located((By.XPATH, xpath))
-            )
+            elementos = driver.find_elements(By.XPATH, xpath)
+            for elemento in elementos:
+                if elemento.is_displayed() and elemento.is_enabled():
+                    return elemento
         except Exception:
             continue
 
-    raise NoSuchElementException("No se encontró el input de Nombre Cuatrimestre.")
+    raise NoSuchElementException("No se encontró el input de nombre_cuatrimestre.")
 
 
 def obtener_select_mes(driver):
-    """
-    Obtiene el select real de meses dentro del formulario expandido.
-    """
     xpaths = [
         "//label[contains(., 'Selecciona los meses')]/following::select[1]",
-        "//label[contains(., 'Selecciona los meses')]/following::*//select[1]",
-        "//select[preceding::label[contains(., 'Selecciona los meses')]][1]",
+        "//select[option[contains(., 'SEPTIEMBRE') or contains(., 'ENERO') or contains(., 'MAYO')]]",
         "//select[contains(@wire:model, 'mes_id')]",
-        "//select[contains(@wire:model.live, 'mes_id')]",
         "(//select)[1]",
     ]
 
     for xpath in xpaths:
-        elementos = driver.find_elements(By.XPATH, xpath)
-        for elemento in elementos:
-            try:
+        try:
+            elementos = driver.find_elements(By.XPATH, xpath)
+            for elemento in elementos:
                 if elemento.is_displayed() and elemento.is_enabled():
                     return elemento
-            except Exception:
-                pass
+        except Exception:
+            continue
 
-    raise NoSuchElementException("No se encontró el select visible de meses.")
+    raise NoSuchElementException("No se encontró el select de mes.")
 
 
-def escribir_input(driver, elemento, texto):
+def escribir_en_input(driver, elemento, texto):
     driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", elemento)
     time.sleep(0.5)
-    elemento.clear()
+
+    try:
+        elemento.click()
+    except Exception:
+        driver.execute_script("arguments[0].click();", elemento)
+
     time.sleep(0.3)
-    elemento.send_keys(texto)
-    time.sleep(0.8)
+
+    try:
+        driver.execute_script("""
+            arguments[0].value = '';
+            arguments[0].dispatchEvent(new Event('input', { bubbles: true }));
+            arguments[0].dispatchEvent(new Event('change', { bubbles: true }));
+        """, elemento)
+    except Exception:
+        pass
+
+    time.sleep(0.3)
+
+    try:
+        elemento.clear()
+    except Exception:
+        pass
+
+    try:
+        elemento.send_keys(str(texto))
+    except Exception:
+        driver.execute_script("""
+            arguments[0].value = arguments[1];
+            arguments[0].dispatchEvent(new Event('input', { bubbles: true }));
+            arguments[0].dispatchEvent(new Event('change', { bubbles: true }));
+        """, elemento, str(texto))
+
+    time.sleep(1)
+    valor_final = driver.execute_script("return arguments[0].value;", elemento)
+    print(f"Valor capturado en input: {valor_final}")
 
 
-def seleccionar_mes_por_indice(driver, indice_opcion):
+def seleccionar_mes(driver, indice_opcion=1):
     """
-    Selecciona el mes por índice real del select.
-    Debe ir del 1 al 3, porque 0 normalmente es la opción por defecto.
+    Selecciona el mes por índice.
+    0 suele ser placeholder.
+    1 a 3 son opciones válidas.
     """
     print(f"Seleccionando mes por índice: {indice_opcion}")
 
-    select = obtener_select_mes(driver)
-    driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", select)
-    time.sleep(0.5)
+    select_mes = obtener_select_mes(driver)
+    driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", select_mes)
+    time.sleep(1)
 
-    if indice_opcion not in [1, 2, 3]:
-        raise Exception("El índice del mes debe estar entre 1 y 3.")
-
-    # Intento 1: con Select()
     try:
-        combo = Select(select)
-        opciones_validas = combo.options
-
-        if len(opciones_validas) <= indice_opcion:
-            raise Exception(f"El select no tiene la opción con índice {indice_opcion}")
-
+        combo = Select(select_mes)
         combo.select_by_index(indice_opcion)
-        time.sleep(1)
-
-        texto = opciones_validas[indice_opcion].text.strip()
-        valor = opciones_validas[indice_opcion].get_attribute("value")
-        print(f"Mes seleccionado con Select(): índice {indice_opcion} -> {texto} ({valor})")
+        texto = combo.options[indice_opcion].text.strip()
+        valor = combo.options[indice_opcion].get_attribute("value")
+        print(f"Mes seleccionado con Select(): {valor} -> {texto}")
+        time.sleep(1.5)
         return
     except Exception:
         print("No se pudo seleccionar con Select(), se intentará con JavaScript...")
 
-    # Intento 2: con JavaScript
     resultado = driver.execute_script("""
         const el = arguments[0];
         const indice = arguments[1];
@@ -286,21 +319,18 @@ def seleccionar_mes_por_indice(driver, indice_opcion):
         el.dispatchEvent(new Event('input', { bubbles: true }));
         el.dispatchEvent(new Event('change', { bubbles: true }));
 
-        return {
-            value: opt.value,
-            text: opt.text
-        };
-    """, select, indice_opcion)
+        return { value: opt.value, text: opt.text };
+    """, select_mes, indice_opcion)
 
-    if not resultado or resultado["value"] in [None, "", "0"]:
-        raise Exception(f"No se pudo seleccionar el mes en el índice {indice_opcion}")
+    if not resultado:
+        raise Exception("No se pudo seleccionar el mes.")
 
-    time.sleep(1)
-    print(f"Mes seleccionado con JavaScript: índice {indice_opcion} -> {resultado['text']} ({resultado['value']})")
+    print(f"Mes seleccionado con JavaScript: {resultado['value']} -> {resultado['text']}")
+    time.sleep(1.5)
 
 
-def guardar(driver):
-    print("Presionando botón Guardar...")
+def guardar_formulario(driver):
+    print("Guardando formulario...")
 
     xpaths = [
         "//button[contains(., 'Guardar')]",
@@ -310,91 +340,134 @@ def guardar(driver):
     for xpath in xpaths:
         try:
             boton = esperar(driver, 4).until(
-                EC.element_to_be_clickable((By.XPATH, xpath))
+                EC.presence_of_element_located((By.XPATH, xpath))
             )
-            driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", boton)
-            time.sleep(0.5)
-            driver.execute_script("arguments[0].click();", boton)
-            time.sleep(2)
-            return
+            if boton.is_displayed():
+                driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", boton)
+                time.sleep(1)
+                try:
+                    boton.click()
+                except Exception:
+                    driver.execute_script("arguments[0].click();", boton)
+                time.sleep(3)
+                return
         except Exception:
             continue
 
     raise NoSuchElementException("No se encontró el botón Guardar.")
 
 
+def detectar_mensaje_exito(driver):
+    try:
+        html = driver.page_source.lower()
+        return "cuatrimestre creado correctamente" in html
+    except Exception:
+        return False
+
+
+def detectar_mensaje_duplicado(driver):
+    try:
+        html = driver.page_source.lower()
+        return "el cuatrimestre ya existe" in html
+    except Exception:
+        return False
+
+
+def detectar_error_nombre(driver):
+    try:
+        html = driver.page_source.lower()
+        return "el campo nombre del cuatrimestre es obligatorio" in html
+    except Exception:
+        return False
+
+
+def detectar_error_mes(driver):
+    try:
+        html = driver.page_source.lower()
+        return "el campo mes es obligatorio" in html or "el mes seleccionado no es válido" in html
+    except Exception:
+        return False
+
+
 # =========================================================
-# CASOS DE PRUEBA
+# FLUJO DE LA PRUEBA
 # =========================================================
+def llenar_formulario_cuatrimestre_correcto(driver, numero, nombre, indice_mes):
+    print("Capturando datos del cuatrimestre...")
+    abrir_panel_nuevo_cuatrimestre(driver)
+    escribir_en_input(driver, obtener_input_no_cuatrimestre(driver), numero)
+    escribir_en_input(driver, obtener_input_nombre_cuatrimestre(driver), nombre)
+    seleccionar_mes(driver, indice_mes)
+
+
 def caso_registro_correcto(driver):
     print("\nCaso 1: registro correcto")
+    llenar_formulario_cuatrimestre_correcto(driver, "9", "9° Cuatrimestre", 3)
+    guardar_formulario(driver)
 
-    escribir_input(driver, obtener_input_no_cuatrimestre(driver), "8")
-    escribir_input(driver, obtener_input_nombre_cuatrimestre(driver), "Octavo")
-    seleccionar_mes_por_indice(driver, 1)
-    guardar(driver)
-
-    texto = obtener_texto_pagina(driver)
-
-    if "¡Cuatrimestre creado correctamente!" in texto or "Cuatrimestre creado correctamente" in texto:
+    if detectar_mensaje_exito(driver):
         print("OK: se creó correctamente el cuatrimestre.")
         return True
-    else:
-        print("REVISAR: no se detectó claramente el mensaje de éxito.")
-        return False
+
+    print("REVISAR: no se detectó claramente el mensaje de éxito.")
+    return False
 
 
 def caso_cuatrimestre_duplicado(driver):
     print("\nCaso 2: cuatrimestre duplicado")
+    llenar_formulario_cuatrimestre_correcto(driver, "1", "Primero", 1)
+    guardar_formulario(driver)
 
-    escribir_input(driver, obtener_input_no_cuatrimestre(driver), "1")
-    escribir_input(driver, obtener_input_nombre_cuatrimestre(driver), "Primero")
-    seleccionar_mes_por_indice(driver, 1)
-    guardar(driver)
-
-    texto = obtener_texto_pagina(driver)
-
-    if "¡El cuatrimestre ya existe!" in texto or "cuatrimestre ya existe" in texto.lower():
+    if detectar_mensaje_duplicado(driver):
         print("OK: se detectó duplicidad.")
         return True
-    else:
-        print("REVISAR: no se detectó claramente la duplicidad.")
-        return False
+
+    print("REVISAR: no se detectó claramente la duplicidad.")
+    return False
 
 
 def caso_nombre_vacio(driver):
     print("\nCaso 3: nombre vacío")
-
-    escribir_input(driver, obtener_input_no_cuatrimestre(driver), "5")
+    abrir_panel_nuevo_cuatrimestre(driver)
+    escribir_en_input(driver, obtener_input_no_cuatrimestre(driver), "5")
 
     input_nombre = obtener_input_nombre_cuatrimestre(driver)
     driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", input_nombre)
-    input_nombre.clear()
     time.sleep(0.5)
 
-    seleccionar_mes_por_indice(driver, 2)
-    guardar(driver)
+    try:
+        input_nombre.click()
+    except Exception:
+        driver.execute_script("arguments[0].click();", input_nombre)
 
-    texto = obtener_texto_pagina(driver)
+    driver.execute_script("""
+        arguments[0].value = '';
+        arguments[0].dispatchEvent(new Event('input', { bubbles: true }));
+        arguments[0].dispatchEvent(new Event('change', { bubbles: true }));
+    """, input_nombre)
 
-    if "El campo nombre del cuatrimestre es obligatorio." in texto:
+    time.sleep(1)
+    seleccionar_mes(driver, 2)
+    guardar_formulario(driver)
+
+    if detectar_error_nombre(driver):
         print("OK: se detectó validación del nombre.")
         return True
-    else:
-        print("REVISAR: no se detectó claramente la validación del nombre.")
-        return False
+
+    print("REVISAR: no se detectó claramente la validación del nombre.")
+    return False
 
 
 def caso_mes_invalido(driver):
     print("\nCaso 4: mes no seleccionado o inválido")
+    abrir_panel_nuevo_cuatrimestre(driver)
+    escribir_en_input(driver, obtener_input_no_cuatrimestre(driver), "5")
+    escribir_en_input(driver, obtener_input_nombre_cuatrimestre(driver), "Quinto")
 
-    escribir_input(driver, obtener_input_no_cuatrimestre(driver), "5")
-    escribir_input(driver, obtener_input_nombre_cuatrimestre(driver), "Quinto")
-
-    select = obtener_select_mes(driver)
+    select_mes = obtener_select_mes(driver)
 
     try:
-        Select(select).select_by_index(0)
+        Select(select_mes).select_by_index(0)
     except Exception:
         driver.execute_script("""
             const el = arguments[0];
@@ -403,19 +476,17 @@ def caso_mes_invalido(driver):
                 el.dispatchEvent(new Event('input', { bubbles: true }));
                 el.dispatchEvent(new Event('change', { bubbles: true }));
             }
-        """, select)
+        """, select_mes)
 
     time.sleep(1)
-    guardar(driver)
+    guardar_formulario(driver)
 
-    texto = obtener_texto_pagina(driver)
-
-    if "El campo mes es obligatorio." in texto or "El mes seleccionado no es válido." in texto:
+    if detectar_error_mes(driver):
         print("OK: se detectó error de validación del mes.")
         return True
-    else:
-        print("REVISAR: no se detectó claramente la validación del mes.")
-        return False
+
+    print("REVISAR: no se detectó claramente la validación del mes.")
+    return False
 
 
 # =========================================================
@@ -431,23 +502,22 @@ def prueba_pcb_013_creacion_cuatrimestre():
 
         resultados = []
 
-        abrir_collapse_nuevo_cuatrimestre(driver)
         resultados.append(caso_registro_correcto(driver))
-
         limpiar_formulario(driver)
+
         resultados.append(caso_cuatrimestre_duplicado(driver))
-
         limpiar_formulario(driver)
+
         resultados.append(caso_nombre_vacio(driver))
-
         limpiar_formulario(driver)
+
         resultados.append(caso_mes_invalido(driver))
 
         if all(resultados):
             imprimir_resultado(
                 "PCB-013 - Creación de cuatrimestre",
                 True,
-                "Los casos ejecutados respondieron conforme a lo esperado, abriendo primero el collapse y seleccionando correctamente el mes."
+                "Los casos ejecutados respondieron conforme a lo esperado."
             )
         else:
             imprimir_resultado(
