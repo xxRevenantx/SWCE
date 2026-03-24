@@ -3,14 +3,25 @@
 namespace App\Http\Controllers\Profesor;
 
 use App\Http\Controllers\Controller;
-use App\Models\Profesor;
 use Illuminate\Http\Request;
+use App\Models\Dia;
+use App\Models\Profesor;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\DB;
 
 class ProfesorPDFController extends Controller
 {
     public function horario_profesor_pdf()
     {
-        $profesorModelo = Profesor::findOrFail($profesor);
+        $id = auth()->user()->profesor->id;
+
+        $profesor = Profesor::findOrFail($id);
+
+        if (!$profesor) {
+            abort(404);
+        }
+
+        $profesorModelo = $profesor;
 
         $licenciaturaId = request('licenciatura');
         $generacionId = request('generacion');
