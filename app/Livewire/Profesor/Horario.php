@@ -31,27 +31,28 @@ class Horario extends Component
 
     public function mount(): void
     {
-        // Buscar el profesor relacionado al usuario autenticado
+        // Se busca el profesor relacionado al usuario autenticado
         $this->profesor = Profesor::where('user_id', Auth::id())->first();
         $this->profesor_id = $this->profesor?->id;
 
-        // Cargar los días
+        // Se cargan los días
         $this->dias = Dia::orderBy('id')->get();
 
-        // Inicializar colecciones vacías
+        // Se inicializan colecciones vacías
         $this->licenciaturas = collect();
         $this->cuatrimestres = collect();
         $this->generaciones = collect();
 
-        // Cargar datos del horario
+        // Se cargan filtros y horario inicial
         $this->cargarFiltros();
         $this->cargarHorasDisponibles();
         $this->inicializarMatriz();
         $this->cargarHorario();
     }
 
-    public function updatedLicenciaturaId(): void
+    public function updatedLicenciaturaId($value): void
     {
+        $this->licenciatura_id = !empty($value) ? (int) $value : null;
         $this->cuatrimestre_id = null;
         $this->generacion_id = null;
 
@@ -60,8 +61,9 @@ class Horario extends Component
         $this->cargarHorario();
     }
 
-    public function updatedCuatrimestreId(): void
+    public function updatedCuatrimestreId($value): void
     {
+        $this->cuatrimestre_id = !empty($value) ? (int) $value : null;
         $this->generacion_id = null;
 
         $this->cargarFiltros();
@@ -69,15 +71,28 @@ class Horario extends Component
         $this->cargarHorario();
     }
 
-    public function updatedGeneracionId(): void
+    public function updatedGeneracionId($value): void
     {
+        $this->generacion_id = !empty($value) ? (int) $value : null;
+
+        $this->cargarHorasDisponibles();
+        $this->cargarHorario();
+    }
+
+    public function limpiarFiltros(): void
+    {
+        $this->licenciatura_id = null;
+        $this->cuatrimestre_id = null;
+        $this->generacion_id = null;
+
+        $this->cargarFiltros();
         $this->cargarHorasDisponibles();
         $this->cargarHorario();
     }
 
     public function baseConsulta()
     {
-        // Consulta base del horario del profesor
+        // Se arma la consulta base del horario del profesor
         return DB::table('horarios')
             ->join('asignacion_materias', 'horarios.asignacion_materia_id', '=', 'asignacion_materias.id')
             ->leftJoin('materias', 'asignacion_materias.materia_id', '=', 'materias.id')
@@ -150,6 +165,7 @@ class Horario extends Component
     {
         if (!$this->profesor_id) {
             $this->horasDisponibles = [];
+            $this->inicializarMatriz();
             return;
         }
 
@@ -167,7 +183,6 @@ class Horario extends Component
             $consulta->where('horarios.generacion_id', $this->generacion_id);
         }
 
-        // Ordenar por la hora inicial, no por texto
         $this->horasDisponibles = $consulta
             ->select('horarios.hora')
             ->distinct()
@@ -181,6 +196,8 @@ class Horario extends Component
             ->filter()
             ->values()
             ->toArray();
+
+        $this->inicializarMatriz();
     }
 
     public function inicializarMatriz(): void
@@ -189,30 +206,29 @@ class Horario extends Component
 
         foreach ($this->horasDisponibles as $hora) {
             foreach ($this->dias as $dia) {
-                $this->matrizHorario[$hora][$dia->id] = null;
+                // Cada celda guardará varias materias
+                $this->matrizHorario[$hora][$dia->id] = [];
             }
         }
     }
 
     public function obtenerColorLicenciatura(?int $licenciaturaId): string
     {
-        // Color fijo para cada licenciatura
         return match ($licenciaturaId) {
-            1 => '#16a34a', // Nutrición
-            2 => '#2563eb', // Administración Empresarial
-            4 => '#b91c1c', // Criminalística, Criminología y Técnicas Periciales
-            5 => '#7c3aed', // Ciencias de la Educación
-            6 => '#ea580c', // Cultura Física y Deportes
-            default => '#334155', // Color por defecto
+            1 => '#16a34a',
+            2 => '#2563eb',
+            3 => '#0f766e',
+            4 => '#b91c1c',
+            5 => '#7c3aed',
+            6 => '#ea580c',
+            default => '#334155',
         };
     }
 
     public function obtenerColorTexto(string $colorHex): string
     {
-        // Quitar el símbolo #
         $colorHex = ltrim($colorHex, '#');
 
-        // Si el color no es válido, regresar blanco
         if (strlen($colorHex) !== 6) {
             return '#ffffff';
         }
@@ -221,7 +237,6 @@ class Horario extends Component
         $verde = hexdec(substr($colorHex, 2, 2));
         $azul = hexdec(substr($colorHex, 4, 2));
 
-        // Calcular si el fondo es claro u oscuro
         $luminosidad = (($rojo * 299) + ($verde * 587) + ($azul * 114)) / 1000;
 
         return $luminosidad > 155 ? '#000000' : '#ffffff';
@@ -275,17 +290,18 @@ class Horario extends Component
             $hora = $horario->hora;
             $diaId = $horario->dia_id;
 
-            if (!array_key_exists($hora, $this->matrizHorario)) {
+            if (!isset($this->matrizHorario[$hora])) {
                 continue;
             }
 
-            if (!array_key_exists($diaId, $this->matrizHorario[$hora])) {
+            if (!isset($this->matrizHorario[$hora][$diaId])) {
                 continue;
             }
 
             $colorLicenciatura = $this->obtenerColorLicenciatura($horario->licenciatura_id);
 
-            $this->matrizHorario[$hora][$diaId] = [
+            // Se agregan todas las materias en la misma celda
+            $this->matrizHorario[$hora][$diaId][] = [
                 'materia' => $horario->materia ?? 'Sin materia',
                 'licenciatura' => $horario->licenciatura ?? 'Sin licenciatura',
                 'cuatrimestre' => $horario->cuatrimestre ?? 'Sin cuatrimestre',
@@ -294,6 +310,43 @@ class Horario extends Component
                 'color' => $colorLicenciatura,
             ];
         }
+    }
+
+    public function getFiltrosListosProperty(): bool
+    {
+        return !empty($this->licenciatura_id)
+            && !empty($this->cuatrimestre_id)
+            && !empty($this->generacion_id);
+    }
+
+    public function getPdfUrlProperty(): string
+    {
+        if (!$this->profesor_id) {
+            return '';
+        }
+
+        $parametros = [
+            'profesor' => $this->profesor_id,
+        ];
+
+        if (!empty($this->licenciatura_id)) {
+            $parametros['licenciatura'] = $this->licenciatura_id;
+        }
+
+        if (!empty($this->generacion_id)) {
+            $parametros['generacion'] = $this->generacion_id;
+        }
+
+        if (!empty($this->cuatrimestre_id)) {
+            $parametros['cuatrimestre'] = $this->cuatrimestre_id;
+        }
+
+        return route('profesor.pdf.horario', $parametros);
+    }
+
+    public function getClasePdfProperty(): string
+    {
+        return 'inline-flex items-center gap-2 rounded-xl bg-red-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-300';
     }
 
     public function render()
