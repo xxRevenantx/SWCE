@@ -92,7 +92,7 @@ class ProfesorPDFController extends Controller
             ];
         }
 
-        $pdf = Pdf::loadView('pdf.profesor-horario', [
+        $pdf = Pdf::loadView('profesor.pdf.horarioProfesorPDF', [
             'profesor' => $profesorModelo,
             'dias' => $dias,
             'horasDisponibles' => $horasDisponibles,
@@ -100,7 +100,7 @@ class ProfesorPDFController extends Controller
             'licenciaturaId' => $licenciaturaId,
             'generacionId' => $generacionId,
             'cuatrimestreId' => $cuatrimestreId,
-        ])->setPaper('a4', 'landscape');
+        ])->setPaper('letter', 'portrait');
 
         return $pdf->stream('horario-profesor.pdf');
     }
