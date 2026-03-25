@@ -346,7 +346,7 @@ class Horario extends Component
 
     public function getClasePdfProperty(): string
     {
-        return 'inline-flex items-center gap-2 rounded-xl bg-red-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-300';
+        return 'inline-flex items-center my-2 justify-center gap-2 rounded-2xl bg-gradient-to-r from-sky-400 to-indigo-500 text-white px-6 py-3 text-sm font-semibold shadow transition';
     }
 
     public function render()
