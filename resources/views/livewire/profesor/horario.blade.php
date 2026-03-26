@@ -1,10 +1,19 @@
 <div x-data="{
     mostrarModalPdf: false,
     pdfModalUrl: '',
+    cargandoPdf: false,
     cerrarPdf() {
         this.mostrarModalPdf = false;
         this.pdfModalUrl = '';
+        this.cargandoPdf = false;
         document.body.classList.remove('overflow-hidden');
+    },
+    abrirPdf(url) {
+        if (!url) return;
+        this.cargandoPdf = true;
+        this.pdfModalUrl = url;
+        this.mostrarModalPdf = true;
+        document.body.classList.add('overflow-hidden');
     }
 }" x-on:keydown.escape.window="cerrarPdf()" class="space-y-6">
     <div
@@ -92,14 +101,7 @@
         </div>
 
         <div class="mt-4">
-            <button type="button"
-                x-on:click="
-                    pdfModalUrl = '{{ $this->pdfUrl }}';
-                    if (!pdfModalUrl) return;
-                    mostrarModalPdf = true;
-                    document.body.classList.add('overflow-hidden');
-                "
-                class="{{ $this->clasePdf }}">
+            <button type="button" x-on:click="abrirPdf('{{ $this->pdfUrl }}')" class="{{ $this->clasePdf }}">
                 Ver horario en PDF
             </button>
         </div>
@@ -254,8 +256,36 @@
 
             <div class="bg-neutral-100 p-4 dark:bg-neutral-950 sm:p-5">
                 <div
-                    class="overflow-hidden rounded-2xl border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900">
-                    <iframe x-bind:src="mostrarModalPdf ? pdfModalUrl : ''" class="h-[75vh] w-full"></iframe>
+                    class="relative overflow-hidden rounded-2xl border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900">
+
+                    <div x-show="cargandoPdf" x-transition.opacity
+                        class="absolute inset-0 z-20 flex items-center justify-center bg-white/90 backdrop-blur-sm dark:bg-neutral-900/90">
+                        <div
+                            class="flex flex-col items-center gap-4 rounded-2xl border border-sky-100 bg-white px-8 py-6 shadow-2xl dark:border-neutral-700 dark:bg-neutral-800">
+                            <div class="relative flex h-16 w-16 items-center justify-center">
+                                <div
+                                    class="absolute h-16 w-16 rounded-full border-4 border-sky-100 dark:border-neutral-700">
+                                </div>
+                                <div
+                                    class="absolute h-16 w-16 animate-spin rounded-full border-4 border-transparent border-t-sky-600 border-r-blue-500">
+                                </div>
+                                <div class="h-6 w-6 animate-pulse rounded-full bg-sky-600"></div>
+                            </div>
+
+                            <div class="text-center">
+                                <p class="text-sm font-semibold text-neutral-800 dark:text-white">
+                                    Cargando documento
+                                </p>
+                                <p class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
+                                    Espera mientras se genera la vista previa del PDF...
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <iframe x-bind:src="mostrarModalPdf ? pdfModalUrl : ''" x-on:load="cargandoPdf = false"
+                        class="h-[75vh] w-full">
+                    </iframe>
                 </div>
             </div>
         </div>

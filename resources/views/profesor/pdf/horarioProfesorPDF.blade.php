@@ -49,7 +49,6 @@
 
         .title {
             text-align: center;
-
             letter-spacing: .7px;
             font-size: 14px;
         }
@@ -96,7 +95,6 @@
         table.horario thead th {
             background: #cbd5e1;
             color: #0f172a;
-
             text-transform: uppercase;
             font-size: 10px;
             text-align: center;
@@ -105,7 +103,6 @@
         .col-hora {
             width: 15%;
             text-align: center;
-
             background: #f8fafc;
             white-space: nowrap;
             vertical-align: middle !important;
@@ -113,10 +110,10 @@
 
         .materia-card {
             border: 1px solid #dbeafe;
-            background: #f8fafc;
             border-radius: 10px;
             padding: 6px;
             margin-bottom: 6px;
+            color: #ffffff;
         }
 
         .materia-card:last-child {
@@ -125,16 +122,16 @@
 
         .materia {
             text-align: center;
-
             font-size: 10px;
             line-height: 1.25;
             margin-bottom: 4px;
+            font-weight: 700;
         }
 
         .detalle {
             text-align: center;
             font-size: 9px;
-            color: #334155;
+            color: #ffffff;
             line-height: 1.2;
             margin-top: 2px;
         }
@@ -147,7 +144,6 @@
             display: inline-block;
             text-align: center;
             line-height: 18px;
-
             color: #475569;
             background: #f8fafc;
             margin: 0 auto;
@@ -292,18 +288,20 @@
                     <div class="subtitle">
                         HORARIO DEL PROFESOR
                     </div>
-                    <div class="subtitle" style="margin-top: 4px;">
-                        {{ mb_strtoupper($nombreProfesor ?: '—', 'UTF-8') }}
-                    </div>
+
                 </td>
             </tr>
         </table>
 
         <div class="pills">
-            <span class="pill">Licenciatura: {{ $licenciaturaId ?: 'Todas' }}</span>
-            <span class="pill">Cuatrimestre: {{ $cuatrimestreId ?: 'Todos' }}</span>
-            <span class="pill">Generación: {{ $generacionId ?: 'Todas' }}</span>
+            <span class="pill">Licenciatura: {{ $nombreLicenciatura ?? 'Todas' }}</span>
+            <span class="pill">Cuatrimestre: {{ $nombreCuatrimestre ?? 'Todos' }}</span>
+            <span class="pill">Generación: {{ $nombreGeneracion ?? 'Todas' }}</span>
             <span class="pill">Bloques asignados: {{ $totalBloques }}</span>
+        </div>
+
+        <div class="subtitle" style="margin: 10px; 0">
+            DOCENTE: {{ mb_strtoupper($nombreProfesor ?: '—', 'UTF-8') }}
         </div>
 
         <table class="horario">
@@ -329,10 +327,12 @@
                             <td>
                                 @if (count($clases) > 0)
                                     @foreach ($clases as $clase)
-                                        <div class="materia-card">
+                                        <div class="materia-card"
+                                            style="background-color: {{ $clase['color'] ?? '#334155' }};">
                                             <div class="materia">{{ $clase['materia'] }}</div>
                                             <div class="detalle">Licenciatura: {{ $clase['licenciatura'] }}</div>
                                             <div class="detalle">Cuatrimestre: {{ $clase['cuatrimestre'] }}</div>
+                                            <div class="detalle">Generación: {{ $clase['generacion'] }}</div>
                                         </div>
                                     @endforeach
                                 @else

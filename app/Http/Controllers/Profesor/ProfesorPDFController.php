@@ -3,14 +3,29 @@
 namespace App\Http\Controllers\Profesor;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Models\Cuatrimestre;
 use App\Models\Dia;
+use App\Models\Generacion;
+use App\Models\Licenciatura;
 use App\Models\Profesor;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\DB;
 
-class ProfesorPDFController extends Controller
+class ProfesorPdfController extends Controller
 {
+    public function obtenerColorLicenciatura(?int $licenciaturaId): string
+    {
+        return match ($licenciaturaId) {
+            1 => '#16a34a',
+            2 => '#2563eb',
+            3 => '#0f766e',
+            4 => '#b91c1c',
+            5 => '#7c3aed',
+            6 => '#ea580c',
+            default => '#334155',
+        };
+    }
+
     public function horario_profesor_pdf()
     {
         $id = auth()->user()->profesor->id;
@@ -26,6 +41,23 @@ class ProfesorPDFController extends Controller
         $licenciaturaId = request('licenciatura');
         $generacionId = request('generacion');
         $cuatrimestreId = request('cuatrimestre');
+
+        // Se obtienen los nombres reales de los filtros para mostrarlos en el PDF
+        $licenciaturaSeleccionada = !empty($licenciaturaId)
+            ? Licenciatura::find($licenciaturaId)
+            : null;
+
+        $generacionSeleccionada = !empty($generacionId)
+            ? Generacion::find($generacionId)
+            : null;
+
+        $cuatrimestreSeleccionado = !empty($cuatrimestreId)
+            ? Cuatrimestre::find($cuatrimestreId)
+            : null;
+
+        $nombreLicenciatura = $licenciaturaSeleccionada?->nombre ?? 'Todas';
+        $nombreGeneracion = $generacionSeleccionada?->generacion ?? 'Todas';
+        $nombreCuatrimestre = $cuatrimestreSeleccionado?->nombre_cuatrimestre ?? 'Todos';
 
         $consulta = DB::table('horarios')
             ->join('asignacion_materias', 'horarios.asignacion_materia_id', '=', 'asignacion_materias.id')
@@ -52,6 +84,7 @@ class ProfesorPDFController extends Controller
             ->select(
                 'horarios.hora',
                 'horarios.dia_id',
+                'horarios.licenciatura_id',
                 'materias.nombre as materia',
                 'licenciaturas.nombre as licenciatura',
                 'cuatrimestres.nombre_cuatrimestre as cuatrimestre',
@@ -83,12 +116,15 @@ class ProfesorPDFController extends Controller
         }
 
         foreach ($horarios as $horario) {
+            $colorLicenciatura = $this->obtenerColorLicenciatura($horario->licenciatura_id);
+
             $matrizHorario[$horario->hora][$horario->dia_id][] = [
                 'materia' => $horario->materia ?? 'Sin materia',
                 'licenciatura' => $horario->licenciatura ?? 'Sin licenciatura',
                 'cuatrimestre' => $horario->cuatrimestre ?? 'Sin cuatrimestre',
                 'generacion' => $horario->generacion ?? 'Sin generación',
                 'hora' => $horario->hora ?? '',
+                'color' => $colorLicenciatura,
             ];
         }
 
@@ -100,6 +136,9 @@ class ProfesorPDFController extends Controller
             'licenciaturaId' => $licenciaturaId,
             'generacionId' => $generacionId,
             'cuatrimestreId' => $cuatrimestreId,
+            'nombreLicenciatura' => $nombreLicenciatura,
+            'nombreGeneracion' => $nombreGeneracion,
+            'nombreCuatrimestre' => $nombreCuatrimestre,
         ])->setPaper('letter', 'portrait');
 
         return $pdf->stream('horario-profesor.pdf');
