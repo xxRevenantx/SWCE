@@ -57,6 +57,20 @@
             </div>
         </div>
 
+        <!-- Botón descargar Excel Profesores    -->
+        <div class="mb-4 flex justify-end">
+            <flux:button variant="primary" wire:click="exportarProfesores"
+                class="bg-green-600 hover:bg-green-700 focus:ring-4 dark:text-white">
+                <div class="flex items-center gap-2">
+                    <flux:icon.sheet class="w-4 h-4" />
+                    Exportar profesores
+                </div>
+
+            </flux:button>
+        </div>
+
+
+
         <!-- WRAPPER que se desenfoca mientras se busca -->
         <div class="transition ease-out duration-200" wire:loading.class="blur-sm opacity-80 pointer-events-none"
             wire:target="search, eliminarProfesor">
