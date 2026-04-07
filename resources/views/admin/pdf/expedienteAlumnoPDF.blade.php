@@ -7,12 +7,12 @@
         content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
 
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
-
     <link rel="icon" type="image/png" href="{{ public_path('imagenes_publicas/logo-letra.png') }}" />
 
-    <title>EXPEDIENTE DEL ALUMNO | {{ $alumno->alumno->nombre }} {{ $alumno->alumno->apellido_paterno }}
+    <title>
+        EXPEDIENTE DEL ALUMNO |
+        {{ $alumno->alumno->nombre }}
+        {{ $alumno->alumno->apellido_paterno }}
         {{ $alumno->alumno->apellido_materno }}
     </title>
 </head>
@@ -22,25 +22,7 @@
         margin: 30px 0px 10px 0px;
     }
 
-    .page-break {
-        page-break-after: always;
-    }
-
-    @font-face {
-        font-family: 'calibri';
-        font-style: normal;
-        src: url('{{ storage_path('fonts/calibri/calibri.ttf') }}') format('truetype');
-    }
-
-    @font-face {
-        font-family: 'calibri';
-        font-style: bold;
-        font-weight: 700;
-        src: url('{{ storage_path('fonts/calibri/calibri-bold.ttf') }}') format('truetype');
-    }
-
     body {
-        /* font-family: 'calibri'; */
         font-family: sans-serif;
         margin: auto;
         font-size: 13px;
@@ -114,20 +96,11 @@
     }
 
     .center {
-        text-align: center
-    }
-
-    .sin-borde {
-        border: none;
+        text-align: center;
     }
 
     .subtitulo {
         background-color: #eaeaea;
-        font-weight: bold;
-    }
-
-    .email {
-        color: #333;
         font-weight: bold;
     }
 
@@ -139,7 +112,7 @@
     }
 
     .contenedor {
-        padding: 0 35px
+        padding: 0 35px;
     }
 
     .chip {
@@ -186,21 +159,28 @@
             return !empty($value) ? mb_strtoupper($value) : $dash;
         };
 
-        $inscripcion = $inscripcion ?? ($alumno->inscripcion ?? null);
+        $inscripcion = $inscripcion ?? $alumno;
+
         $statusTxt = 'ACTIVO';
         $statusOk = true;
+
         if ($inscripcion && isset($inscripcion->status)) {
             $statusOk = (string) $inscripcion->status === '1' || (int) $inscripcion->status === 1;
             $statusTxt = $statusOk ? 'ACTIVO' : 'BAJA / INACTIVO';
         }
-    @endphp
 
-
-    @php
+        /*
+        |--------------------------------------------------------------------------
+        | Rutas de imágenes
+        |--------------------------------------------------------------------------
+        | Para Dompdf es más seguro usar rutas físicas absolutas.
+        | Se toma una imagen por defecto si el archivo no existe.
+        */
         $logoLicenciatura = public_path('imagenes_publicas/logo-letra.png');
 
         if (!empty($alumno->licenciatura->logo)) {
-            $rutaLogo = storage_path('app/public/storage/licenciaturas/' . $alumno->licenciatura->logo);
+            $rutaLogo = storage_path('app/public/licenciaturas/' . $alumno->licenciatura->logo);
+
             if (file_exists($rutaLogo)) {
                 $logoLicenciatura = $rutaLogo;
             }
@@ -208,31 +188,33 @@
 
         $fotoAlumno = public_path('imagenes_publicas/user.png');
 
-        if (!empty($alumno->foto)) {
-            $rutaFoto = storage_path('app/public/storage/alumnos/' . $alumno->foto);
+        if (!empty($alumno->alumno->foto)) {
+            $rutaFoto = storage_path('app/public/alumnos/fotos/' . $alumno->alumno->foto);
+
             if (file_exists($rutaFoto)) {
                 $fotoAlumno = $rutaFoto;
             }
         }
     @endphp
 
-    <div style="width: 12%; text-align: center; margin-top: 0px;  position: absolute; left: 50px; top: -20px; ">
-        <img style="width: 100%;" src="{{ $logoLicenciatura }}" alt="Logo">
-
+    {{-- Logo de la licenciatura --}}
+    <div style="width: 12%; text-align: center; position: absolute; left: 50px; top: -20px;">
+        <img style="width: 100%;" src="{{ $logoLicenciatura }}" alt="Logo licenciatura">
     </div>
+
+    {{-- Logo principal --}}
     <div style="width: 100%; text-align: center; margin-top: 0px;">
-        <img style="width: 40%;" src="{{ public_path('imagenes_publicas/logo.png') }}" alt="">
+        <img style="width: 40%;" src="{{ public_path('imagenes_publicas/logo.png') }}" alt="Logo principal">
     </div>
-
 
     <div class="contenedor">
 
-        {{-- WATERMARK --}}
+        {{-- Marca de agua --}}
         <div class="watermark">
             <img src="{{ public_path('imagenes_publicas/logo-letra.png') }}" alt="Watermark">
         </div>
 
-        {{-- ====================== SECCIÓN 1: DATOS DEL ALUMNO ====================== --}}
+        {{-- ====================== DATOS DEL ALUMNO ====================== --}}
         <h2>DATOS DEL ALUMNO</h2>
 
         <table>
@@ -243,15 +225,15 @@
                 <td style="text-align: center">{{ $v($alumno->alumno->apellido_materno) }}</td>
 
                 <td rowspan="3" class="foto">
-                    <img src="{{ $fotoAlumno }}" height="90" style="object-fit: cover;">
+                    <img src="{{ $fotoAlumno }}" height="90" style="object-fit: cover;" alt="Foto alumno">
                 </td>
             </tr>
 
             <tr>
                 <td colspan="2"></td>
-                <td style="text-align: center; font-size:9px; padding:0px;">NOMBRE(S)</td>
-                <td style="text-align: center; font-size:9px; padding:0px;">A. PATERNO</td>
-                <td style="text-align: center; font-size:9px; padding:0px;">A. MATERNO</td>
+                <td style="text-align: center; font-size: 9px; padding: 0px;">NOMBRE(S)</td>
+                <td style="text-align: center; font-size: 9px; padding: 0px;">A. PATERNO</td>
+                <td style="text-align: center; font-size: 9px; padding: 0px;">A. MATERNO</td>
             </tr>
 
             <tr>
@@ -263,98 +245,124 @@
                         {{ $dash }}
                     @endif
                 </td>
+
                 <td class="subtitulo center">CURP</td>
-                <td colspan="2" class="center">{{ $v($alumno->alumno->CURP ?? ($alumno->alumno->curp ?? null)) }}
+                <td colspan="2" class="center">
+                    {{ $v($alumno->alumno->CURP ?? ($alumno->alumno->curp ?? null)) }}
                 </td>
             </tr>
 
-
             <tr>
                 <td class="subtitulo">BACHILLERATO DE PROCEDENCIA</td>
-                <td style="text-transform: uppercase;" colspan="5" class="center">
-                    {{ $upper($alumno->alumno->datosContacto->bachillerato_procedente ?? null) }}</td>
+                <td colspan="5" class="center" style="text-transform: uppercase;">
+                    {{ $upper($alumno->alumno->datosContacto->bachillerato_procedente ?? null) }}
+                </td>
             </tr>
         </table>
 
-        {{-- ====================== SECCIÓN 2: DATOS ESCOLARES ====================== --}}
+        {{-- ====================== DATOS ESCOLARES ====================== --}}
         <h2>DATOS ESCOLARES</h2>
-
-
 
         <table class="two-col">
             <tr>
                 <td>
-                    <b>Licenciatura:</b> <span
-                        style="text-transform: uppercase;">{{ $v($alumno->licenciatura->nombre ?? null) }}</span><br>
-                    <b>Generación:</b> <span
-                        style="text-transform: uppercase;">{{ $v($alumno->generacion->generacion ?? null) }}</span><br>
-                </td>
-                <td>
-                    <b>Sexo:</b> <span
-                        style="text-transform: uppercase;">{{ $v($alumno->alumno->sexo ?? null) }}</span><br>
-                    <b>Matrícula:</b> <span
-                        style="text-transform: uppercase;">{{ $v($alumno->alumno->datosEscolares->matricula ?? null) }}</span><br>
+                    <b>Licenciatura:</b>
+                    <span style="text-transform: uppercase;">
+                        {{ $v($alumno->licenciatura->nombre ?? null) }}
+                    </span>
+                    <br>
 
+                    <b>Generación:</b>
+                    <span style="text-transform: uppercase;">
+                        {{ $v($alumno->generacion->generacion ?? null) }}
+                    </span>
+                    <br>
+                </td>
+
+                <td>
+                    <b>Sexo:</b>
+                    <span style="text-transform: uppercase;">
+                        {{ $v($alumno->alumno->sexo ?? null) }}
+                    </span>
+                    <br>
+
+                    <b>Matrícula:</b>
+                    <span style="text-transform: uppercase;">
+                        {{ $v($alumno->alumno->datosEscolares->matricula ?? null) }}
+                    </span>
+                    <br>
                 </td>
             </tr>
         </table>
 
-        {{-- ====================== SECCIÓN 3: DATOS DE CONTACTO ====================== --}}
+        {{-- ====================== DATOS DE CONTACTO ====================== --}}
         <h2>DATOS DE CONTACTO</h2>
-
-
 
         <table>
             <tr>
                 <td class="subtitulo">EMAIL</td>
                 <td class="center">{{ $v($alumno->alumno->user->email ?? null) }}</td>
+
                 <td class="subtitulo">TELÉFONO</td>
                 <td class="center">{{ $v($alumno->alumno->datosContacto->telefono ?? null) }}</td>
             </tr>
+
             <tr>
                 <td class="subtitulo">CELULAR</td>
                 <td class="center">{{ $v($alumno->alumno->datosContacto->celular ?? null) }}</td>
+
                 <td class="subtitulo">CIUDAD</td>
                 <td class="center" style="text-transform: uppercase;">
-                    @if (!empty($alumno->alumno->datosContacto->ciudad->name))
-                        {{ $alumno->alumno->datosContacto->ciudad->name }}
-
+                    {{ $v($alumno->alumno->datosContacto->ciudad->name ?? null) }}
                 </td>
             </tr>
+
             <tr>
                 <td class="subtitulo">COLONIA</td>
                 <td class="center">{{ $v($alumno->alumno->datosContacto->colonia ?? null) }}</td>
+
                 <td class="subtitulo">MUNICIPIO</td>
                 <td class="center">{{ $v($alumno->alumno->datosContacto->municipio ?? null) }}</td>
             </tr>
+
             <tr>
                 <td class="subtitulo">C.P.</td>
                 <td class="center">{{ $v($alumno->alumno->datosContacto->codigo_postal ?? null) }}</td>
+
                 <td class="subtitulo">ESTADO</td>
                 <td class="center">{{ $v($alumno->alumno->datosContacto->estado->name ?? null) }}</td>
             </tr>
+
             <tr>
                 <td class="subtitulo">DOMICILIO</td>
-                <td colspan="3" class="center">{{ $v($alumno->alumno->datosContacto->calle ?? null) }} @if (!empty($alumno->alumno->datosContacto->numero_exterior))
-                        NO. EXT.{{ $alumno->alumno->datosContacto->numero_exterior }}
+                <td colspan="3" class="center">
+                    @php
+                        $calle = $alumno->alumno->datosContacto->calle ?? null;
+                        $numeroExterior = $alumno->alumno->datosContacto->numero_exterior ?? null;
+                    @endphp
+
+                    @if (!empty($calle))
+                        {{ $calle }}
+                        @if (!empty($numeroExterior))
+                            NO. EXT. {{ $numeroExterior }}
+                        @else
+                            S/N
+                        @endif
                     @else
-                        S/N
-                    @endif
-                @else
-                    {{ $dash }}
+                        {{ $dash }}
                     @endif
                 </td>
             </tr>
         </table>
 
-        {{-- ====================== SECCIÓN 4: INSCRIPCIÓN ====================== --}}
+        {{-- ====================== INSCRIPCIÓN ====================== --}}
         <h2>INSCRIPCIÓN</h2>
 
         <table>
             <tr>
                 <td class="subtitulo" style="width: 30%;">FOLIO / ID</td>
                 <td class="center">
-                    @if ($alumno->alumno->datosEscolares->folio)
+                    @if (!empty($alumno->alumno->datosEscolares->folio))
                         {{ $alumno->alumno->datosEscolares->folio }}
                     @else
                         {{ $dash }}
@@ -373,11 +381,7 @@
                     @if ($inscripcion && !empty($inscripcion->fecha_inscripcion))
                         {{ \Carbon\Carbon::parse($inscripcion->fecha_inscripcion)->format('d/m/Y') }}
                     @else
-                        @if (!empty($alumno->fecha_inscripcion))
-                            {{ \Carbon\Carbon::parse($alumno->fecha_inscripcion)->format('d/m/Y') }}
-                        @else
-                            {{ $dash }}
-                        @endif
+                        {{ $dash }}
                     @endif
                 </td>
 
@@ -388,13 +392,12 @@
             </tr>
         </table>
 
-
-
         <footer style="line-height: 20px">
-            <p>Sistema Web de Control Escolar | {{ config('app.name') }} | Fecha de expedición:
-                {{ \Carbon\Carbon::now()->locale('es')->isoFormat('DD/MM/YYYY') }}</p>
+            <p>
+                Sistema Web de Control Escolar | {{ config('app.name') }} | Fecha de expedición:
+                {{ \Carbon\Carbon::now()->locale('es')->isoFormat('DD/MM/YYYY') }}
+            </p>
         </footer>
-
     </div>
 </body>
 
