@@ -196,16 +196,28 @@
     @endphp
 
 
-    {{ $alumno->licenciatura->logo }}
+    @php
+        $logoLicenciatura = public_path('imagenes_publicas/logo-letra.png');
+
+        if (!empty($alumno->licenciatura->logo)) {
+            $rutaLogo = storage_path('app/public/licenciaturas/' . $alumno->licenciatura->logo);
+            if (file_exists($rutaLogo)) {
+                $logoLicenciatura = $rutaLogo;
+            }
+        }
+
+        $fotoAlumno = public_path('imagenes_publicas/user.png');
+
+        if (!empty($alumno->foto)) {
+            $rutaFoto = storage_path('app/public/alumnos/' . $alumno->foto);
+            if (file_exists($rutaFoto)) {
+                $fotoAlumno = $rutaFoto;
+            }
+        }
+    @endphp
 
     <div style="width: 12%; text-align: center; margin-top: 0px;  position: absolute; left: 50px; top: -20px; ">
-        @if ($alumno->licenciatura->logo)
-            <img style="width: 100%;"
-                src="{{ public_path('public/storage/licenciaturas/' . $alumno->licenciatura->logo) }}"
-                alt="{{ $alumno->licenciatura->nombre }}">
-        @else
-            <img style="width: 100%;" src="{{ public_path('imagenes_publicas/logo-letra.png') }}" alt="Logo">
-        @endif
+        <img style="width: 100%;" src="{{ $logoLicenciatura }}" alt="Logo">
 
     </div>
     <div style="width: 100%; text-align: center; margin-top: 0px;">
@@ -231,13 +243,7 @@
                 <td style="text-align: center">{{ $v($alumno->alumno->apellido_materno) }}</td>
 
                 <td rowspan="3" class="foto">
-                    @if (!empty($alumno->foto))
-                        <img src="{{ public_path('storage/alumnos/' . $alumno->foto) }}" height="90"
-                            style="object-fit: cover;">
-                    @else
-                        <img src="{{ public_path('imagenes_publicas/user.png') }}" height="90"
-                            style="object-fit: cover;">
-                    @endif
+                    <img src="{{ $fotoAlumno }}" height="90" style="object-fit: cover;">
                 </td>
             </tr>
 
