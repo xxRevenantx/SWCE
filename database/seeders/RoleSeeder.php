@@ -103,7 +103,7 @@ class RoleSeeder extends Seeder
         // Crear el permiso 'profesor.pdf.lista_alumnos' y asignarlo al rol 'Profesor'
         Permission::create(['name' => 'profesor.pdf.lista_alumnos'])->syncRoles([$role2]);
 
-        // Crear el permiso 'profesor.documentos' y asignarlo al rol 'Profesor'
+        // Crear el permiso 'profesor.documentos(Listas)' y asignarlo al rol 'Profesor'
         Permission::create(['name' => 'profesor.documentos'])->syncRoles([$role2]);
 
         // Crear el permiso 'profesor.pdf.calificaciones' y asignarlo al rol 'Profesor'

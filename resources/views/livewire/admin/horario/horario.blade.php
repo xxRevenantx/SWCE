@@ -1,9 +1,18 @@
 <div x-data="{
     mostrarModalPdf: false,
     pdfModalUrl: '',
+    cargandoPdf: false,
+    abrirPdf(url) {
+        if (!url) return;
+        this.pdfModalUrl = url;
+        this.cargandoPdf = true;
+        this.mostrarModalPdf = true;
+        document.body.classList.add('overflow-hidden');
+    },
     cerrarPdf() {
         this.mostrarModalPdf = false;
         this.pdfModalUrl = '';
+        this.cargandoPdf = false;
         document.body.classList.remove('overflow-hidden');
     }
 }" x-on:keydown.escape.window="cerrarPdf()">
@@ -21,23 +30,25 @@
         <div
             class="mt-6 rounded-2xl border bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-700 shadow-sm p-5">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <flux:select wire:model.live="licenciatura_id" placeholder="Selecciona una licenciatura...">
+
+                <flux:select wire:model.live="licenciatura_id" label="Selecciona una licenciatura"
+                    placeholder="Selecciona una licenciatura...">
                     <flux:select.option value="0">--Selecciona una licenciatura--</flux:select.option>
                     @foreach ($licenciaturas as $lic)
                         <flux:select.option value="{{ $lic->id }}">{{ $lic->nombre }}</flux:select.option>
                     @endforeach
                 </flux:select>
 
-                <flux:select wire:model.live="generacion_id" placeholder="Selecciona una generación..."
-                    :disabled="!$licenciatura_id">
+                <flux:select wire:model.live="generacion_id" label="Selecciona una generación"
+                    placeholder="Selecciona una generación..." :disabled="!$licenciatura_id">
                     <flux:select.option value="0">--Selecciona una generación--</flux:select.option>
                     @foreach ($generaciones as $gen)
                         <flux:select.option value="{{ $gen->id }}">{{ $gen->generacion }}</flux:select.option>
                     @endforeach
                 </flux:select>
 
-                <flux:select wire:model.live="cuatrimestre_id" placeholder="Selecciona un cuatrimestre..."
-                    :disabled="!$licenciatura_id || !$generacion_id">
+                <flux:select wire:model.live="cuatrimestre_id" label="Selecciona un cuatrimestre"
+                    placeholder="Selecciona un cuatrimestre..." :disabled="!$licenciatura_id || !$generacion_id">
                     <flux:select.option value="0">--Selecciona un cuatrimestre--</flux:select.option>
                     @foreach ($cuatrimestres as $cuat)
                         <flux:select.option value="{{ $cuat->id }}">
@@ -67,13 +78,7 @@
 
         <div class="mt-4">
             <button type="button" :disabled="!@js($filtrosListos)"
-                x-on:click="
-                    pdfModalUrl = '{{ $this->filtrosListos ? $this->pdfUrl : '' }}';
-                    if (!pdfModalUrl) return;
-                    mostrarModalPdf = true;
-                    document.body.classList.add('overflow-hidden');
-                "
-                class="{{ $this->clasePdf }}">
+                x-on:click="abrirPdf('{{ $this->filtrosListos ? $this->pdfUrl : '' }}')" class="{{ $this->clasePdf }}">
                 Ver horario en PDF
             </button>
         </div>
@@ -245,8 +250,33 @@
 
             <div class="p-4 sm:p-5 bg-neutral-100 dark:bg-neutral-950">
                 <div
-                    class="overflow-hidden rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900">
-                    <iframe x-bind:src="mostrarModalPdf ? pdfModalUrl : ''" class="h-[75vh] w-full"></iframe>
+                    class="relative overflow-hidden rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900">
+
+                    <div x-show="cargandoPdf" x-transition.opacity
+                        class="absolute inset-0 z-20 flex items-center justify-center bg-white/80 dark:bg-neutral-900/80 backdrop-blur-sm">
+                        <div
+                            class="flex items-center gap-3 rounded-2xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-5 py-4 shadow-lg">
+                            <svg class="h-5 w-5 animate-spin text-sky-600" xmlns="http://www.w3.org/2000/svg"
+                                fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10"
+                                    stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z">
+                                </path>
+                            </svg>
+
+                            <div class="leading-tight">
+                                <p class="text-sm font-semibold text-neutral-900 dark:text-neutral-100">
+                                    Cargando PDF…
+                                </p>
+                                <p class="text-xs text-neutral-600 dark:text-neutral-300">
+                                    Espera un momento
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <iframe x-bind:src="mostrarModalPdf ? pdfModalUrl : ''" x-on:load="cargandoPdf = false"
+                        class="h-[75vh] w-full"></iframe>
                 </div>
             </div>
         </div>

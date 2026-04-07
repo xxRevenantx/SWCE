@@ -69,7 +69,7 @@ Route::middleware(['auth'])->group(function () {
 
     // Horario
     Route::get(
-        'horarios/horario/{licenciatura}/{generacion}/{cuatrimestre}',
+        'admin/horarios/pdf/licenciatura/{licenciatura:slug}/generacion/{generacion:generacion}/cuatrimestre/{cuatrimestre:slug}',
         [PDFController::class, 'horario']
     )
         ->middleware('can:admin.pdf.horario')

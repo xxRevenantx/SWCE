@@ -38,7 +38,7 @@ class MostrarMatricula extends Component
     public function mount(): void
     {
         // Carga los datos de los filtros.
-        $this->licenciaturas = Licenciatura::query()->orderBy('nombre')->get(['id', 'nombre']);
+        $this->licenciaturas = Licenciatura::query()->orderBy('id')->get(['id', 'nombre']);
         $this->generaciones = Generacion::query()->orderBy('generacion')->get(['id', 'generacion']);
         $this->cuatrimestres = Cuatrimestre::query()
             ->orderBy('no_cuatrimestre')
@@ -116,15 +116,9 @@ class MostrarMatricula extends Component
 
     public function getRegistrosProperty()
     {
-        // Quita espacios al inicio y al final.
         $search = trim($this->search);
 
         return Inscripcion::query()
-            ->select('inscripciones.*')
-            ->join('licenciaturas', 'licenciaturas.id', '=', 'inscripciones.licenciatura_id')
-            ->join('alumnos', 'alumnos.id', '=', 'inscripciones.alumno_id')
-            ->whereNull('alumnos.deleted_at')
-            ->leftJoin('datos_escolares', 'datos_escolares.alumno_id', '=', 'alumnos.id')
             ->with([
                 'licenciatura:id,nombre',
                 'generacion:id,generacion',
@@ -134,21 +128,33 @@ class MostrarMatricula extends Component
                 'alumno.datosEscolares:id,alumno_id,matricula,folio,foto',
                 'alumno.documentacion:id,alumno_id,url_curp,url_acta_nacimiento,url_certificado_estudios',
             ])
-            ->when($this->filtrar_licenciatura !== '', fn($q) => $q->where('inscripciones.licenciatura_id', (int) $this->filtrar_licenciatura))
-            ->when($this->filtrar_generacion !== '', fn($q) => $q->where('inscripciones.generacion_id', (int) $this->filtrar_generacion))
-            ->when($this->filtrar_cuatrimestre !== '', fn($q) => $q->where('inscripciones.cuatrimestre_id', (int) $this->filtrar_cuatrimestre))
-            ->when($search !== '', function ($q) use ($search) {
-                $q->where(function ($qq) use ($search) {
-                    $qq->where('datos_escolares.matricula', 'like', "%{$search}%")
-                        ->orWhere('datos_escolares.folio', 'like', "%{$search}%")
-                        ->orWhere('alumnos.curp', 'like', "%{$search}%")
-                        ->orWhere('alumnos.nombre', 'like', "%{$search}%")
-                        ->orWhere('alumnos.apellido_paterno', 'like', "%{$search}%")
-                        ->orWhere('alumnos.apellido_materno', 'like', "%{$search}%");
+            ->when($this->filtrar_licenciatura !== '', function ($query) {
+                $query->where('licenciatura_id', (int) $this->filtrar_licenciatura);
+            })
+            ->when($this->filtrar_generacion !== '', function ($query) {
+                $query->where('generacion_id', (int) $this->filtrar_generacion);
+            })
+            ->when($this->filtrar_cuatrimestre !== '', function ($query) {
+                $query->where('cuatrimestre_id', (int) $this->filtrar_cuatrimestre);
+            })
+            ->when($search !== '', function ($query) use ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->whereHas('alumno', function ($alumnoQuery) use ($search) {
+                        $alumnoQuery->where(function ($sub) use ($search) {
+                            $sub->where('curp', 'like', "%{$search}%")
+                                ->orWhere('nombre', 'like', "%{$search}%")
+                                ->orWhere('apellido_paterno', 'like', "%{$search}%")
+                                ->orWhere('apellido_materno', 'like', "%{$search}%");
+                        });
+                    })
+                        ->orWhereHas('alumno.datosEscolares', function ($datosQuery) use ($search) {
+                            $datosQuery->where('matricula', 'like', "%{$search}%")
+                                ->orWhere('folio', 'like', "%{$search}%");
+                        });
                 });
             })
-            ->orderBy('licenciaturas.nombre', 'asc')
-            ->orderByDesc('inscripciones.id')
+            ->orderBy('licenciatura_id', 'asc')
+            ->orderByDesc('id')
             ->paginate(10);
     }
 

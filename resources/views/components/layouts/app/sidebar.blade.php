@@ -140,6 +140,14 @@
                         :current="request()->routeIs('profesor.perfil')">
                         Perfil
                     </flux:navlist.item>
+
+
+                    <flux:navlist.item class="py-4" icon="list-ordered" wire:navigate :href="route('profesor.listas')"
+                        :current="request()->routeIs('profesor.listas')">
+                        Listas
+                    </flux:navlist.item>
+
+
                     <flux:navlist.item class="py-4" icon="calendar-days" wire:navigate :href="route('profesor.horario')"
                         :current="request()->routeIs('profesor.horario')">
                         Mi horario

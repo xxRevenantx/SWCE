@@ -131,8 +131,6 @@ class PDFController extends Controller
 
     public function calificacionesGenerales($licenciatura, $generacion, $cuatrimestre)
     {
-
-
         $alumnos = Inscripcion::query()
             ->join('alumnos', 'alumnos.id', '=', 'inscripciones.alumno_id')
             ->leftJoin('datos_escolares', 'datos_escolares.alumno_id', '=', 'alumnos.id')
@@ -170,9 +168,6 @@ class PDFController extends Controller
 
         $inscripcionIds = $alumnos->pluck('inscripcion_id')->values();
 
-        /**
-         * 2) Calificaciones SOLO de esas inscripciones
-         */
         $calificacionesRaw = Calificacion::query()
             ->join('asignacion_materias', 'asignacion_materias.id', '=', 'calificaciones.asignacion_materia_id')
             ->join('materias', 'materias.id', '=', 'asignacion_materias.materia_id')
@@ -187,11 +182,6 @@ class PDFController extends Controller
             ])
             ->get();
 
-        /**
-         * 3) Materias (columnas)
-         *    Si no hay ninguna calificación todavía, aquí quedaría vacío.
-         *    En ese caso, mandamos un arreglo vacío y el PDF mostrará solo alumnos + promedio.
-         */
         $materias = $calificacionesRaw
             ->map(function ($r) {
                 return (object) [
@@ -204,54 +194,56 @@ class PDFController extends Controller
             ->sortBy(fn($m) => $m->clave ?? '')
             ->values();
 
-        /**
-         * 4) Matriz: [inscripcion_id][asignacion_materia_id] = calificacion
-         */
         $matriz = [];
         foreach ($calificacionesRaw as $r) {
             $matriz[$r->inscripcion_id][$r->asignacion_materia_id] = $r->calificacion;
         }
 
-        /**
-         * 5) Promedio por alumno (solo considera numéricos)
-         *    Si no tiene calificaciones, queda null
-         */
+        // Promedio truncado a 1 decimal, sin redondear
         $promedios = [];
         foreach ($alumnos as $a) {
             $valores = [];
 
             foreach ($materias as $m) {
                 $valor = $matriz[$a->inscripcion_id][$m->asignacion_materia_id] ?? null;
+
                 if (is_numeric($valor)) {
                     $valores[] = (float) $valor;
                 }
             }
 
-            $promedios[$a->inscripcion_id] = count($valores)
-                ? round(array_sum($valores) / count($valores), 1)
-                : null;
+            if (count($valores) > 0) {
+                $promedioReal = array_sum($valores) / count($valores);
+
+                // Se trunca a 1 decimal, no se redondea
+                $promedios[$a->inscripcion_id] = floor($promedioReal * 10) / 10;
+            } else {
+                $promedios[$a->inscripcion_id] = null;
+            }
         }
 
-        /**
-         * 6) Datos generales
-         */
-        $lic = Licenciatura::query()->select('id', 'nombre')->find($licenciatura);
-        $gen = Generacion::query()->select('id', 'generacion')->find($generacion);
-        $cuat = Cuatrimestre::query()->select('id', 'no_cuatrimestre')->find($cuatrimestre);
+        $lic = Licenciatura::query()
+            ->select('id', 'nombre', 'logo')
+            ->find($licenciatura);
+
+        $gen = Generacion::query()
+            ->select('id', 'generacion')
+            ->find($generacion);
+
+        $cuat = Cuatrimestre::query()
+            ->select('id', 'no_cuatrimestre')
+            ->find($cuatrimestre);
 
         $nombreLicenciatura = $lic?->nombre ?? 'LICENCIATURA_DESCONOCIDA';
         $nombreGeneracion = $gen?->generacion ?? 'GEN_DESCONOCIDA';
         $nombreCuatrimestre = $cuat?->no_cuatrimestre ?? 'CUATRIMESTRE_DESCONOCIDO';
 
-        /**
-         * 7) PDF
-         */
         $data = [
             'materias' => $materias,
             'alumnos' => $alumnos,
             'matriz' => $matriz,
             'promedios' => $promedios,
-
+            'licenciatura' => $lic,
             'nombreLicenciatura' => $nombreLicenciatura,
             'nombreGeneracion' => $nombreGeneracion,
             'nombreCuatrimestre' => $nombreCuatrimestre,

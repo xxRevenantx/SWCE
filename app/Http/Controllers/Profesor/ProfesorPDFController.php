@@ -143,4 +143,100 @@ class ProfesorPdfController extends Controller
 
         return $pdf->stream('horario-profesor.pdf');
     }
+
+
+    // Método para generar el PDF de la lista de alumnos del profesor
+    public function lista_alumnos_pdf()
+    {
+        $id = auth()->user()->profesor->id;
+
+        $profesor = Profesor::findOrFail($id);
+
+        $licenciaturaId = request('licenciatura');
+        $generacionId = request('generacion');
+        $cuatrimestreId = request('cuatrimestre');
+        $asignacionMateriaId = request('asignacion_materia');
+        $search = trim((string) request('search', ''));
+
+        if (
+            empty($licenciaturaId) ||
+            empty($generacionId) ||
+            empty($cuatrimestreId) ||
+            empty($asignacionMateriaId)
+        ) {
+            abort(404, 'Faltan filtros para generar la lista de asistencia.');
+        }
+
+        $materiaSeleccionada = DB::table('asignacion_materias')
+            ->join('materias', 'asignacion_materias.materia_id', '=', 'materias.id')
+            ->join('horarios', 'horarios.asignacion_materia_id', '=', 'asignacion_materias.id')
+            ->leftJoin('licenciaturas', 'horarios.licenciatura_id', '=', 'licenciaturas.id')
+            ->leftJoin('cuatrimestres', 'horarios.cuatrimestre_id', '=', 'cuatrimestres.id')
+            ->leftJoin('generaciones', 'horarios.generacion_id', '=', 'generaciones.id')
+            ->where('asignacion_materias.id', $asignacionMateriaId)
+            ->where('asignacion_materias.profesor_id', $id)
+            ->where('horarios.licenciatura_id', $licenciaturaId)
+            ->where('horarios.cuatrimestre_id', $cuatrimestreId)
+            ->where('horarios.generacion_id', $generacionId)
+            ->select(
+                'asignacion_materias.id as asignacion_materia_id',
+                'materias.id as materia_id',
+                'materias.clave',
+                'materias.nombre as materia',
+                'licenciaturas.nombre as licenciatura',
+                'cuatrimestres.nombre_cuatrimestre as cuatrimestre',
+                'generaciones.generacion as generacion'
+            )
+            ->distinct()
+            ->first();
+
+        if (!$materiaSeleccionada) {
+            abort(404, 'No se encontró la materia seleccionada para este profesor.');
+        }
+
+        $alumnos = DB::table('inscripciones')
+            ->join('alumnos', 'inscripciones.alumno_id', '=', 'alumnos.id')
+            ->leftJoin('datos_escolares', 'alumnos.id', '=', 'datos_escolares.alumno_id')
+            ->where('inscripciones.licenciatura_id', $licenciaturaId)
+            ->where('inscripciones.status', 1)
+            ->where('inscripciones.cuatrimestre_id', $cuatrimestreId)
+            ->where('inscripciones.generacion_id', $generacionId)
+            ->when($search !== '', function ($query) use ($search) {
+                $query->where(function ($subquery) use ($search) {
+                    $subquery->where('datos_escolares.matricula', 'like', "%{$search}%")
+                        ->orWhere('alumnos.nombre', 'like', "%{$search}%")
+                        ->orWhere('alumnos.apellido_paterno', 'like', "%{$search}%")
+                        ->orWhere('alumnos.apellido_materno', 'like', "%{$search}%")
+                        ->orWhereRaw(
+                            "CONCAT_WS(' ', alumnos.nombre, alumnos.apellido_paterno, alumnos.apellido_materno) LIKE ?",
+                            ["%{$search}%"]
+                        );
+                });
+            })
+            ->select(
+                'alumnos.id',
+                'alumnos.nombre',
+                'alumnos.apellido_paterno',
+                'alumnos.apellido_materno',
+                'datos_escolares.matricula'
+            )
+            ->distinct()
+            ->orderBy('alumnos.apellido_paterno')
+            ->orderBy('alumnos.apellido_materno')
+            ->orderBy('alumnos.nombre')
+            ->get();
+
+        $pdf = Pdf::loadView('profesor.pdf.listaAsistenciaPDF', [
+            'profesor' => $profesor,
+            'alumnos' => $alumnos,
+            'licenciatura' => $materiaSeleccionada->licenciatura ?? 'Sin licenciatura',
+            'cuatrimestre' => $materiaSeleccionada->cuatrimestre ?? 'Sin cuatrimestre',
+            'generacion' => $materiaSeleccionada->generacion ?? 'Sin generación',
+            'materia' => $materiaSeleccionada->materia ?? 'Sin materia',
+            'clave' => $materiaSeleccionada->clave ?? 'Sin clave',
+        ])->setPaper('letter', 'portrait');
+
+        return $pdf->stream('lista-asistencia-' . str_replace(' ', '-', strtolower($materiaSeleccionada->materia ?? 'materia')) . '.pdf');
+    }
+
 }

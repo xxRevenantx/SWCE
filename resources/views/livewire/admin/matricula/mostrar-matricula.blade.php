@@ -2,7 +2,7 @@
     destroyAlumno(id) {
         Swal.fire({
             title: '¿Estás seguro?',
-            text: 'Esta acción no podrá revertirse.',
+            text: 'Todos los datos del alumno se eliminarán permanentemente.',
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#2563EB',

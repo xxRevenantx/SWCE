@@ -12,21 +12,7 @@
                 </p>
             </div>
 
-            @if ($profesor)
-                <div
-                    class="inline-flex items-center gap-3 rounded-2xl border border-indigo-100 bg-indigo-50 px-4 py-3 text-sm font-semibold text-indigo-700 dark:border-indigo-500/20 dark:bg-indigo-500/10 dark:text-indigo-300">
-                    <span
-                        class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-indigo-600 text-white">
-                        {{ substr($profesor->nombre ?? 'P', 0, 1) }}
-                    </span>
 
-                    <div class="leading-tight">
-                        <div>{{ $profesor->nombre ?? '' }} {{ $profesor->apellido_paterno ?? '' }}
-                            {{ $profesor->apellido_materno ?? '' }}</div>
-                        <div class="text-xs font-medium opacity-80">Profesor activo</div>
-                    </div>
-                </div>
-            @endif
         </div>
 
         {{-- Resumen --}}

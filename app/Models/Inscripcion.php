@@ -21,7 +21,6 @@ class Inscripcion extends Model
         'fecha_inscripcion',
     ];
 
-    protected $with = ['alumno.datosContacto', 'alumno.datosEscolares'];
 
 
     // RELACIONES
