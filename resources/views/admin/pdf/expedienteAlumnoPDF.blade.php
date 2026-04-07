@@ -196,7 +196,7 @@
     @endphp
 
 
-
+    {{ $alumno->licenciatura->logo }}
 
     <div style="width: 12%; text-align: center; margin-top: 0px;  position: absolute; left: 50px; top: -20px; ">
         @if ($alumno->licenciatura->logo)
