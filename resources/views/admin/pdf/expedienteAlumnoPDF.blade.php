@@ -232,7 +232,7 @@
 
                 <td rowspan="3" class="foto">
                     @if (!empty($alumno->foto))
-                        <img src="{{ public_path('storage/estudiantes/' . $alumno->foto) }}" height="90"
+                        <img src="{{ public_path('storage/alumnos/' . $alumno->foto) }}" height="90"
                             style="object-fit: cover;">
                     @else
                         <img src="{{ public_path('imagenes_publicas/user.png') }}" height="90"
