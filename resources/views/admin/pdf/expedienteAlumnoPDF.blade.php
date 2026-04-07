@@ -200,7 +200,7 @@
         $logoLicenciatura = public_path('imagenes_publicas/logo-letra.png');
 
         if (!empty($alumno->licenciatura->logo)) {
-            $rutaLogo = storage_path('app/public/licenciaturas/' . $alumno->licenciatura->logo);
+            $rutaLogo = storage_path('app/public/storage/licenciaturas/' . $alumno->licenciatura->logo);
             if (file_exists($rutaLogo)) {
                 $logoLicenciatura = $rutaLogo;
             }
@@ -209,7 +209,7 @@
         $fotoAlumno = public_path('imagenes_publicas/user.png');
 
         if (!empty($alumno->foto)) {
-            $rutaFoto = storage_path('app/public/alumnos/' . $alumno->foto);
+            $rutaFoto = storage_path('app/public/storage/alumnos/' . $alumno->foto);
             if (file_exists($rutaFoto)) {
                 $fotoAlumno = $rutaFoto;
             }
