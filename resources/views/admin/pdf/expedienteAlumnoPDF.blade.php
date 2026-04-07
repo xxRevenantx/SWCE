@@ -200,7 +200,8 @@
 
     <div style="width: 12%; text-align: center; margin-top: 0px;  position: absolute; left: 50px; top: -20px; ">
         @if ($alumno->licenciatura->logo)
-            <img style="width: 100%;" src="{{ public_path('storage/licenciaturas/' . $alumno->licenciatura->logo) }}"
+            <img style="width: 100%;"
+                src="{{ public_path('public/storage/licenciaturas/' . $alumno->licenciatura->logo) }}"
                 alt="{{ $alumno->licenciatura->nombre }}">
         @else
             <img style="width: 100%;" src="{{ public_path('imagenes_publicas/logo-letra.png') }}" alt="Logo">
