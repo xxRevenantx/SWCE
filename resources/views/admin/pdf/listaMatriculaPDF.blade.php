@@ -3,275 +3,449 @@
 
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <meta name="viewport"
-        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Lista de alumnos</title>
 
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+    <style>
+        @page {
+            margin: 24px 24px 42px 24px;
+        }
 
-    <title>LISTA DE ALUMNOS
-    </title>
-</head>
+        body {
+            font-family: DejaVu Sans, sans-serif;
+            font-size: 11px;
+            color: #0f172a;
+            margin: 0;
+            padding: 0;
+        }
 
-<style>
-    /* =========================
-           DOMPDF: CONFIG BÁSICA
+        /* =========================
+           CONTENEDOR GENERAL
            ========================= */
-    @page {
-        margin: 28px 28px 36px 28px;
-    }
+        .sheet {
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            padding: 14px;
+            background: #ffffff;
+        }
 
-    body {
-        font-family: DejaVu Sans, sans-serif;
-        font-size: 11px;
-        color: #111827;
-    }
+        .top-line {
+            height: 4px;
+            background: #0ea5e9;
+            border-radius: 999px;
+            margin-bottom: 12px;
+        }
 
-    /* =========================
+        /* =========================
            HEADER
            ========================= */
-    .header {
-        border: 1px solid #e5e7eb;
-        border-radius: 10px;
-        padding: 14px 14px;
-        margin-bottom: 14px;
-        background: #f8fafc;
-    }
+        .header {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 10px;
+        }
 
-    .header-grid {
-        width: 100%;
-    }
+        .header td {
+            vertical-align: middle;
+        }
 
-    .title {
-        font-size: 16px;
-        font-weight: 700;
-        margin: 0 0 4px 0;
-    }
+        .logo {
+            width: 76px;
+            height: 76px;
+            border-radius: 999px;
+            border: 1px solid #e5e7eb;
+            padding: 5px;
+            background: #ffffff;
+        }
 
-    .subtitle {
-        margin: 0;
-        color: #4b5563;
-        font-size: 11px;
-        line-height: 1.4;
-    }
+        .title {
+            text-align: center;
+            letter-spacing: .6px;
+            font-size: 18px;
+            text-transform: uppercase;
+        }
 
-    .meta {
-        text-align: right;
-        vertical-align: top;
-        white-space: nowrap;
-    }
+        .subtitle {
+            text-align: center;
+            margin-top: 3px;
 
-    .chip {
-        display: inline-block;
-        padding: 6px 10px;
-        border-radius: 999px;
-        border: 1px solid #e5e7eb;
-        background: #ffffff;
-        font-size: 10px;
-        color: #374151;
-    }
+            font-size: 10px;
+            color: #475569;
+        }
 
-    /* =========================
-           TABLE
+        /* =========================
+           PILLS
            ========================= */
-    table {
-        width: 100%;
-        border-collapse: collapse;
-        /* Dompdf friendly */
-    }
+        .pills {
+            text-align: center;
+            margin: 10px 0 12px 0;
+        }
 
-    thead th {
-        background: #0f172a;
-        /* azul oscuro */
-        color: #ffffff;
-        font-weight: 700;
-        font-size: 10px;
-        letter-spacing: .2px;
-        text-transform: uppercase;
-        padding: 10px 8px;
-        border: 1px solid #0f172a;
-    }
+        .pill {
+            display: inline-block;
+            background: #f8fafc;
+            border: 1px solid #dbeafe;
+            color: #1e3a8a;
+            border-radius: 999px;
+            padding: 5px 9px;
+            font-size: 9px;
+            margin: 0 4px 4px 0;
+        }
 
-    tbody td {
-        padding: 9px 8px;
-        border: 1px solid #e5e7eb;
-        vertical-align: middle;
-    }
+        .pill-dark {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            color: #1d4ed8;
+        }
 
-    /* Zebra */
-    tbody tr:nth-child(even) td {
-        background: #f9fafb;
-    }
+        .pill-green {
+            background: #ecfdf5;
+            border: 1px solid #bbf7d0;
+            color: #047857;
+        }
 
-    /* =========================
-           “Avatar” e info de alumno
+        .pill-amber {
+            background: #fffbeb;
+            border: 1px solid #fde68a;
+            color: #b45309;
+        }
+
+        /* =========================
+           TABLA PRINCIPAL
            ========================= */
-    .alumno-wrap {
-        width: 100%;
-    }
+        table.lista {
+            width: 100%;
+            border-collapse: collapse;
+            border: 1px solid #cbd5e1;
+            border-radius: 12px;
+            overflow: hidden;
+        }
 
-    .avatar {
-        display: inline-block;
-        width: 26px;
-        height: 26px;
-        line-height: 26px;
-        text-align: center;
-        border-radius: 8px;
-        background: #e0f2fe;
-        /* sky-100 */
-        color: #075985;
-        /* sky-800 */
-        font-weight: 700;
-        font-size: 10px;
-        margin-right: 8px;
-    }
+        table.lista th,
+        table.lista td {
+            border: 1px solid #e5e7eb;
+            padding: 5px 5px;
+            vertical-align: middle;
+        }
 
-    .alumno-name {
-        font-weight: 700;
-        font-size: 11px;
-        margin: 0;
-    }
+        table.lista thead th {
+            background: #cbd5e1;
+            color: #0f172a;
 
-    .alumno-sub {
-        margin: 1px 0 0 0;
-        font-size: 10px;
-        color: #6b7280;
-    }
+            text-transform: uppercase;
+            font-size: 9px;
+            text-align: center;
+        }
 
-    /* =========================
-           Badges (Lic, Gen, Cuatr)
+        table.lista tbody tr:nth-child(even) td {
+            background: #f8fafc;
+        }
+
+        .col-num {
+            width: 5%;
+            text-align: center;
+
+        }
+
+        .col-matricula {
+            width: 12%;
+            text-align: center;
+            white-space: nowrap;
+
+            color: #1e293b;
+        }
+
+        .col-nombre {
+            width: 26%;
+        }
+
+        .col-apellido {
+            width: 14%;
+        }
+
+
+
+        .col-gen {
+            width: 12%;
+            text-align: center;
+        }
+
+        .col-cuatri {
+            width: 13%;
+            text-align: center;
+        }
+
+        .col-status {
+            width: 10%;
+            text-align: center;
+        }
+
+        .alumno {
+
+            font-size: 10px;
+            color: #0f172a;
+            margin-bottom: 2px;
+        }
+
+        .alumno-sub {
+            font-size: 9px;
+            color: #64748b;
+        }
+
+        .badge {
+            display: inline-block;
+            border-radius: 999px;
+            padding: 4px 8px;
+            font-size: 9px;
+
+            border: 1px solid #e5e7eb;
+            white-space: nowrap;
+        }
+
+        .badge-blue {
+            background: #eff6ff;
+            color: #1d4ed8;
+            border-color: #bfdbfe;
+        }
+
+        .badge-green {
+            background: #ecfdf5;
+            color: #047857;
+            border-color: #bbf7d0;
+        }
+
+        .badge-amber {
+            background: #fffbeb;
+            color: #b45309;
+            border-color: #fde68a;
+        }
+
+        .badge-slate {
+            background: #f8fafc;
+            color: #334155;
+            border-color: #cbd5e1;
+        }
+
+        .badge-ok {
+            background: #dcfce7;
+            color: #166534;
+            border-color: #86efac;
+        }
+
+        .badge-off {
+            background: #fee2e2;
+            color: #b91c1c;
+            border-color: #fca5a5;
+        }
+
+        /* =========================
+           RESUMEN
            ========================= */
-    .badge {
-        display: inline-block;
-        padding: 5px 8px;
-        border-radius: 999px;
-        font-size: 10px;
-        border: 1px solid #e5e7eb;
-        background: #ffffff;
-        color: #111827;
-        white-space: nowrap;
-    }
+        .box {
+            margin-top: 12px;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #f8fafc;
+        }
 
-    .badge-blue {
-        border-color: #bfdbfe;
-        background: #eff6ff;
-        color: #1e40af;
-    }
+        .box-title {
+            padding: 10px 12px;
 
-    .badge-green {
-        border-color: #bbf7d0;
-        background: #ecfdf5;
-        color: #065f46;
-    }
+            text-transform: uppercase;
+            font-size: 10px;
+            color: #0f172a;
+        }
 
-    .badge-amber {
-        border-color: #fde68a;
-        background: #fffbeb;
-        color: #92400e;
-    }
+        .summary-grid {
+            width: 100%;
+            border-collapse: collapse;
+            background: #ffffff;
+        }
 
-    /* =========================
+        .summary-grid td {
+            border: 1px solid #e5e7eb;
+            padding: 9px 10px;
+            font-size: 10px;
+        }
+
+        .summary-label {
+
+            color: #334155;
+            width: 22%;
+            background: #f8fafc;
+        }
+
+        .empty {
+            text-align: center;
+            color: #64748b;
+            padding: 14px;
+        }
+
+        /* =========================
            FOOTER
            ========================= */
-    footer {
-        position: absolute;
-        bottom: 0;
-        left: 5%;
-        text-align: center;
-        font-size: 12px;
-        line-height: 12px;
-        width: 90%;
-        margin: auto;
-        border-top: 1px solid #4a5568;
-        border-bottom: 1px solid #4a5568;
-    }
+        footer {
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: 6px;
+            text-align: center;
+            font-size: 9px;
+            color: #475569;
+            border-top: 1px solid #cbd5e1;
+            padding-top: 6px;
+        }
 
-    footer p {
-        margin: 0;
-        padding: 0;
-    }
-</style>
+        footer p {
+            margin: 0;
+            line-height: 1.35;
+        }
+    </style>
 </head>
 
 <body>
+    @php
+        date_default_timezone_set('America/Mexico_City');
 
-    {{-- Encabezado --}}
-    <div class="header">
-        <table class="header-grid">
+        $totalAlumnos = $inscripciones->count();
+
+        $activos = $inscripciones
+            ->filter(function ($item) {
+                return (int) ($item->status ?? 0) === 1;
+            })
+            ->count();
+
+        $bajas = $totalAlumnos - $activos;
+
+        $fecha = now()->format('d/m/Y H:i:s');
+    @endphp
+
+    <div class="sheet">
+        <div class="top-line"></div>
+
+        <table class="header">
             <tr>
-                <td>
-                    <p class="title">Lista de alumnos</p>
+                <td style="width: 74px;">
+                    <img class="logo" src="{{ public_path('imagenes_publicas/logo-letra.png') }}" alt="Logo">
                 </td>
-                <td class="meta">
-                    <span class="chip">Total: <strong>{{ $inscripciones->count() }}</strong></span><br>
-                    <span class="chip">Fecha: <strong>{{ now()->format('d/m/Y H:i') }}</strong></span>
+
+                <td>
+                    <div class="title">Centro Universitario Moctezuma A.C.</div>
+                    <div class="subtitle">
+                        LISTA DE ALUMNOS
+                    </div>
+                </td>
+
+                <td style="width: 74px; text-align:right;">
+                    @if (!empty($licenciatura->logo) && file_exists(public_path('storage/licenciaturas/' . $licenciatura->logo)))
+                        <img class="logo" src="{{ public_path('storage/licenciaturas/' . $licenciatura->logo) }}"
+                            alt="Logo Licenciatura">
+                    @endif
                 </td>
             </tr>
         </table>
+
+        <div class="pills">
+
+            <span class="pill pill-green">Activos: {{ $activos }}</span>
+            <span class="pill pill-dark">Total: {{ $totalAlumnos }}</span>
+        </div>
+
+        <table class="lista">
+            <thead>
+                <tr>
+                    <th class="col-num">#</th>
+                    <th class="col-matricula">Matrícula</th>
+                    <th class="col-nombre">Nombre</th>
+                    <th class="col-apellido">Apellido paterno</th>
+                    <th class="col-apellido">Apellido materno</th>
+                    <th class="col-lic">Licenciatura</th>
+                    <th class="col-gen">Generación</th>
+                    <th class="col-cuatri">Cuatrimestre</th>
+                    <th class="col-status">Estado</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @forelse ($inscripciones as $index => $inscripcion)
+                    @php
+                        $alumno = $inscripcion->alumno;
+                        $nombreCompleto = trim(
+                            ($alumno->nombre ?? '') .
+                                ' ' .
+                                ($alumno->apellido_paterno ?? '') .
+                                ' ' .
+                                ($alumno->apellido_materno ?? ''),
+                        );
+
+                        $matricula = $alumno->datosEscolares->matricula ?? ($inscripcion->matricula ?? '—');
+
+                        $statusActivo = (int) ($inscripcion->status ?? 0) === 1;
+                    @endphp
+
+                    <tr>
+                        <td class="col-num">{{ $index + 1 }}</td>
+
+                        <td class="col-matricula">
+                            {{ $matricula }}
+                        </td>
+
+                        <td class="col-nombre">
+                            <div class="alumno">{{ $alumno->nombre ?? '—' }}</div>
+                        </td>
+
+                        <td class="col-apellido">
+                            {{ $alumno->apellido_paterno ?? '—' }}
+                        </td>
+
+                        <td class="col-apellido">
+                            {{ $alumno->apellido_materno ?? '—' }}
+                        </td>
+
+                        <td class="col-lic">
+                            <span class="badge badge-blue">
+                                {{ $inscripcion->licenciatura->nombre ?? '—' }}
+                            </span>
+                        </td>
+
+                        <td class="col-gen">
+                            <span class="badge badge-green">
+                                {{ $inscripcion->generacion->generacion ?? '—' }}
+                            </span>
+                        </td>
+
+                        <td class="col-cuatri">
+                            <span class="badge badge-amber">
+                                {{ $inscripcion->cuatrimestre->nombre_cuatrimestre ?? '—' }}
+                            </span>
+                        </td>
+
+                        <td class="col-status">
+                            @if ($statusActivo)
+                                <span class="badge badge-ok">Activo</span>
+                            @else
+                                <span class="badge badge-off">Baja</span>
+                            @endif
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="9" class="empty">
+                            No hay alumnos registrados para los filtros seleccionados.
+                        </td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+
+
     </div>
 
-    {{-- Tabla --}}
-    <table>
-        <thead>
-            <tr>
-                <th style="width: 26%;">Alumno</th>
-                <th style="width: 14%;">Apellido paterno</th>
-                <th style="width: 14%;">Apellido materno</th>
-                <th style="width: 20%;">Licenciatura</th>
-                <th style="width: 13%;">Generación</th>
-                <th style="width: 13%;">Cuatrimestre</th>
-            </tr>
-        </thead>
-
-        <tbody>
-            @forelse ($inscripciones as $matricula)
-                @php
-                    $nombre = $matricula->alumno->nombre ?? '';
-                    $ap = $matricula->alumno->apellido_paterno ?? '';
-                    $iniciales = mb_strtoupper(mb_substr($nombre, 0, 1) . mb_substr($ap, 0, 1));
-                @endphp
-
-                <tr>
-                    <td>
-                        <div class="alumno-wrap">
-                            <span style="display:inline-block; vertical-align: top;">
-                                <p class="alumno-name">{{ $matricula->alumno->nombre }}</p>
-                                </p>
-                            </span>
-                        </div>
-                    </td>
-
-                    <td>{{ $matricula->alumno->apellido_paterno }}</td>
-                    <td>{{ $matricula->alumno->apellido_materno }}</td>
-
-                    <td>
-                        <span class="badge badge-blue">{{ $matricula->licenciatura->nombre }}</span>
-                    </td>
-
-                    <td>
-                        <span class="badge badge-green">{{ $matricula->generacion->generacion }}</span>
-                    </td>
-
-                    <td>
-                        <span class="badge badge-amber">{{ $matricula->cuatrimestre->nombre_cuatrimestre }}</span>
-                    </td>
-                </tr>
-            @empty
-                <tr>
-                    <td colspan="6" style="padding: 14px; text-align:center; color:#6b7280;">
-                        No hay inscripciones para mostrar.
-                    </td>
-                </tr>
-            @endforelse
-        </tbody>
-    </table>
-
-    <footer style="line-height: 20px">
-        <p>Sistema Web de Control Escolar | {{ config('app.name') }} | Fecha de expedición:
-            {{ \Carbon\Carbon::now()->locale('es')->isoFormat('DD/MM/YYYY') }}</p>
+    <footer>
+        <p><strong>Centro Universitario Moctezuma A.C.</strong> — C.C.T. 12PSU0173I</p>
+        <p>C. Francisco I. Madero Ote. No. 800, Col. Esquipula, C.P. 40665, Altamirano, Guerrero · Tel. 7676880774</p>
+        <p><strong>Fecha de expedición:</strong> {{ $fecha }}</p>
     </footer>
-
 </body>
 
 </html>

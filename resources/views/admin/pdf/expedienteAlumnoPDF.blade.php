@@ -52,24 +52,6 @@
         color: white;
     }
 
-    footer {
-        position: absolute;
-        bottom: 0;
-        left: 5%;
-        text-align: center;
-        font-size: 12px;
-        line-height: 12px;
-        width: 90%;
-        margin: auto;
-        border-top: 1px solid #4a5568;
-        border-bottom: 1px solid #4a5568;
-    }
-
-    footer p {
-        margin: 0;
-        padding: 0;
-    }
-
     .watermark {
         position: fixed;
         top: 50%;
@@ -392,12 +374,7 @@
             </tr>
         </table>
 
-        <footer style="line-height: 20px">
-            <p>
-                Sistema Web de Control Escolar | {{ config('app.name') }} | Fecha de expedición:
-                {{ \Carbon\Carbon::now()->locale('es')->isoFormat('DD/MM/YYYY') }}
-            </p>
-        </footer>
+        @include('includes.footer')
     </div>
 </body>
 

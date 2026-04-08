@@ -81,7 +81,7 @@ class PDFController extends Controller
             'inscripciones' => $inscripciones,
         ];
 
-        $pdf = Pdf::loadView('admin.pdf.listaMatriculaPDF', $data)->setPaper('letter', 'landscape');
+        $pdf = Pdf::loadView('admin.pdf.listaMatriculaPDF', $data)->setPaper('letter', 'portrait');
         return $pdf->stream("LISTA_MATRICULA.pdf");
     }
 

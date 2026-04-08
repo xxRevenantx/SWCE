@@ -478,15 +478,7 @@
         <span class="score np">NP No presentó</span>
     </div>
 
-    <footer>
-        <p class="uppercase fw-700">{{ $plantelNombre }} · C.C.T. {{ $plantelCCT }}</p>
-        <p>
-            C. {{ $plantelCalle }} No. {{ $plantelNo }}, Col. {{ $plantelColonia }},
-            C.P. {{ $plantelCP }}, Cd. {{ $plantelCiudad }}, {{ $plantelEstado }}.
-        </p>
-        <p>Fecha de expedición: {{ now()->translatedFormat('d \\d\\e F \\d\\e\\l Y \\a \\l\\a\\s H:i') }}</p>
-    </footer>
-
+    @include('includes.footer')
 
 </body>
 
