@@ -136,6 +136,7 @@
         </div>
     </div>
 
+
     {{-- Tabla --}}
     <div
         class="mt-6 rounded-2xl border bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-700 shadow-sm overflow-hidden">
@@ -189,7 +190,7 @@
 
                             @foreach ($materias as $m)
                                 <th class="px-4 py-2 text-center font-semibold text-white min-w-[180px]">
-                                    <div class=" dark:text-neutral-100 text-white">
+                                    <div class="dark:text-neutral-100 text-white">
                                         {{ mb_strtoupper($m['materia']) }}
                                     </div>
                                     <div class="text-[11px] font-normal text-neutral-300 dark:text-neutral-400 mt-1">
@@ -199,13 +200,14 @@
                             @endforeach
 
                             <th class="px-4 py-3 text-center font-semibold text-white min-w-[110px]">PROMEDIO</th>
-                            <th class="px-4 py-3 text-center font-semibold text-white min-w-[180px]">ACCIONES</th>
+                            <th class="px-4 py-3 text-center font-semibold text-white min-w-[320px]">ACCIONES</th>
                         </tr>
                     </thead>
 
                     <tbody class="divide-y divide-neutral-100 dark:divide-neutral-800">
                         @forelse ($inscripciones as $index => $fila)
                             @php($insId = (int) $fila['inscripcion_id'])
+                            @php($alumnoId = (int) $fila['alumno_id'])
 
                             <tr class="hover:bg-neutral-50/70 dark:hover:bg-neutral-950/40">
                                 <td class="px-4 py-3 text-neutral-700 dark:text-neutral-200">
@@ -247,12 +249,18 @@
                                 </td>
 
                                 <td class="px-4 py-3">
-                                    <div class="flex items-center justify-end gap-2">
+                                    <div class="flex flex-wrap items-center justify-end gap-2">
                                         {{-- Boleta --}}
                                         <a href="{{ route('admin.pdf.boletaCalificacion', [$insId, $cuatrimestre_id]) }}"
                                             target="_blank" rel="noopener"
                                             class="inline-flex items-center justify-center rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 text-sm font-semibold">
                                             Boleta
+                                        </a>
+
+                                        {{-- Kardex --}}
+                                        <a href="{{ $this->kardexUrl($alumnoId) }}" target="_blank" rel="noopener"
+                                            class="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-sky-500 to-cyan-600 hover:opacity-95 text-white px-4 py-2 text-sm font-semibold shadow">
+                                            Kárdex
                                         </a>
 
                                         {{-- Enviar --}}

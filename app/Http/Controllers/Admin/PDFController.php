@@ -281,4 +281,164 @@ class PDFController extends Controller
         $pdf = Pdf::loadView('admin.pdf.horarioPDF', $data)->setPaper('letter', 'portrait');
         return $pdf->stream("HORARIO_" . mb_strtoupper($data['licenciatura']->nombre) . "_" . mb_strtoupper($data['generacion']->generacion) . "_" . mb_strtoupper($data['cuatrimestre']->no_cuatrimestre) . "°_CUATRIMESTRE.pdf");
     }
+
+
+
+    public function kardexAlumno(int $alumno)
+    {
+        $alumno = \App\Models\Alumno::with([
+            'datosEscolares',
+            'datosContacto',
+        ])->findOrFail($alumno);
+
+        $inscripciones = \App\Models\Inscripcion::query()
+            ->with([
+                'licenciatura',
+                'generacion',
+                'cuatrimestre',
+                'calificaciones.asignacionMateria.materia',
+                'calificaciones.asignacionMateria.profesor',
+                'calificaciones.asignacionMateria.cuatrimestre',
+            ])
+            ->where('alumno_id', $alumno->id)
+            ->whereHas('cuatrimestre')
+            ->get()
+            ->sortBy(fn($inscripcion) => (int) ($inscripcion->cuatrimestre?->no_cuatrimestre ?? 999))
+            ->values();
+
+        $licenciatura = $inscripciones->first()?->licenciatura;
+        $generacion = $inscripciones->first()?->generacion;
+
+        $cuatrimestres = \App\Models\Cuatrimestre::query()
+            ->orderBy('no_cuatrimestre')
+            ->get();
+
+        $materiasPorCuatrimestre = collect();
+
+        if ($licenciatura) {
+            $materiasPorCuatrimestre = \App\Models\Materia::query()
+                ->where('licenciatura_id', $licenciatura->id)
+                ->where('calificable', 'si')
+                ->orderBy('cuatrimestre_id')
+                ->orderBy('clave')
+                ->get()
+                ->groupBy('cuatrimestre_id');
+        }
+
+        // Se juntan todas las calificaciones del alumno sin depender del cuatrimestre de inscripción
+        $todasLasCalificaciones = $inscripciones
+            ->flatMap(function ($inscripcion) {
+                return $inscripcion->calificaciones;
+            })
+            ->filter(function ($calificacion) {
+                return !is_null($calificacion->asignacionMateria?->materia_id)
+                    && !is_null($calificacion->asignacionMateria?->cuatrimestre_id);
+            });
+
+        // Se agrupan por cuatrimestre de la asignación y luego por materia
+        $calificacionesPorCuatrimestreYMateria = $todasLasCalificaciones
+            ->sortByDesc(function ($calificacion) {
+                return $calificacion->fecha_captura ?? $calificacion->id;
+            })
+            ->groupBy(function ($calificacion) {
+                return $calificacion->asignacionMateria->cuatrimestre_id;
+            })
+            ->map(function ($calificacionesDelCuatrimestre) {
+                return collect($calificacionesDelCuatrimestre)
+                    ->groupBy(function ($calificacion) {
+                        return $calificacion->asignacionMateria->materia_id;
+                    })
+                    ->map(function ($grupo) {
+                        // Se toma la más reciente de cada materia
+                        return $grupo->first();
+                    });
+            });
+
+        $kardex = $cuatrimestres->map(function ($cuatrimestre) use ($materiasPorCuatrimestre, $calificacionesPorCuatrimestreYMateria) {
+            $materiasBase = collect($materiasPorCuatrimestre->get($cuatrimestre->id, collect()));
+            $calificacionesDelCuatrimestre = collect($calificacionesPorCuatrimestreYMateria->get($cuatrimestre->id, collect()));
+
+            $materias = $materiasBase->map(function ($materia) use ($calificacionesDelCuatrimestre) {
+                $calificacion = $calificacionesDelCuatrimestre->get($materia->id);
+                $profesor = $calificacion?->asignacionMateria?->profesor;
+
+                $nombreProfesor = trim(
+                    ($profesor->nombre ?? '') . ' ' .
+                    ($profesor->apellido_paterno ?? '') . ' ' .
+                    ($profesor->apellido_materno ?? '')
+                );
+
+                return [
+                    'clave' => $materia->clave ?? '---',
+                    'materia' => $materia->nombre ?? 'MATERIA',
+                    'calificacion' => is_numeric($calificacion?->calificacion)
+                        ? number_format((float) $calificacion->calificacion, 1, '.', '')
+                        : '---',
+                    'profesor' => $nombreProfesor !== '' ? $nombreProfesor : '—',
+                ];
+            })->values();
+
+            $calificacionesNumericas = $materias
+                ->pluck('calificacion')
+                ->filter(fn($valor) => is_numeric($valor))
+                ->map(fn($valor) => (float) $valor)
+                ->values();
+
+            $promedioCuatrimestre = '';
+
+            if ($calificacionesNumericas->count() > 0) {
+                $promedioReal = $calificacionesNumericas->avg();
+                $promedioCuatrimestre = number_format(floor($promedioReal * 10) / 10, 1, '.', '');
+            }
+
+            return [
+                'id' => $cuatrimestre->id,
+                'numero' => $cuatrimestre->no_cuatrimestre,
+                'nombre' => $cuatrimestre->nombre_cuatrimestre,
+                'materias' => $materias,
+                'promedio' => $promedioCuatrimestre,
+            ];
+        });
+
+        $promedioGeneral = '';
+        $todasLasCalificacionesNumericas = $kardex
+            ->flatMap(function ($bloque) {
+                return collect($bloque['materias'])
+                    ->pluck('calificacion')
+                    ->filter(fn($valor) => is_numeric($valor))
+                    ->map(fn($valor) => (float) $valor);
+            })
+            ->values();
+
+        if ($todasLasCalificacionesNumericas->count() > 0) {
+            $promedioReal = $todasLasCalificacionesNumericas->avg();
+            $promedioGeneral = number_format(floor($promedioReal * 10) / 10, 1, '.', '');
+        }
+
+        $escuela = (object) [
+            'nombre' => 'Centro Universitario Moctezuma A.C.',
+            'CCT' => '12PSU0173I',
+        ];
+
+        $rector = (object) [
+            'nombre' => 'José Rubén',
+            'apellido_paterno' => 'Solórzano',
+            'apellido_materno' => 'Carbajal',
+        ];
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('admin.pdf.kardexAlumnoPDF', [
+            'alumno' => $alumno,
+            'licenciatura' => $licenciatura,
+            'generacion' => $generacion,
+            'cuatrimestres' => $cuatrimestres,
+            'kardex' => $kardex,
+            'promedioGeneral' => $promedioGeneral,
+            'escuela' => $escuela,
+            'rector' => $rector,
+        ])->setPaper('legal', 'portrait');
+
+        $matricula = $alumno->datosEscolares?->matricula ?? $alumno->id;
+
+        return $pdf->stream('kardex-' . $matricula . '.pdf');
+    }
 }

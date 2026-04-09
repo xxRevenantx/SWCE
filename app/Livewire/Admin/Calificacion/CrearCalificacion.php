@@ -117,6 +117,21 @@ class CrearCalificacion extends Component
             : $base . ' opacity-60 cursor-not-allowed';
     }
 
+    /**
+     * Aquí genero la URL del Kárdex del alumno.
+     * El Kárdex debe tomar el historial completo del alumno.
+     */
+    public function kardexUrl(int $alumnoId): string
+    {
+        if ($alumnoId <= 0) {
+            return '#';
+        }
+
+        return route('admin.pdf.kardex.alumno', [
+            'alumno' => $alumnoId,
+        ]);
+    }
+
     /** ======================= ENVÍOS ======================= */
     public function enviarCalificacion(int $inscripcionId): void
     {
@@ -171,7 +186,7 @@ class CrearCalificacion extends Component
 
         $calificaciones = Calificacion::with(['asignacionMateria.materia', 'asignacionMateria.profesor'])
             ->where('inscripcion_id', $inscripcion->id)
-            ->whereHas('asignacionMateria', function ($q) use ($inscripcion) {
+            ->whereHas('asignacionMateria', function ($q) {
                 $q->where('cuatrimestre_id', $this->cuatrimestre_id)
                     ->where('licenciatura_id', $this->licenciatura_id);
             })
@@ -295,8 +310,8 @@ class CrearCalificacion extends Component
             $profesor = $a->profesor
                 ? trim(
                     ($a->profesor->nombre ?? '') . ' ' .
-                        ($a->profesor->apellido_paterno ?? '') . ' ' .
-                        ($a->profesor->apellido_materno ?? '')
+                    ($a->profesor->apellido_paterno ?? '') . ' ' .
+                    ($a->profesor->apellido_materno ?? '')
                 )
                 : '—';
 

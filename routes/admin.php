@@ -84,6 +84,9 @@ Route::middleware(['auth'])->group(function () {
     )->middleware('can:admin.pdf.calificaciones')
         ->name('admin.pdf.calificaciones');
 
+    // KARDEX DEL ALUMNO
+    Route::get('calificaciones/kardex-alumno/{alumno}', [PDFController::class, 'kardexAlumno'])->middleware('can:admin.pdf.calificaciones')->name('admin.pdf.kardex.alumno');
+
 
     // Lista de matrícula
     Route::get('matricula/lista/{filtrar_licenciatura?}/{filtrar_generacion?}/{filtrar_cuatrimestre?}/{search?}', [PDFController::class, 'listaMatricula'])->middleware('can:admin.pdf.lista_matricula')->name('admin.pdf.listaMatricula');
