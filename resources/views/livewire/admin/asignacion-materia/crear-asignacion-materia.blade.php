@@ -21,11 +21,8 @@
                                     d="M10 4a6 6 0 104.472 10.03l3.749 3.75 1.414-1.415-3.75-3.749A6 6 0 0010 4zm0 2a4 4 0 110 8 4 4 0 010-8z" />
                             </svg>
                         </span>
-                        <input type="text" wire:model.live.debounce.350ms="search"
-                            placeholder="Buscar materia (nombre, clave o slug)…"
-                            class="w-full rounded-2xl border border-neutral-200 bg-white pl-10 pr-3 py-2.5 text-sm
-                                   focus:ring-2 focus:ring-sky-400 focus:border-sky-400
-                                   dark:border-neutral-800 dark:bg-neutral-950 dark:text-white dark:placeholder:text-neutral-500" />
+                        <flux:input type="text" wire:model.live.debounce.350ms="search"
+                            placeholder="Buscar materia (nombre, clave o slug)…" />
                     </div>
                 </div>
             </div>
@@ -35,53 +32,43 @@
                 <div class="sm:col-span-4">
                     <label class="text-xs font-semibold text-neutral-600 dark:text-neutral-300">Filtrar por
                         Licenciatura</label>
-                    <select wire:model.live="filtrar_licenciatura"
-                        class="mt-2 w-full rounded-2xl border border-neutral-200 bg-white px-3 py-2.5 text-sm
-                               focus:ring-2 focus:ring-sky-400 focus:border-sky-400
-                               dark:border-neutral-800 dark:bg-neutral-950 dark:text-white">
-                        <option value="">--Todas--</option>
+                    <flux:select wire:model.live="filtrar_licenciatura" class="mt-2">
+                        <flux:select.option value="">--Todas--</flux:select.option>
                         @foreach ($licenciaturas as $l)
-                            <option value="{{ $l->id }}">{{ $l->nombre }}</option>
+                            <flux:select.option value="{{ $l->id }}">{{ $l->nombre }}</flux:select.option>
                         @endforeach
-                    </select>
+                    </flux:select>
                 </div>
 
                 <div class="sm:col-span-4">
                     <label class="text-xs font-semibold text-neutral-600 dark:text-neutral-300">Filtrar por
                         Cuatrimestre</label>
-                    <select wire:model.live="filtrar_cuatrimestre"
-                        class="mt-2 w-full rounded-2xl border border-neutral-200 bg-white px-3 py-2.5 text-sm
-                               focus:ring-2 focus:ring-sky-400 focus:border-sky-400
-                               dark:border-neutral-800 dark:bg-neutral-950 dark:text-white">
-                        <option value="">--Todos--</option>
+                    <flux:select wire:model.live="filtrar_cuatrimestre" class="mt-2">
+                        <flux:select.option value="">--Todos--</flux:select.option>
                         @foreach ($cuatrimestres as $c)
-                            <option value="{{ $c->id }}">
+                            <flux:select.option value="{{ $c->id }}">
                                 {{ $c->nombre_cuatrimestre ?? 'Cuatrimestre ' . $c->no_cuatrimestre }}
-                            </option>
+                            </flux:select.option>
                         @endforeach
-                    </select>
+                    </flux:select>
                 </div>
 
                 <div class="sm:col-span-2">
                     <label class="text-xs font-semibold text-neutral-600 dark:text-neutral-300">Por página</label>
-                    <select wire:model.live="por_pagina"
-                        class="mt-2 w-full rounded-2xl border border-neutral-200 bg-white px-3 py-2.5 text-sm
-                               focus:ring-2 focus:ring-sky-400 focus:border-sky-400
-                               dark:border-neutral-800 dark:bg-neutral-950 dark:text-white">
-                        <option value="10">10</option>
-                        <option value="25">25</option>
-                        <option value="50">50</option>
-                        <option value="100">100</option>
-                    </select>
+                    <flux:select wire:model.live="por_pagina" class="mt-2">
+                        <flux:select.option value="10">10</flux:select.option>
+                        <flux:select.option value="25">25</flux:select.option>
+                        <flux:select.option value="50">50</flux:select.option>
+                        <flux:select.option value="100">100</flux:select.option>
+                    </flux:select>
                 </div>
 
                 <div class="sm:col-span-2 flex items-end">
-                    <button type="button" wire:click="limpiarFiltros"
-                        class="w-full rounded-2xl px-4 py-2.5 text-sm font-semibold
-                               bg-neutral-100 text-neutral-800 hover:bg-neutral-200
-                               dark:bg-neutral-800 dark:text-neutral-100 dark:hover:bg-neutral-700">
+                    <flux:button type="button" wire:click="limpiarFiltros" variant="primary"
+                        class="w-full bg-indigo-500 hover:bg-indigo-600 focus:ring-indigo-400"
+                        wire:loading.attr="disabled">
                         Limpiar
-                    </button>
+                    </flux:button>
                 </div>
             </div>
         </div>

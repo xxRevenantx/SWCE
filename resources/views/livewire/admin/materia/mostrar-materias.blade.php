@@ -21,13 +21,10 @@
 
 
     <!-- Búsqueda + Filtros (Flux UI) -->
-    <div
-        class="flex flex-col gap-3 md:flex-row md:items-center md:gap-4
-           rounded-2xl border border-gray-200 dark:border-neutral-800
-           bg-white/70 dark:bg-neutral-900/60 p-3 md:p-4 shadow-sm">
+    <div class="flex  md:grid md:grid-cols-4 gap-4">
 
         {{-- Licenciatura --}}
-        <div class="w-full md:w-[28%]">
+        <div class="w-full">
             <flux:field>
                 <flux:label>Licenciatura</flux:label>
 
@@ -41,7 +38,7 @@
         </div>
 
         {{-- Cuatrimestre --}}
-        <div class="w-full md:w-[24%]">
+        <div class="w-full">
             <flux:field>
                 <flux:label>Cuatrimestre</flux:label>
 
@@ -56,7 +53,7 @@
         </div>
 
         {{-- Calificable --}}
-        <div class="w-full md:w-[20%]">
+        <div class="w-full">
             <flux:field>
                 <flux:label>Calificable</flux:label>
 
@@ -69,10 +66,9 @@
         </div>
 
         {{-- Buscador --}}
-        <div class="w-full md:flex-1">
+        <div class="w-full">
             <flux:field>
-                <flux:label class="sr-only">Buscar</flux:label>
-
+                <flux:label>Buscar</flux:label>
                 <div class="relative">
                     <div class="pointer-events-none absolute inset-y-0 left-3 flex items-center">
                         <svg class="h-5 w-5 text-gray-400 dark:text-gray-500" viewBox="0 0 24 24" fill="none">

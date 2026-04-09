@@ -34,44 +34,39 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {{-- Licenciatura --}}
                 <div>
-                    <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-200 mb-2">
-                        Licenciatura
-                    </label>
-                    <select wire:model.live="filtrar_licenciatura"
+                    <flux:label>Licenciatura</flux:label>
+                    <flux:select wire:model.live="filtrar_licenciatura"
                         class="w-full rounded-xl border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-3 py-2 text-sm text-neutral-900 dark:text-neutral-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <option value="">--Selecciona una licenciatura--</option>
+                        <flux:select.option value="">--Selecciona una licenciatura--</flux:select.option>
                         @foreach ($licenciaturas as $l)
-                            <option value="{{ $l->id }}">{{ $l->nombre }}</option>
+                            <flux:select.option value="{{ $l->id }}">{{ $l->nombre }}</flux:select.option>
                         @endforeach
-                    </select>
+                    </flux:select>
                 </div>
 
                 {{-- Generación --}}
                 <div>
-                    <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-200 mb-2">
-                        Generación
-                    </label>
-                    <select wire:model.live="filtrar_generacion"
+                    <flux:label>Generación</flux:label>
+                    <flux:select wire:model.live="filtrar_generacion"
                         class="w-full rounded-xl border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-3 py-2 text-sm text-neutral-900 dark:text-neutral-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <option value="">--Selecciona una generación--</option>
+                        <flux:select.option value="">--Selecciona una generación--</flux:select.option>
                         @foreach ($generaciones as $g)
-                            <option value="{{ $g->id }}">{{ $g->generacion }}</option>
+                            <flux:select.option value="{{ $g->id }}">{{ $g->generacion }}</flux:select.option>
                         @endforeach
-                    </select>
+                    </flux:select>
                 </div>
 
                 {{-- Cuatrimestre --}}
                 <div>
-                    <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-200 mb-2">
-                        Cuatrimestre
-                    </label>
-                    <select wire:model.live="filtrar_cuatrimestre"
+                    <flux:label>Cuatrimestre</flux:label>
+                    <flux:select wire:model.live="filtrar_cuatrimestre"
                         class="w-full rounded-xl border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-3 py-2 text-sm text-neutral-900 dark:text-neutral-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <option value="">--Selecciona un cuatrimestre--</option>
+                        <flux:select.option value="">--Selecciona un cuatrimestre--</flux:select.option>
                         @foreach ($cuatrimestres as $c)
-                            <option value="{{ $c->id }}">{{ $c->no_cuatrimestre }}°</option>
+                            <flux:select.option value="{{ $c->id }}">{{ $c->no_cuatrimestre }}°
+                            </flux:select.option>
                         @endforeach
-                    </select>
+                    </flux:select>
                 </div>
             </div>
 
@@ -321,6 +316,9 @@
                                             class="h-8 w-8 rounded-full bg-neutral-200 dark:bg-neutral-700 overflow-hidden">
                                             @if (!empty($foto))
                                                 <img src="{{ asset('storage/' . $foto) }}" alt="Foto"
+                                                    class="h-full w-full object-cover">
+                                            @else
+                                                <img src="{{ asset('imagenes_publicas/user.png') }}" alt="Foto"
                                                     class="h-full w-full object-cover">
                                             @endif
                                         </div>
