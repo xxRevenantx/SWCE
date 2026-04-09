@@ -448,13 +448,7 @@
                     </div>
                 </td>
 
-                <td style="width: 90px;" class="text-right">
-                    @if (!empty($licenciatura?->logo) && file_exists(public_path('storage/licenciaturas/' . $licenciatura->logo)))
-                        <img class="logo-licenciatura"
-                            src="{{ public_path('storage/licenciaturas/' . $licenciatura->logo) }}"
-                            alt="Logo licenciatura">
-                    @endif
-                </td>
+
             </tr>
         </table>
     </div>
