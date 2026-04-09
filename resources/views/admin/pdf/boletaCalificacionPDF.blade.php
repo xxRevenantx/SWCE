@@ -360,12 +360,7 @@
                         Boleta de Calificaciones
                     </div>
                 </td>
-                <td style="width:92px; text-align:right;">
-                    @if (!empty($licenciatura->logo) && file_exists(public_path('storage/licenciaturas/' . $licenciatura->logo)))
-                        <img class="logo" src="{{ public_path('storage/licenciaturas/' . $licenciatura->logo) }}"
-                            alt="Logo Licenciatura">
-                    @endif
-                </td>
+
             </tr>
         </table>
     </div>
