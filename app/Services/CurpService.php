@@ -73,7 +73,7 @@ class CurpService
 
         // Listas separadas para evitar mezclar nombres
         $nombresHombre = ['CARLOS', 'ALBERTO', 'JUAN', 'PEDRO', 'ANGEL', 'DANIEL', 'MIGUEL', 'JOSE', 'LUIS', 'FERNANDO'];
-        $nombresMujer  = ['MARIA', 'MELISA', 'PAOLA', 'YULISA', 'KARLA', 'ANDREA', 'SOFIA', 'DANIELA', 'FERNANDA', 'VALERIA'];
+        $nombresMujer = ['MARIA', 'MELISA', 'PAOLA', 'YULISA', 'KARLA', 'ANDREA', 'SOFIA', 'DANIELA', 'FERNANDA', 'VALERIA'];
 
         $apellidos = ['NUNEZ', 'PEREZ', 'GARCIA', 'HERNANDEZ', 'LOPEZ', 'MARTINEZ', 'SANCHEZ', 'RAMIREZ', 'FLORES', 'TORRES'];
 

@@ -127,6 +127,23 @@
                             </div>
                         </div>
                     </div>
+                @else
+                    <div
+                        class="mx-4 sm:mx-6 mt-4 rounded-2xl border border-green-200 bg-green-50 px-4 py-3 shadow-sm dark:border-green-900/40 dark:bg-green-950/30 dark:text-green-100">
+                        <div class="flex items-start gap-3">
+                            <div class="mt-0.5">
+                                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                    <path d="M12 2a10 10 0 100 20 10 10 0 000-20zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
+                                </svg>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-sm font-semibold"></p>Los datos de CURP se generan/consultan usando la
+                                API real. Asegúrate de tener
+                                conexión a internet para que funcione correctamente.</p>
+
+                            </div>
+                        </div>
+                    </div>
                 @endif
 
 
