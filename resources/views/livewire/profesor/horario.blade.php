@@ -39,57 +39,45 @@
 
         <div class="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
             <div>
-                <label for="licenciatura_id"
-                    class="mb-2 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
-                    Licenciatura
-                </label>
 
-                <select id="licenciatura_id" wire:model.live="licenciatura_id"
-                    class="w-full rounded-xl border border-neutral-300 bg-white px-4 py-3 text-sm text-neutral-900 shadow-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white">
-                    <option value="">Todas las licenciaturas</option>
+
+                <flux:select label="Licenciatura" id="licenciatura_id" wire:model.live="licenciatura_id">
+                    <flux:select.option value="">Todas las licenciaturas</flux:select.option>
 
                     @foreach ($licenciaturas as $licenciatura)
-                        <option value="{{ $licenciatura->id }}">
+                        <flux:select.option value="{{ $licenciatura->id }}">
                             {{ $licenciatura->nombre }}
-                        </option>
+                        </flux:select.option>
                     @endforeach
-                </select>
+                </flux:select>
             </div>
 
             <div>
-                <label for="cuatrimestre_id"
-                    class="mb-2 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
-                    Cuatrimestre
-                </label>
 
-                <select id="cuatrimestre_id" wire:model.live="cuatrimestre_id"
-                    class="w-full rounded-xl border border-neutral-300 bg-white px-4 py-3 text-sm text-neutral-900 shadow-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white">
-                    <option value="">Todos los cuatrimestres</option>
+
+                <flux:select label="Cuatrimestre" id="cuatrimestre_id" wire:model.live="cuatrimestre_id">
+                    <flux:select.option value="">Todos los cuatrimestres</flux:select.option>
 
                     @foreach ($cuatrimestres as $cuatrimestre)
-                        <option value="{{ $cuatrimestre->id }}">
+                        <flux:select.option value="{{ $cuatrimestre->id }}">
                             {{ $cuatrimestre->nombre_cuatrimestre }}
-                        </option>
+                        </flux:select.option>
                     @endforeach
-                </select>
+                </flux:select>
             </div>
 
             <div>
-                <label for="generacion_id"
-                    class="mb-2 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
-                    Generación
-                </label>
 
-                <select id="generacion_id" wire:model.live="generacion_id"
-                    class="w-full rounded-xl border border-neutral-300 bg-white px-4 py-3 text-sm text-neutral-900 shadow-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white">
-                    <option value="">Todas las generaciones</option>
+
+                <flux:select label="Generación" id="generacion_id" wire:model.live="generacion_id">
+                    <flux:select.option value="">Todas las generaciones</flux:select.option>
 
                     @foreach ($generaciones as $generacion)
-                        <option value="{{ $generacion->id }}">
+                        <flux:select.option value="{{ $generacion->id }}">
                             {{ $generacion->generacion }}
-                        </option>
+                        </flux:select.option>
                     @endforeach
-                </select>
+                </flux:select>
             </div>
 
             <div class="flex items-end">

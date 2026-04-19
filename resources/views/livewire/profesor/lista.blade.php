@@ -22,57 +22,45 @@
 
             <div class="relative mt-6 grid grid-cols-1 gap-4 xl:grid-cols-5">
                 <div>
-                    <label for="licenciatura_id"
-                        class="mb-2 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
-                        Licenciatura
-                    </label>
 
-                    <select id="licenciatura_id" wire:model.live="licenciatura_id"
-                        class="w-full rounded-2xl border border-neutral-300 bg-white px-4 py-3 text-sm text-neutral-900 shadow-sm outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white">
-                        <option value="">Selecciona una licenciatura</option>
+
+                    <flux:select label="Licenciatura" id="licenciatura_id" wire:model.live="licenciatura_id">
+                        <flux:select.option value="">Selecciona una licenciatura</flux:select.option>
 
                         @foreach ($licenciaturas as $licenciatura)
-                            <option value="{{ $licenciatura->id }}">
+                            <flux:select.option value="{{ $licenciatura->id }}">
                                 {{ $licenciatura->nombre }}
-                            </option>
+                            </flux:select.option>
                         @endforeach
-                    </select>
+                    </flux:select>
                 </div>
 
                 <div>
-                    <label for="cuatrimestre_id"
-                        class="mb-2 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
-                        Cuatrimestre
-                    </label>
 
-                    <select id="cuatrimestre_id" wire:model.live="cuatrimestre_id"
-                        class="w-full rounded-2xl border border-neutral-300 bg-white px-4 py-3 text-sm text-neutral-900 shadow-sm outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white">
-                        <option value="">Selecciona un cuatrimestre</option>
+
+                    <flux:select label="Cuatrimestre" id="cuatrimestre_id" wire:model.live="cuatrimestre_id">
+                        <flux:select.option value="">Selecciona un cuatrimestre</flux:select.option>
 
                         @foreach ($cuatrimestres as $cuatrimestre)
-                            <option value="{{ $cuatrimestre->id }}">
+                            <flux:select.option value="{{ $cuatrimestre->id }}">
                                 {{ $cuatrimestre->nombre_cuatrimestre }}
-                            </option>
+                            </flux:select.option>
                         @endforeach
-                    </select>
+                    </flux:select>
                 </div>
 
                 <div>
-                    <label for="generacion_id"
-                        class="mb-2 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
-                        Generación
-                    </label>
 
-                    <select id="generacion_id" wire:model.live="generacion_id"
-                        class="w-full rounded-2xl border border-neutral-300 bg-white px-4 py-3 text-sm text-neutral-900 shadow-sm outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white">
-                        <option value="">Selecciona una generación</option>
+
+                    <flux:select label="Generación" id="generacion_id" wire:model.live="generacion_id">
+                        <flux:select.option value="">Selecciona una generación</flux:select.option>
 
                         @foreach ($generaciones as $generacion)
-                            <option value="{{ $generacion->id }}">
+                            <flux:select.option value="{{ $generacion->id }}">
                                 {{ $generacion->generacion }}
-                            </option>
+                            </flux:select.option>
                         @endforeach
-                    </select>
+                    </flux:select>
                 </div>
 
                 <div class="xl:col-span-2">
@@ -92,7 +80,7 @@
 
                         <input id="search" type="text" wire:model.live.debounce.400ms="search"
                             placeholder="Buscar por clave o nombre..." @disabled(!$this->filtrosCompletos)
-                            class="w-full rounded-2xl border border-neutral-300 bg-white py-3 pl-12 pr-4 text-sm text-neutral-900 shadow-sm outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200 disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:text-neutral-400 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white dark:disabled:bg-neutral-800/60 dark:disabled:text-neutral-500">
+                            class="w-full rounded-2xl border border-neutral-300 bg-white py-2 pl-12 pr-4 text-sm text-neutral-900 shadow-sm outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200 disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:text-neutral-400 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white dark:disabled:bg-neutral-800/60 dark:disabled:text-neutral-500">
                     </div>
                 </div>
             </div>
@@ -277,8 +265,7 @@
                         class="rounded-[24px] border border-neutral-200 bg-white p-5 shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
                         <div class="flex items-start justify-between gap-4">
                             <div>
-                                <p
-                                    class="text-xs font-semibold uppercase tracking-wide text-sky-600 dark:text-sky-300">
+                                <p class="text-xs font-semibold uppercase tracking-wide text-sky-600 dark:text-sky-300">
                                     Materia {{ ($materias->currentPage() - 1) * $materias->perPage() + $index + 1 }}
                                 </p>
 

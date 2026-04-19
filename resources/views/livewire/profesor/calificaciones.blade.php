@@ -61,9 +61,7 @@
         {{-- Filtros --}}
         <div class="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-5">
             <div class="xl:col-span-2">
-                <label for="buscar" class="mb-2 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
-                    Buscar
-                </label>
+
 
                 <div class="relative">
                     <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-neutral-400">
@@ -73,80 +71,67 @@
                         </svg>
                     </span>
 
-                    <input id="buscar" type="text" wire:model.live.debounce.400ms="buscar"
-                        placeholder="Alumno, matrícula o materia..."
-                        class="w-full rounded-2xl border border-neutral-300 bg-white py-3 pl-11 pr-4 text-sm text-neutral-900 shadow-sm outline-none transition focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white dark:focus:ring-indigo-500/20">
+                    <flux:input id="buscar" label="Buscar" wire:model.live.debounce.400ms="buscar"
+                        placeholder="Alumno, matrícula o materia..." />
                 </div>
             </div>
 
             <div>
-                <label for="licenciatura_id"
-                    class="mb-2 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
-                    Licenciatura
-                </label>
 
-                <select id="licenciatura_id" wire:model.live="licenciatura_id" wire:loading.attr="disabled"
-                    wire:target="buscar,licenciatura_id,cuatrimestre_id,materia_id,generacion_id"
-                    class="w-full rounded-2xl border border-neutral-300 bg-white px-4 py-3 text-sm text-neutral-900 shadow-sm outline-none transition focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white dark:focus:ring-indigo-500/20">
-                    <option value="">Todas</option>
+                <flux:select label="Licenciatura" id="licenciatura_id" wire:model.live="licenciatura_id"
+                    wire:loading.attr="disabled"
+                    wire:target="buscar,licenciatura_id,cuatrimestre_id,materia_id,generacion_id">
+                    <flux:select.option value="">Todas</flux:select.option>
 
                     @foreach ($licenciaturas as $licenciaturaItem)
-                        <option value="{{ $licenciaturaItem['id'] }}">{{ $licenciaturaItem['nombre'] }}</option>
+                        <flux:select.option value="{{ $licenciaturaItem['id'] }}">{{ $licenciaturaItem['nombre'] }}
+                        </flux:select.option>
                     @endforeach
-                </select>
+                </flux:select>
             </div>
 
             <div>
-                <label for="cuatrimestre_id"
-                    class="mb-2 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
-                    Cuatrimestre
-                </label>
 
-                <select id="cuatrimestre_id" wire:model.live="cuatrimestre_id" wire:loading.attr="disabled"
-                    wire:target="buscar,licenciatura_id,cuatrimestre_id,materia_id,generacion_id"
-                    class="w-full rounded-2xl border border-neutral-300 bg-white px-4 py-3 text-sm text-neutral-900 shadow-sm outline-none transition focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white dark:focus:ring-indigo-500/20">
-                    <option value="">Todos</option>
+                <flux:select label="Cuatrimestre" id="cuatrimestre_id" wire:model.live="cuatrimestre_id"
+                    wire:loading.attr="disabled"
+                    wire:target="buscar,licenciatura_id,cuatrimestre_id,materia_id,generacion_id">
+                    <flux:select.option value="">Todos</flux:select.option>
 
                     @foreach ($cuatrimestres as $cuatrimestreItem)
-                        <option value="{{ $cuatrimestreItem['id'] }}">{{ $cuatrimestreItem['nombre_cuatrimestre'] }}
-                        </option>
+                        <flux:select.option value="{{ $cuatrimestreItem['id'] }}">
+                            {{ $cuatrimestreItem['nombre_cuatrimestre'] }}
+                        </flux:select.option>
                     @endforeach
-                </select>
+                </flux:select>
             </div>
 
             <div>
-                <label for="generacion_id"
-                    class="mb-2 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
-                    Generación
-                </label>
-
-                <select id="generacion_id" wire:model.live="generacion_id" wire:loading.attr="disabled"
-                    wire:target="buscar,licenciatura_id,cuatrimestre_id,materia_id,generacion_id"
-                    class="w-full rounded-2xl border border-neutral-300 bg-white px-4 py-3 text-sm text-neutral-900 shadow-sm outline-none transition focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white dark:focus:ring-indigo-500/20">
-                    <option value="">Todas</option>
+                <flux:select label="Generación" id="generacion_id" wire:model.live="generacion_id"
+                    wire:loading.attr="disabled"
+                    wire:target="buscar,licenciatura_id,cuatrimestre_id,materia_id,generacion_id">
+                    <flux:select.option value="">Todas</flux:select.option>
 
                     @foreach ($generaciones as $generacionItem)
-                        <option value="{{ $generacionItem['id'] }}">{{ $generacionItem['generacion'] }}</option>
+                        <flux:select.option value="{{ $generacionItem['id'] }}">{{ $generacionItem['generacion'] }}
+                        </flux:select.option>
                     @endforeach
-                </select>
+                </flux:select>
             </div>
         </div>
 
         <div class="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
-                <label for="materia_id" class="mb-2 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
-                    Materia
-                </label>
 
-                <select id="materia_id" wire:model.live="materia_id" wire:loading.attr="disabled"
-                    wire:target="buscar,licenciatura_id,cuatrimestre_id,materia_id,generacion_id"
-                    class="w-full rounded-2xl border border-neutral-300 bg-white px-4 py-3 text-sm text-neutral-900 shadow-sm outline-none transition focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white dark:focus:ring-indigo-500/20">
-                    <option value="">Todas las materias</option>
+
+                <flux:select label="Materia" id="materia_id" wire:model.live="materia_id" wire:loading.attr="disabled"
+                    wire:target="buscar,licenciatura_id,cuatrimestre_id,materia_id,generacion_id">
+                    <flux:select.option value="">Todas las materias</flux:select.option>
 
                     @foreach ($materias as $materiaItem)
-                        <option value="{{ $materiaItem['id'] }}">{{ $materiaItem['nombre'] }}</option>
+                        <flux:select.option value="{{ $materiaItem['id'] }}">{{ $materiaItem['nombre'] }}
+                        </flux:select.option>
                     @endforeach
-                </select>
+                </flux:select>
             </div>
         </div>
     </div>
