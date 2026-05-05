@@ -21,7 +21,7 @@
 
 
     <!-- Búsqueda + Filtros (Flux UI) -->
-    <div class="flex  md:grid md:grid-cols-4 gap-4">
+    <div class="grid grid-cols-1 md:grid-cols-4  gap-4">
 
         {{-- Licenciatura --}}
         <div class="w-full">
