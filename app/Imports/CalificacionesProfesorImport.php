@@ -8,14 +8,15 @@ use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 
-class CalificacionesImport implements ToCollection, WithHeadingRow
+class CalificacionesProfesorImport implements ToCollection, WithHeadingRow
 {
-    protected $periodoId;
-    protected $errores = [];
+    protected int $profesorId;
 
-    public function __construct($periodoId)
+    protected array $errores = [];
+
+    public function __construct(int $profesorId)
     {
-        $this->periodoId = $periodoId;
+        $this->profesorId = $profesorId;
     }
 
     public function collection(Collection $rows)
@@ -29,17 +30,16 @@ class CalificacionesImport implements ToCollection, WithHeadingRow
                 $calificacion = $row['calificacion'] ?? null;
 
                 /*
-                 * Se valida que los identificadores internos existan.
-                 * Estos campos no se actualizan, solo se usan para localizar
-                 * la calificación correcta.
+                 * Se revisa que existan los identificadores internos.
+                 * Estos campos solo sirven para ubicar al alumno y la materia.
                  */
-                if (!$inscripcionId || !$asignacionMateriaId) {
-                    $this->errores[] = "Fila {$fila}: faltan identificadores internos del alumno o materia.";
+                if (empty($inscripcionId) || empty($asignacionMateriaId)) {
+                    $this->errores[] = "Fila {$fila}: faltan los identificadores internos del alumno o la materia.";
                     continue;
                 }
 
                 /*
-                 * Se valida que la calificación no venga vacía.
+                 * Se revisa que la calificación no venga vacía.
                  */
                 if ($calificacion === null || $calificacion === '') {
                     $this->errores[] = "Fila {$fila}: la calificación está vacía.";
@@ -47,42 +47,70 @@ class CalificacionesImport implements ToCollection, WithHeadingRow
                 }
 
                 /*
-                 * Se permite número de 0 a 10.
-                 * Si también usas AC, ED o RA, se aceptan como códigos válidos.
+                 * Se limpia el valor capturado.
                  */
-                $calificacion = strtoupper(trim((string) $calificacion));
+                $calificacion = trim((string) $calificacion);
+                $calificacion = str_replace(',', '.', $calificacion);
 
-                $esNumeroValido = is_numeric($calificacion)
-                    && $calificacion >= 0
-                    && $calificacion <= 10;
+                /*
+                 * Para nivel superior se acepta únicamente calificación numérica de 0 a 10.
+                 */
+                if (!is_numeric($calificacion)) {
+                    $this->errores[] = "Fila {$fila}: la calificación debe ser numérica.";
+                    continue;
+                }
 
-                $esCodigoValido = in_array($calificacion, ['AC', 'ED', 'RA'], true);
+                $calificacion = round((float) $calificacion, 2);
 
-                if (!$esNumeroValido && !$esCodigoValido) {
-                    $this->errores[] = "Fila {$fila}: la calificación no es válida.";
+                if ($calificacion < 0 || $calificacion > 10) {
+                    $this->errores[] = "Fila {$fila}: la calificación debe estar entre 0 y 10.";
                     continue;
                 }
 
                 /*
-                 * Se busca la calificación existente usando los identificadores.
-                 * No se permite modificar inscripcion_id ni asignacion_materia_id.
+                 * Se valida que la materia asignada pertenezca al profesor autenticado.
+                 * Esto evita que el docente manipule el archivo y capture materias ajenas.
                  */
-                $registro = Calificacion::where('inscripcion_id', $inscripcionId)
-                    ->where('asignacion_materia_id', $asignacionMateriaId)
-                    ->where('periodo_id', $this->periodoId)
+                $asignacion = DB::table('asignacion_materias')
+                    ->where('id', (int) $asignacionMateriaId)
+                    ->where('profesor_id', $this->profesorId)
                     ->first();
 
-                if (!$registro) {
-                    $this->errores[] = "Fila {$fila}: no se encontró una calificación relacionada con ese alumno y materia.";
+                if (!$asignacion) {
+                    $this->errores[] = "Fila {$fila}: la materia asignada no pertenece al profesor autenticado.";
                     continue;
                 }
 
                 /*
-                 * Solo se actualiza la columna calificacion.
+                 * Se valida que la inscripción exista y corresponda al mismo contexto académico.
+                 * Así se evita relacionar una materia con un alumno que no corresponde.
                  */
-                $registro->update([
-                    'calificacion' => $calificacion,
-                ]);
+                $inscripcionExiste = DB::table('inscripciones')
+                    ->where('id', (int) $inscripcionId)
+                    ->where('status', 1)
+                    ->where('licenciatura_id', $asignacion->licenciatura_id)
+                    ->where('cuatrimestre_id', $asignacion->cuatrimestre_id)
+                    ->exists();
+
+                if (!$inscripcionExiste) {
+                    $this->errores[] = "Fila {$fila}: el alumno no corresponde a la materia asignada.";
+                    continue;
+                }
+
+                /*
+                 * Solo se actualiza o crea la calificación.
+                 * No se modifican inscripcion_id ni asignacion_materia_id.
+                 */
+                Calificacion::updateOrCreate(
+                    [
+                        'inscripcion_id' => (int) $inscripcionId,
+                        'asignacion_materia_id' => (int) $asignacionMateriaId,
+                    ],
+                    [
+                        'calificacion' => $calificacion,
+                        'fecha_captura' => now()->toDateString(),
+                    ]
+                );
             }
         });
     }

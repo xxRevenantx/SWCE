@@ -443,7 +443,17 @@ class Calificaciones extends Component
             'archivoCalificaciones.mimes' => 'El archivo debe estar en formato Excel.',
         ]);
 
-        $import = new CalificacionesProfesorImport($this->periodo_id);
+        if (!$this->profesor_id) {
+            $this->dispatch('swal', [
+                'title' => 'No se encontró el profesor autenticado',
+                'icon' => 'error',
+                'position' => 'top-end',
+            ]);
+
+            return;
+        }
+
+        $import = new CalificacionesProfesorImport($this->profesor_id);
 
         Excel::import($import, $this->archivoCalificaciones);
 
