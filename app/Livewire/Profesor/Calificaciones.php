@@ -3,7 +3,6 @@
 namespace App\Livewire\Profesor;
 
 use App\Exports\CalificacionesProfesorExport;
-use App\Imports\CalificacionesImport;
 use App\Imports\CalificacionesProfesorImport;
 use App\Models\Calificacion;
 use App\Models\Cuatrimestre;
@@ -444,7 +443,7 @@ class Calificaciones extends Component
             'archivoCalificaciones.mimes' => 'El archivo debe estar en formato Excel.',
         ]);
 
-        $import = new CalificacionesImport($this->periodo_id);
+        $import = new CalificacionesProfesorImport($this->periodo_id);
 
         Excel::import($import, $this->archivoCalificaciones);
 
