@@ -2,87 +2,102 @@
 
 namespace App\Exports;
 
-use App\Models\Profesor;
+use App\Models\Calificacion;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
-use Maatwebsite\Excel\Concerns\WithStyles;
-use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithEvents;
-use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use Maatwebsite\Excel\Events\AfterSheet;
 
-class ProfesorExport implements FromCollection, WithHeadings, WithStyles, ShouldAutoSize, WithEvents
+class CalificacionesExport implements FromCollection, WithHeadings, WithMapping, WithEvents
 {
-    protected $profesores;
+    protected $grupoId;
+    protected $periodoId;
 
-    public function __construct($profesores)
+    public function __construct($grupoId, $periodoId)
     {
-        $this->profesores = $profesores;
+        $this->grupoId = $grupoId;
+        $this->periodoId = $periodoId;
     }
 
     public function collection()
     {
-        return $this->profesores->values()->map(function ($prof, $index) {
-            return [
-                'numero' => $index + 1,
-                'nombre' => $prof->nombre,
-                'apellido_paterno' => $prof->apellido_paterno,
-                'apellido_materno' => $prof->apellido_materno,
-                'CURP' => $prof->CURP,
-                'telefono' => $prof->telefono,
-                'perfil' => $prof->perfil,
-                'status' => $prof->status ? 'Activo' : 'Inactivo',
-                'created_at' => $prof->created_at,
-            ];
-        });
+        return Calificacion::query()
+            ->with([
+                'inscripcion',
+                'asignacionMateria',
+            ])
+            ->where('grupo_id', $this->grupoId)
+            ->where('periodo_id', $this->periodoId)
+            ->get();
     }
 
     public function headings(): array
     {
         return [
-            'N°',
-            'Nombre',
-            'Apellido Paterno',
-            'Apellido Materno',
-            'CURP',
-            'Teléfono',
-            'Perfil',
-            'Status',
-            'Fecha de Creación',
+            'inscripcion_id',
+            'asignacion_materia_id',
+            'alumno',
+            'materia',
+            'calificacion',
         ];
     }
 
-    public function styles(Worksheet $sheet)
+    public function map($calificacion): array
     {
-        // Encabezado con fondo verde y texto blanco
-        $sheet->getStyle('A1:I1')->applyFromArray([
-            'font' => [
-                'bold' => true,
-                'color' => ['rgb' => 'FFFFFF'],
-            ],
-            'fill' => [
-                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
-                'startColor' => ['rgb' => '4CAF50'],
-            ],
-        ]);
+        return [
+            $calificacion->inscripcion_id,
+            $calificacion->asignacion_materia_id,
+            $calificacion->inscripcion?->nombre_completo ?? '',
+            $calificacion->asignacionMateria?->materia ?? '',
+            $calificacion->calificacion,
+        ];
     }
 
     public function registerEvents(): array
     {
         return [
             AfterSheet::class => function (AfterSheet $event) {
-                $rowCount = $this->profesores->count();
-                $cellRange = 'A1:I' . ($rowCount + 1);
+                $hoja = $event->sheet->getDelegate();
 
-                // Bordes para toda la tabla
-                $event->sheet->getStyle($cellRange)->applyFromArray([
-                    'borders' => [
-                        'allBorders' => [
-                            'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
-                            'color' => ['rgb' => '000000'],
-                        ],
-                    ],
-                ]);
+                /*
+                 * Se protege la hoja para evitar que el docente modifique
+                 * columnas internas del sistema.
+                 */
+                $hoja->getProtection()->setSheet(true);
+
+                /*
+                 * Se bloquean todas las columnas por defecto.
+                 * Esto protege inscripcion_id, asignacion_materia_id,
+                 * alumno y materia.
+                 */
+                $hoja->getStyle('A:D')->getProtection()->setLocked(
+                    \PhpOffice\PhpSpreadsheet\Style\Protection::PROTECTION_PROTECTED
+                );
+
+                /*
+                 * Solo se desbloquea la columna E, donde el docente
+                 * debe capturar o modificar la calificación.
+                 */
+                $hoja->getStyle('E:E')->getProtection()->setLocked(
+                    \PhpOffice\PhpSpreadsheet\Style\Protection::PROTECTION_UNPROTECTED
+                );
+
+                /*
+                 * Se aplica estilo visual para indicar qué columna puede editarse.
+                 */
+                $hoja->getStyle('A1:E1')->getFont()->setBold(true);
+                $hoja->getColumnDimension('A')->setWidth(18);
+                $hoja->getColumnDimension('B')->setWidth(25);
+                $hoja->getColumnDimension('C')->setWidth(35);
+                $hoja->getColumnDimension('D')->setWidth(35);
+                $hoja->getColumnDimension('E')->setWidth(15);
+
+                /*
+                 * Se congela la primera fila para que los encabezados
+                 * permanezcan visibles durante la captura.
+                 */
+                $hoja->freezePane('A2');
             },
         ];
     }

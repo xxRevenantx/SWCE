@@ -84,19 +84,20 @@
             </div>
 
             <div
-                class="mt-5 rounded-2xl border border-sky-200 bg-sky-50 p-4 text-sm leading-6 text-sky-900 dark:border-sky-500/20 dark:bg-sky-500/10 dark:text-sky-200">
-                <p class="font-bold">Nota para el docente antes de importar:</p>
+                class="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800 dark:border-amber-700/40 dark:bg-amber-900/20 dark:text-amber-200">
+                <p class="font-semibold">Indicaciones para importar calificaciones</p>
+
                 <p class="mt-1">
-                    Primero descarga la plantilla con el botón <strong>Exportar plantilla Excel</strong>. En el archivo
-                    no
-                    modifiques las columnas <strong>inscripcion_id</strong> ni <strong>asignacion_materia_id</strong>,
-                    porque
-                    identifican al alumno y la materia asignada. Captura únicamente la columna
-                    <strong>calificacion</strong> con valores de <strong>0 a 10</strong>; puedes usar hasta dos
-                    decimales,
-                    por ejemplo <strong>8.50</strong>. Si dejas la calificación vacía, el sistema la tomará como
-                    pendiente
-                    y eliminará la calificación previamente registrada para esa fila.
+                    Para evitar errores en la importación, no se deben modificar las columnas
+                    <strong>inscripcion_id</strong> ni <strong>asignacion_materia_id</strong>,
+                    ya que estos campos identifican al alumno y la materia asignada.
+                    El docente únicamente debe capturar o actualizar la columna
+                    <strong>calificacion</strong>.
+                </p>
+
+                <p class="mt-1">
+                    Si se modifican columnas de identificación, el sistema podrá rechazar el archivo
+                    o ignorar esos cambios para proteger la integridad de la información.
                 </p>
             </div>
 
@@ -123,14 +124,12 @@
                     <span wire:loading wire:target="archivoCalificaciones,importarCalificaciones">Procesando...</span>
                 </button>
             </div>
-
             @if (!empty($erroresImportacion))
                 <div
-                    class="mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-500/20 dark:bg-amber-500/10">
-                    <p class="text-sm font-bold text-amber-800 dark:text-amber-300">
-                        La importación terminó con observaciones:
-                    </p>
-                    <ul class="mt-3 max-h-44 space-y-1 overflow-y-auto text-sm text-amber-800 dark:text-amber-200">
+                    class="mt-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-700/40 dark:bg-red-900/20 dark:text-red-200">
+                    <p class="font-semibold">Observaciones encontradas durante la importación:</p>
+
+                    <ul class="mt-2 list-disc space-y-1 pl-5">
                         @foreach ($erroresImportacion as $error)
                             <li>{{ $error }}</li>
                         @endforeach

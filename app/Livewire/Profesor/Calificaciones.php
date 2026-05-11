@@ -3,6 +3,7 @@
 namespace App\Livewire\Profesor;
 
 use App\Exports\CalificacionesProfesorExport;
+use App\Imports\CalificacionesImport;
 use App\Imports\CalificacionesProfesorImport;
 use App\Models\Calificacion;
 use App\Models\Cuatrimestre;
@@ -16,10 +17,15 @@ use Livewire\WithFileUploads;
 use Livewire\WithPagination;
 use Maatwebsite\Excel\Facades\Excel;
 
+
+
 class Calificaciones extends Component
 {
     use WithPagination;
     use WithFileUploads;
+
+
+
 
     protected $paginationTheme = 'tailwind';
 
@@ -428,35 +434,38 @@ class Calificaciones extends Component
         );
     }
 
-    public function importarCalificaciones(): void
+    public function importarCalificaciones()
     {
         $this->validate([
-            'archivoCalificaciones' => ['required', 'file', 'mimes:xlsx,xls,csv', 'max:5120'],
+            'archivoCalificaciones' => 'required|file|mimes:xlsx,xls',
         ], [
-            'archivoCalificaciones.required' => 'Selecciona un archivo de Excel.',
-            'archivoCalificaciones.mimes' => 'El archivo debe ser xlsx, xls o csv.',
-            'archivoCalificaciones.max' => 'El archivo no debe superar los 5 MB.',
+            'archivoCalificaciones.required' => 'Debes seleccionar un archivo de Excel.',
+            'archivoCalificaciones.file' => 'El archivo seleccionado no es válido.',
+            'archivoCalificaciones.mimes' => 'El archivo debe estar en formato Excel.',
         ]);
 
-        if (!$this->profesor_id) {
-            $this->dispatch('notificacion', [
-                'tipo' => 'error',
-                'mensaje' => 'No se encontró el profesor autenticado.',
+        $import = new CalificacionesImport($this->periodo_id);
+
+        Excel::import($import, $this->archivoCalificaciones);
+
+        $this->erroresImportacion = $import->getErrores();
+
+        if (count($this->erroresImportacion) > 0) {
+            $this->dispatch('swal', [
+                'title' => 'Importación finalizada con observaciones',
+                'text' => 'Algunas filas no pudieron importarse. Revisa el detalle de errores.',
+                'icon' => 'warning',
                 'position' => 'top-end',
             ]);
+
             return;
         }
 
-        $importador = new CalificacionesProfesorImport($this->profesor_id);
-        Excel::import($importador, $this->archivoCalificaciones);
-
-        $this->erroresImportacion = $importador->errores;
         $this->reset('archivoCalificaciones');
-        $this->resetPage();
 
-        $this->dispatch('notificacion', [
-            'tipo' => empty($this->erroresImportacion) ? 'success' : 'warning',
-            'mensaje' => "Importación terminada. Registros procesados: {$importador->actualizadas}.",
+        $this->dispatch('swal', [
+            'title' => 'Calificaciones importadas correctamente',
+            'icon' => 'success',
             'position' => 'top-end',
         ]);
     }

@@ -3,74 +3,92 @@
 namespace App\Imports;
 
 use App\Models\Calificacion;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
-use Illuminate\Support\Collection;
-use Throwable;
 
-class CalificacionesProfesorImport implements ToCollection, WithHeadingRow
+class CalificacionesImport implements ToCollection, WithHeadingRow
 {
-    public array $errores = [];
-    public int $actualizadas = 0;
+    protected $periodoId;
+    protected $errores = [];
 
-    public function __construct(private int $profesorId)
+    public function __construct($periodoId)
     {
+        $this->periodoId = $periodoId;
     }
 
-    public function collection(Collection $rows): void
+    public function collection(Collection $rows)
     {
-        foreach ($rows as $indice => $row) {
-            $fila = $indice + 2;
+        DB::transaction(function () use ($rows) {
+            foreach ($rows as $index => $row) {
+                $fila = $index + 2;
 
-            try {
-                $inscripcionId = (int) ($row['inscripcion_id'] ?? 0);
-                $asignacionMateriaId = (int) ($row['asignacion_materia_id'] ?? 0);
+                $inscripcionId = $row['inscripcion_id'] ?? null;
+                $asignacionMateriaId = $row['asignacion_materia_id'] ?? null;
                 $calificacion = $row['calificacion'] ?? null;
 
-                if ($inscripcionId <= 0 || $asignacionMateriaId <= 0) {
-                    $this->errores[] = "Fila {$fila}: faltan inscripcion_id o asignacion_materia_id.";
+                /*
+                 * Se valida que los identificadores internos existan.
+                 * Estos campos no se actualizan, solo se usan para localizar
+                 * la calificación correcta.
+                 */
+                if (!$inscripcionId || !$asignacionMateriaId) {
+                    $this->errores[] = "Fila {$fila}: faltan identificadores internos del alumno o materia.";
                     continue;
                 }
 
+                /*
+                 * Se valida que la calificación no venga vacía.
+                 */
                 if ($calificacion === null || $calificacion === '') {
-                    Calificacion::where('inscripcion_id', $inscripcionId)
-                        ->where('asignacion_materia_id', $asignacionMateriaId)
-                        ->delete();
-                    $this->actualizadas++;
+                    $this->errores[] = "Fila {$fila}: la calificación está vacía.";
                     continue;
                 }
 
-                if (!is_numeric($calificacion) || (float) $calificacion < 0 || (float) $calificacion > 10) {
-                    $this->errores[] = "Fila {$fila}: la calificación debe estar entre 0 y 10.";
+                /*
+                 * Se permite número de 0 a 10.
+                 * Si también usas AC, ED o RA, se aceptan como códigos válidos.
+                 */
+                $calificacion = strtoupper(trim((string) $calificacion));
+
+                $esNumeroValido = is_numeric($calificacion)
+                    && $calificacion >= 0
+                    && $calificacion <= 10;
+
+                $esCodigoValido = in_array($calificacion, ['AC', 'ED', 'RA'], true);
+
+                if (!$esNumeroValido && !$esCodigoValido) {
+                    $this->errores[] = "Fila {$fila}: la calificación no es válida.";
                     continue;
                 }
 
-                $perteneceAlProfesor = DB::table('asignacion_materias')
-                    ->where('id', $asignacionMateriaId)
-                    ->where('profesor_id', $this->profesorId)
-                    ->exists();
+                /*
+                 * Se busca la calificación existente usando los identificadores.
+                 * No se permite modificar inscripcion_id ni asignacion_materia_id.
+                 */
+                $registro = Calificacion::where('inscripcion_id', $inscripcionId)
+                    ->where('asignacion_materia_id', $asignacionMateriaId)
+                    ->where('periodo_id', $this->periodoId)
+                    ->first();
 
-                if (!$perteneceAlProfesor) {
-                    $this->errores[] = "Fila {$fila}: la materia no pertenece al profesor autenticado.";
+                if (!$registro) {
+                    $this->errores[] = "Fila {$fila}: no se encontró una calificación relacionada con ese alumno y materia.";
                     continue;
                 }
 
-                Calificacion::updateOrCreate(
-                    [
-                        'inscripcion_id' => $inscripcionId,
-                        'asignacion_materia_id' => $asignacionMateriaId,
-                    ],
-                    [
-                        'calificacion' => (float) $calificacion,
-                        'fecha_captura' => now()->toDateString(),
-                    ]
-                );
-
-                $this->actualizadas++;
-            } catch (Throwable $e) {
-                $this->errores[] = "Fila {$fila}: no se pudo procesar el registro.";
+                /*
+                 * Solo se actualiza la columna calificacion.
+                 */
+                $registro->update([
+                    'calificacion' => $calificacion,
+                ]);
             }
-        }
+        });
+    }
+
+    public function getErrores(): array
+    {
+        return $this->errores;
     }
 }
