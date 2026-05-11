@@ -74,6 +74,13 @@ class Login extends Component
             RateLimiter::clear($this->throttleKey());
             Session::regenerate();
 
+            // Se guardan datos mínimos para comprobar el transporte de la sesión.
+            // Estos datos no sustituyen a Auth; solo sirven como verificación interna.
+            Session::put('swce_usuario_id', $user->id);
+            Session::put('swce_usuario_email', $user->email);
+            Session::put('swce_rol_principal', $user->roles()->pluck('name')->first());
+            Session::save();
+
             $this->redirectIntended(default: route('dashboard', absolute: false), navigate: true);
         } catch (ValidationException $e) {
             // Solo se resetea Turnstile si está activo

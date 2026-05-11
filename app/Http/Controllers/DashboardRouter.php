@@ -16,7 +16,18 @@ class DashboardRouter extends Controller
             return redirect()->route('login');
         }
 
-        // permitir avanzar solo si el campo `status` del usuario es true
+        // Se comprueba que la variable de sesión viaje correctamente después del login.
+        // Si falta o no coincide, se vuelve a escribir para mantener consistencia entre rutas Livewire.
+        if (session('swce_usuario_id') !== $user->id) {
+            session([
+                'swce_usuario_id' => $user->id,
+                'swce_usuario_email' => $user->email,
+                'swce_rol_principal' => $user->roles()->pluck('name')->first(),
+            ]);
+            session()->save();
+        }
+
+        // Permite avanzar solo si el campo status del usuario está activo.
         if ($user->status == "false") {
             return response()->view('inactiva', ['user' => $user, 'message' => 'Cuenta inactiva.'], 403);
         }

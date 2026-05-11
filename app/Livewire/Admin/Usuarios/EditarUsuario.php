@@ -6,6 +6,7 @@ use App\Models\User;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
+use Illuminate\Validation\Rule;
 use Spatie\Permission\Models\Role;
 
 class EditarUsuario extends Component
@@ -16,6 +17,7 @@ class EditarUsuario extends Component
     public $open = false;
     public $userId;
     public $username;
+    public $numero_empleado;
     public $email;
     public $status;
 
@@ -36,6 +38,7 @@ class EditarUsuario extends Component
 
         $this->userId = $user->id;
         $this->username = $user->username;
+        $this->numero_empleado = $user->numero_empleado;
         $this->email = $user->email;
         $this->status = $user->status == "true" ? true : false;
         $this->rol = $user->roles->pluck('id')->toArray();
@@ -55,25 +58,39 @@ class EditarUsuario extends Component
 
     public function actualizarUsuario()
     {
+        // El correo puede ser de cualquier proveedor válido: Gmail, Hotmail, Outlook, institucional, etc.
+        $reglasEmail = ['required', 'email', 'max:255', 'unique:users,email,' . $this->userId];
+
+        $adminRoleId = Role::where('name', 'Admin')->value('id');
+        $rolProfesorId = Role::where('name', 'Profesor')->value('id');
+        $numeroEmpleado = ['nullable', 'string', 'max:30', 'unique:users,numero_empleado,' . $this->userId];
+
+        if ($rolProfesorId && in_array((int) $rolProfesorId, array_map('intval', (array) $this->rol), true)) {
+            $numeroEmpleado[0] = 'required';
+        }
+
         $this->validate([
             'username' => 'required|string|max:15|unique:users,username,' . $this->userId,
-            'email' => 'required|email|max:50|unique:users,email,' . $this->userId,
+            'numero_empleado' => $numeroEmpleado,
+            'email' => $reglasEmail,
             'status' => 'required|boolean',
             'rol' => 'required',
 
         ], [
             'username.required' => 'El nombre de usuario es obligatorio.',
             'username.unique' => 'El nombre de usuario ya está en uso.',
+            'numero_empleado.required' => 'El número de empleado es obligatorio para usuarios con rol Profesor.',
+            'numero_empleado.unique' => 'El número de empleado ya está asignado a otro usuario.',
             'email.required' => 'El correo electrónico es obligatorio.',
             'email.email' => 'El correo electrónico no es válido.',
             'email.unique' => 'El correo electrónico ya está en uso.',
             'rol.required' => 'Debes seleccionar al menos un rol.',
         ]);
 
-        // Noo permitir asignar Admin sin tenerlo
-        $adminRoleId = \Spatie\Permission\Models\Role::where('name', 'Admin')->value('id');
+        // No permitir asignar Admin sin tenerlo.
         $this->username = trim($this->username);
-        $this->email = trim($this->email);
+        $this->numero_empleado = filled($this->numero_empleado) ? trim($this->numero_empleado) : null;
+        $this->email = strtolower(trim($this->email));
         if (in_array($adminRoleId, $this->rol) && !auth()->user()->hasRole('Admin')) {
             abort(403, 'No autorizado a asignar el rol Admin');
         }
@@ -86,6 +103,7 @@ class EditarUsuario extends Component
         // Update + roles
         $this->usuario->update([
             'username' => $this->username,
+            'numero_empleado' => $this->numero_empleado,
             'email' => $this->email,
             'status' => $this->status,
         ]);
@@ -119,7 +137,7 @@ class EditarUsuario extends Component
 
     public function cerrarModal()
     {
-        $this->reset(['open', 'userId', 'username', 'email', 'status', 'rol']);
+        $this->reset(['open', 'userId', 'username', 'numero_empleado', 'email', 'status', 'rol']);
         $this->toggle = false;
         $this->resetValidation();
     }

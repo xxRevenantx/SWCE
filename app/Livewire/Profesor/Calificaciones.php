@@ -2,6 +2,8 @@
 
 namespace App\Livewire\Profesor;
 
+use App\Exports\CalificacionesProfesorExport;
+use App\Imports\CalificacionesProfesorImport;
 use App\Models\Calificacion;
 use App\Models\Cuatrimestre;
 use App\Models\Inscripcion;
@@ -10,11 +12,14 @@ use App\Models\Profesor;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 use Livewire\WithPagination;
+use Maatwebsite\Excel\Facades\Excel;
 
 class Calificaciones extends Component
 {
     use WithPagination;
+    use WithFileUploads;
 
     protected $paginationTheme = 'tailwind';
 
@@ -53,18 +58,21 @@ class Calificaciones extends Component
     public $calificacion = '';
     public string $fecha_captura = '';
 
+    public $archivoCalificaciones;
+    public array $erroresImportacion = [];
+
     protected function rules(): array
     {
         return [
             'inscripcion_id' => ['required', 'integer'],
             'asignacion_materia_id' => ['required', 'integer'],
-            'calificacion' => ['required', 'integer', 'min:0', 'max:10'],
+            'calificacion' => ['required', 'numeric', 'min:0', 'max:10'],
         ];
     }
 
     protected $messages = [
         'calificacion.required' => 'La calificación es obligatoria.',
-        'calificacion.integer' => 'La calificación debe ser un número entero.',
+        'calificacion.numeric' => 'La calificación debe ser un número válido.',
         'calificacion.min' => 'La calificación no puede ser menor a 0.',
         'calificacion.max' => 'La calificación no puede ser mayor a 10.',
     ];
@@ -110,6 +118,12 @@ class Calificaciones extends Component
     public function updatedGeneracionId(): void
     {
         $this->resetPage();
+    }
+
+    public function updatedArchivoCalificaciones(): void
+    {
+        // Se limpian los errores anteriores cuando se selecciona un nuevo archivo.
+        $this->erroresImportacion = [];
     }
 
     public function consultaBase()
@@ -296,7 +310,7 @@ class Calificaciones extends Component
     {
         $this->validate();
 
-        $this->calificacion = (int) $this->calificacion;
+        $this->calificacion = round((float) $this->calificacion, 2);
 
         // Se valida que la materia pertenezca al profesor autenticado
         $materiaDelProfesor = DB::table('asignacion_materias')
@@ -335,6 +349,118 @@ class Calificaciones extends Component
         $this->dispatch('cerrar-modal-calificacion');
     }
 
+
+    private function aplicarFiltros($consulta)
+    {
+        if ($this->licenciatura_id) {
+            $consulta->where('inscripciones.licenciatura_id', (int) $this->licenciatura_id);
+        }
+
+        if ($this->cuatrimestre_id) {
+            $consulta->where('inscripciones.cuatrimestre_id', (int) $this->cuatrimestre_id);
+        }
+
+        if ($this->materia_id) {
+            $consulta->where('materias.id', (int) $this->materia_id);
+        }
+
+        if ($this->generacion_id) {
+            $consulta->where('inscripciones.generacion_id', (int) $this->generacion_id);
+        }
+
+        if ($this->buscar !== '') {
+            $consulta->where(function ($query) {
+                $query->where('alumnos.nombre', 'like', '%' . $this->buscar . '%')
+                    ->orWhere('alumnos.apellido_paterno', 'like', '%' . $this->buscar . '%')
+                    ->orWhere('alumnos.apellido_materno', 'like', '%' . $this->buscar . '%')
+                    ->orWhere('datos_escolares.matricula', 'like', '%' . $this->buscar . '%')
+                    ->orWhere('materias.nombre', 'like', '%' . $this->buscar . '%');
+            });
+        }
+
+        return $consulta;
+    }
+
+    private function consultaCalificacionesFiltrada()
+    {
+        return $this->aplicarFiltros($this->consultaBase())
+            ->select(
+                'inscripciones.id as inscripcion_id',
+                'asignacion_materias.id as asignacion_materia_id',
+                'calificaciones.id as calificacion_id',
+                'calificaciones.calificacion',
+                'calificaciones.fecha_captura',
+                'materias.nombre as materia',
+                'licenciaturas.nombre as licenciatura',
+                'cuatrimestres.nombre_cuatrimestre as cuatrimestre',
+                'generaciones.generacion',
+                'alumnos.nombre as alumno_nombre',
+                'alumnos.apellido_paterno as alumno_apellido_paterno',
+                'alumnos.apellido_materno as alumno_apellido_materno',
+                'datos_escolares.matricula'
+            )
+            ->orderBy('licenciaturas.nombre')
+            ->orderBy('cuatrimestres.no_cuatrimestre')
+            ->orderBy('generaciones.generacion')
+            ->orderBy('materias.nombre')
+            ->orderBy('alumnos.apellido_paterno')
+            ->orderBy('alumnos.apellido_materno')
+            ->orderBy('alumnos.nombre');
+    }
+
+    public function exportarCalificaciones()
+    {
+        if (!$this->profesor_id) {
+            $this->dispatch('notificacion', [
+                'tipo' => 'error',
+                'mensaje' => 'No se encontró el profesor autenticado.',
+                'position' => 'top-end',
+            ]);
+            return null;
+        }
+
+        $registros = $this->consultaCalificacionesFiltrada()->get();
+        $fecha = now()->format('Ymd_His');
+
+        return Excel::download(
+            new CalificacionesProfesorExport($registros),
+            "calificaciones_profesor_{$fecha}.xlsx"
+        );
+    }
+
+    public function importarCalificaciones(): void
+    {
+        $this->validate([
+            'archivoCalificaciones' => ['required', 'file', 'mimes:xlsx,xls,csv', 'max:5120'],
+        ], [
+            'archivoCalificaciones.required' => 'Selecciona un archivo de Excel.',
+            'archivoCalificaciones.mimes' => 'El archivo debe ser xlsx, xls o csv.',
+            'archivoCalificaciones.max' => 'El archivo no debe superar los 5 MB.',
+        ]);
+
+        if (!$this->profesor_id) {
+            $this->dispatch('notificacion', [
+                'tipo' => 'error',
+                'mensaje' => 'No se encontró el profesor autenticado.',
+                'position' => 'top-end',
+            ]);
+            return;
+        }
+
+        $importador = new CalificacionesProfesorImport($this->profesor_id);
+        Excel::import($importador, $this->archivoCalificaciones);
+
+        $this->erroresImportacion = $importador->errores;
+        $this->reset('archivoCalificaciones');
+        $this->resetPage();
+
+        $this->dispatch('notificacion', [
+            'tipo' => empty($this->erroresImportacion) ? 'success' : 'warning',
+            'mensaje' => "Importación terminada. Registros procesados: {$importador->actualizadas}.",
+            'position' => 'top-end',
+        ]);
+    }
+
     public function aplicarColorCalificacion($calificacion): string
     {
         if ($calificacion === null || $calificacion === '') {
@@ -370,36 +496,11 @@ class Calificaciones extends Component
                 'promedio_general' => '0.00',
                 'capturadas' => 0,
                 'pendientes' => 0,
+                'porcentaje_captura' => 0,
             ]);
         }
 
-        $consulta = $this->consultaBase();
-
-        if ($this->licenciatura_id) {
-            $consulta->where('inscripciones.licenciatura_id', (int) $this->licenciatura_id);
-        }
-
-        if ($this->cuatrimestre_id) {
-            $consulta->where('inscripciones.cuatrimestre_id', (int) $this->cuatrimestre_id);
-        }
-
-        if ($this->materia_id) {
-            $consulta->where('materias.id', (int) $this->materia_id);
-        }
-
-        if ($this->generacion_id) {
-            $consulta->where('inscripciones.generacion_id', (int) $this->generacion_id);
-        }
-
-        if ($this->buscar !== '') {
-            $consulta->where(function ($query) {
-                $query->where('alumnos.nombre', 'like', '%' . $this->buscar . '%')
-                    ->orWhere('alumnos.apellido_paterno', 'like', '%' . $this->buscar . '%')
-                    ->orWhere('alumnos.apellido_materno', 'like', '%' . $this->buscar . '%')
-                    ->orWhere('datos_escolares.matricula', 'like', '%' . $this->buscar . '%')
-                    ->orWhere('materias.nombre', 'like', '%' . $this->buscar . '%');
-            });
-        }
+        $consulta = $this->aplicarFiltros($this->consultaBase());
 
         $resumen = clone $consulta;
 
@@ -415,6 +516,9 @@ class Calificaciones extends Component
 
         $capturadas = (clone $resumen)->whereNotNull('calificaciones.calificacion')->count();
         $pendientes = (clone $resumen)->whereNull('calificaciones.calificacion')->count();
+        $porcentaje_captura = $total_registros > 0
+            ? round(($capturadas / $total_registros) * 100)
+            : 0;
 
         $registros = $consulta
             ->select(
@@ -447,6 +551,7 @@ class Calificaciones extends Component
             'promedio_general' => $promedio_general,
             'capturadas' => $capturadas,
             'pendientes' => $pendientes,
+            'porcentaje_captura' => $porcentaje_captura,
         ]);
     }
 }

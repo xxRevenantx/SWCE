@@ -104,7 +104,7 @@
 
                                                             <flux:button
                                                             variant="primary"
-                                                            class="cursor-pointer bg-amber-500 hover:bg-amber-600 text-white"
+                                                            class="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white"
                                                             @click="$dispatch('abrir-modal-cuatrimestre');
                                                                 Livewire.dispatch('editarCuatrimestre', { id: {{ $cuatrimestre->id }} });
                                                             "

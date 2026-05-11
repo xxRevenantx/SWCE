@@ -361,7 +361,7 @@
                                             <flux:button
                                                 href="{{ route('admin.matricula.editar.alumno', $row->alumno->id) }}"
                                                 variant="primary"
-                                                class="cursor-pointer bg-amber-500 hover:bg-amber-600 text-white">
+                                                class="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white">
                                                 <flux:icon.square-pen class="w-3.5 h-3.5" />
                                             </flux:button>
 

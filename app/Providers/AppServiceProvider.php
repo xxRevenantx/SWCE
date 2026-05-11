@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Models\AsignarGeneracion;
+use App\Observers\AsignarGeneracionObserver;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -19,6 +21,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // Se registra el observer para asignar automáticamente el orden.
+        AsignarGeneracion::observe(AsignarGeneracionObserver::class);
     }
 }

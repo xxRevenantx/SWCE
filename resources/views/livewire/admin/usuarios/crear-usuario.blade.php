@@ -57,18 +57,34 @@
           <div class="p-4 sm:p-6">
             <flux:field>
               <!-- Grid campos -->
-              <div x-data="{ email: @entangle('email') }" class="grid grid-cols-2 sm:grid-cols-2 gap-4">
+              <div x-data="{ email: @entangle('email') }" class="grid grid-cols-1 sm:grid-cols-3 gap-4">
 
                 <div class="relative">
                     <flux:input
                     badge="Requerido"
                     wire:model.live="email"
-                    :label="__('Correo electrónico')"
+                    :label="__('Correo institucional')"
                     type="email"
-                    placeholder="usuario@dominio.com"
+                    placeholder="usuario@centrouniversitariomoctezuma.com"
                 />
+                @if (!empty($dominiosInstitucionales))
+                    <p class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
+                        Dominios permitidos: {{ collect($dominiosInstitucionales)->join(', ') }}
+                    </p>
+                @endif
                 </div>
 
+                <div class="relative">
+                  <flux:input
+                    wire:model.live="numero_empleado"
+                    :label="__('Número de empleado')"
+                    type="text"
+                    placeholder="Ej. EMP-001"
+                  />
+                  <p class="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
+                    Obligatorio cuando el usuario tiene rol Profesor.
+                  </p>
+                </div>
 
                 <div class="relative">
                   <flux:input

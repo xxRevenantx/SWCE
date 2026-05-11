@@ -154,7 +154,7 @@
                                         <td class="px-4 py-3">
                                             <div class="flex items-center justify-center gap-2">
                                                 <flux:button variant="primary"
-                                                    class="cursor-pointer bg-amber-500 hover:bg-amber-600 text-white"
+                                                    class="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white"
                                                     @click="$dispatch('abrir-modal-editar');
                                                             Livewire.dispatch('editarModal', { id: {{ $asignacion->id }} });
                                                         ">

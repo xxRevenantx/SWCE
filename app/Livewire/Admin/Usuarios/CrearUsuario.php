@@ -4,38 +4,59 @@ namespace App\Livewire\Admin\Usuarios;
 
 use App\Models\User;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
+use Spatie\Permission\Models\Role;
 use Livewire\Component;
 
 class CrearUsuario extends Component
 {
     public string $username = '';
+    public string $numero_empleado = '';
     public string $email = '';
-    public array  $rol = [];
+    public array $rol = [];
+
 
     /** Si el usuario modificó manualmente el username, dejamos de autollenarlo desde el email */
     public bool $usernameEdited = false;
 
-    protected $rules = [
-        'username' => 'required|unique:users,username|max:15',
-        'email'    => 'required|email|unique:users,email',
-        'rol'      => 'required|array|min:1',
-        'rol.*'    => 'integer|exists:roles,id',
-    ];
+    protected function rules(): array
+    {
+        // El correo puede ser de cualquier proveedor válido: Gmail, Hotmail, Outlook, institucional, etc.
+        $reglasEmail = ['required', 'email', 'max:255', 'unique:users,email'];
+
+        $rolProfesorId = Role::where('name', 'Profesor')->value('id');
+        $numeroEmpleado = ['nullable', 'string', 'max:30', 'unique:users,numero_empleado'];
+
+        if ($rolProfesorId && in_array((int) $rolProfesorId, array_map('intval', $this->rol), true)) {
+            $numeroEmpleado[0] = 'required';
+        }
+
+        return [
+            'username' => 'required|unique:users,username|max:15',
+            'numero_empleado' => $numeroEmpleado,
+            'email' => $reglasEmail,
+            'rol' => 'required|array|min:1',
+            'rol.*' => 'integer|exists:roles,id',
+        ];
+    }
 
     protected $messages = [
         'username.unique' => 'El nombre de usuario ya está en uso.',
-        'email.unique'    => 'El correo electrónico ya está en uso.',
-        'email.email'     => 'El correo electrónico no es válido.',
-        'rol.required'    => 'Debes seleccionar al menos un rol.',
-        'rol.array'       => 'Formato de roles inválido.',
-        'rol.min'         => 'Debes seleccionar al menos un rol.',
-        'rol.*.exists'    => 'Algún rol seleccionado no existe.',
+        'email.unique' => 'El correo electrónico ya está en uso.',
+        'email.email' => 'El correo electrónico no es válido.',
+        'numero_empleado.required' => 'El número de empleado es obligatorio para usuarios con rol Profesor.',
+        'numero_empleado.unique' => 'El número de empleado ya está asignado a otro usuario.',
+        'rol.required' => 'Debes seleccionar al menos un rol.',
+        'rol.array' => 'Formato de roles inválido.',
+        'rol.min' => 'Debes seleccionar al menos un rol.',
+        'rol.*.exists' => 'Algún rol seleccionado no existe.',
     ];
 
     public function mount(): void
     {
-        // username empieza vacío; se llenará al escribir el email
+        // El username empieza vacío; se llenará al escribir el email.
         $this->username = '';
+
     }
 
     /** Sufijo aleatorio de 3 dígitos (000–999) */
@@ -55,7 +76,7 @@ class CrearUsuario extends Component
         // 3) Deja solo letras, números y guion_bajo (sin puntos ni guiones)
         $base = preg_replace('/[^a-z0-9]+/i', '', $local) ?: 'user';
 
-        $maxLen    = 15;
+        $maxLen = 15;
         $suffixLen = 3;
 
         // 4) Recorta base para dejar espacio al sufijo de 3 dígitos
@@ -102,8 +123,8 @@ class CrearUsuario extends Component
         // Validar el campo (rol como grupo)
         $this->validateOnly(
             $field === 'rol' || str_starts_with($field, 'rol.')
-                ? 'rol'
-                : $field
+            ? 'rol'
+            : $field
         );
     }
 
@@ -113,22 +134,23 @@ class CrearUsuario extends Component
 
         $user = User::create([
             'username' => trim($this->username),
-            'email'    => trim($this->email),
+            'numero_empleado' => filled($this->numero_empleado) ? trim($this->numero_empleado) : null,
+            'email' => strtolower(trim($this->email)),
             'password' => bcrypt('password'),
-            'status'   => 'true',
-            'photo'    => null,
+            'status' => 'true',
+            'photo' => null,
         ]);
 
         $user->roles()->sync($this->rol);
 
         $this->dispatch('swal', [
-            'title'    => '¡Usuario creado correctamente!',
-            'icon'     => 'success',
+            'title' => '¡Usuario creado correctamente!',
+            'icon' => 'success',
             'position' => 'top-end',
         ]);
 
         // Reset para crear otro usuario
-        $this->reset(['email', 'rol']);
+        $this->reset(['email', 'numero_empleado', 'rol']);
         $this->username = '';      // vuelve a vaciar
         $this->usernameEdited = false;
 
@@ -137,7 +159,7 @@ class CrearUsuario extends Component
 
     public function render()
     {
-        $roles = \Spatie\Permission\Models\Role::all();
+        $roles = Role::all();
         return view('livewire.admin.usuarios.crear-usuario', compact('roles'));
     }
 }
